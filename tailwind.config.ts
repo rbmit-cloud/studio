@@ -11,7 +11,7 @@ export default {
     extend: {
       boxShadow: {
         'red-2xl': '0 25px 50px -12px hsl(var(--destructive) / 0.25)',
-        'blue-2xl': '0 25px 50px -12px hsl(var(--info) / 0.25)',
+        'cyan-2xl': '0 25px 50px -12px hsl(var(--info) / 0.25)',
       },
       fontFamily: {
         body: ['Inter', 'sans-serif'],
