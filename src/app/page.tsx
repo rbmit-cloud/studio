@@ -164,9 +164,14 @@ export default function Home() {
           </Card>
         </div>
         
-        <Button asChild variant="outline" className="mt-2">
-          <Link href="/dashboard/registros">Ver Registro de Visitas</Link>
-        </Button>
+        <div className="flex items-center justify-center gap-4 mt-2">
+            <Button asChild variant="outline">
+              <Link href="/dashboard/registros">Ver Registro de Visitas</Link>
+            </Button>
+            <Button variant="outline" onClick={() => setOpen(true)}>
+                Administración
+            </Button>
+        </div>
       </div>
     </main>
   );
