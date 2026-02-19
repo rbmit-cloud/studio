@@ -12,6 +12,7 @@ export default {
       boxShadow: {
         'red-2xl': '0 25px 50px -12px hsl(var(--destructive) / 0.25)',
         'cyan-2xl': '0 25px 50px -12px hsl(var(--info) / 0.25)',
+        'yellow-2xl': '0 25px 50px -12px hsl(var(--warning) / 0.25)',
       },
       fontFamily: {
         body: ['Inter', 'sans-serif'],
@@ -52,6 +53,10 @@ export default {
         info: {
           DEFAULT: 'hsl(var(--info))',
           foreground: 'hsl(var(--info-foreground))',
+        },
+        warning: {
+          DEFAULT: 'hsl(var(--warning))',
+          foreground: 'hsl(var(--warning-foreground))',
         },
         border: 'hsl(var(--border))',
         input: 'hsl(var(--input))',
