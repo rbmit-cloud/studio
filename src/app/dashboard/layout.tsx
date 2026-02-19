@@ -2,6 +2,7 @@
 
 import * as React from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { Home, List, Truck, User, LogOut, Settings, BarChart3 } from 'lucide-react';
 
@@ -41,7 +42,7 @@ export default function DashboardLayout({
             <div className="bg-primary rounded-lg p-1.5 flex items-center justify-center">
                 <Truck className="text-primary-foreground h-6 w-6" />
             </div>
-            <h1 className="text-2xl font-bold text-foreground group-data-[collapsible=icon]:hidden">ROBAMA</h1>
+            <Image src="/robama-logo.jpg" alt="Robama Logo" width={140} height={35} className="group-data-[collapsible=icon]:hidden" />
           </div>
         </SidebarHeader>
         <SidebarContent>
