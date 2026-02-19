@@ -48,24 +48,15 @@ export const useFirebase = () => useContext(FirebaseContext);
 
 export const useFirebaseApp = () => {
   const { app } = useFirebase();
-  if (!app) {
-    throw new Error('Firebase app is not initialized');
-  }
   return app;
 };
 
 export const useAuth = () => {
   const { auth } = useFirebase();
-  if (!auth) {
-    throw new Error('Firebase Auth is not initialized');
-  }
   return auth;
 };
 
 export const useFirestore = () => {
   const { firestore } = useFirebase();
-  if (!firestore) {
-    throw new Error('Firebase Firestore is not initialized');
-  }
   return firestore;
 };
