@@ -48,6 +48,10 @@
           "type": "string",
           "format": "date-time"
         },
+        "exitDateTime": {
+          "type": "string",
+          "format": "date-time"
+        },
         "vehicleDetails": {
           "$ref": "#/backend/entities/VehicleDetails"
         },

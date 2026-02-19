@@ -1,17 +1,144 @@
-import { Construction } from "lucide-react";
+'use client';
+
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import * as z from "zod";
+import { toast } from "@/hooks/use-toast";
+import { Button } from "@/components/ui/button";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { useRouter } from "next/navigation";
+import { useFirestore } from "@/firebase";
+import { collection, getDocs, query, where, updateDoc, doc, DocumentData, QueryDocumentSnapshot } from "firebase/firestore";
+
+const formSchema = z.object({
+  identifier: z.string().min(2, "El identificador debe tener al menos 2 caracteres."),
+});
 
 export default function SalidaPage() {
-  return (
-    <div className="flex flex-1 h-[calc(100vh-10rem)] items-center justify-center rounded-lg border border-dashed shadow-sm">
-      <div className="flex flex-col items-center gap-4 text-center">
-        <Construction className="h-16 w-16 text-muted-foreground" />
-        <h3 className="text-2xl font-bold tracking-tight">
-          Página en Construcción
-        </h3>
-        <p className="text-sm text-muted-foreground">
-          La sección para registrar salidas está en desarrollo. ¡Vuelve pronto!
-        </p>
-      </div>
-    </div>
-  );
+    const db = useFirestore();
+    const router = useRouter();
+    
+    const form = useForm<z.infer<typeof formSchema>>({
+        resolver: zodResolver(formSchema),
+        defaultValues: {
+            identifier: "",
+        },
+    });
+
+    async function onSubmit(values: z.infer<typeof formSchema>) {
+        if (!db) {
+            toast({
+                title: "Error",
+                description: "La base de datos no está disponible.",
+                variant: "destructive"
+            });
+            return;
+        }
+
+        const { identifier } = values;
+
+        try {
+            const qByLicensePlate = query(collection(db, "visits"), where("vehicleDetails.licensePlate", "==", identifier.toUpperCase()));
+            const qByName = query(collection(db, "visits"), where("visitorName", "==", identifier));
+
+            const [licensePlateSnapshot, nameSnapshot] = await Promise.all([
+                getDocs(qByLicensePlate),
+                getDocs(qByName),
+            ]);
+            
+            const allDocs: QueryDocumentSnapshot<DocumentData>[] = [...licensePlateSnapshot.docs, ...nameSnapshot.docs];
+            
+            // Filter for visits that are still inside (no exitDateTime)
+            const activeVisits = allDocs.filter(doc => !doc.data().exitDateTime);
+
+            if (activeVisits.length === 0) {
+                toast({
+                    title: "Entrada no registrada",
+                    description: "No se encontró una entrada activa para este identificador.",
+                    variant: "destructive",
+                });
+                return;
+            }
+
+            // Find the most recent visit if there are multiple
+            activeVisits.sort((a, b) => new Date(b.data().entryDateTime).getTime() - new Date(a.data().entryDateTime).getTime());
+            
+            const visitToUpdate = activeVisits[0];
+
+            await updateDoc(doc(db, "visits", visitToUpdate.id), {
+                exitDateTime: new Date().toISOString(),
+            });
+
+            toast({
+                title: "Salida Registrada",
+                description: `Se ha registrado la salida para ${visitToUpdate.data().visitorName}.`,
+            });
+            form.reset();
+            setTimeout(() => {
+                router.push('/dashboard/registros');
+            }, 1000);
+
+        } catch (error) {
+            console.error("Error updating document: ", error);
+            toast({
+                title: "Error al registrar salida",
+                description: "Ocurrió un error al guardar la salida. Por favor, inténtelo de nuevo.",
+                variant: "destructive"
+            });
+        }
+    }
+
+    return (
+        <div className="flex justify-center">
+            <Card className="w-full max-w-lg">
+                <Form {...form}>
+                    <form onSubmit={form.handleSubmit(onSubmit)}>
+                        <CardHeader>
+                            <CardTitle>Registrar Salida</CardTitle>
+                            <CardDescription>
+                                Ingrese la matrícula del vehículo o el nombre del visitante para registrar su salida.
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <FormField
+                                control={form.control}
+                                name="identifier"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Matrícula o Nombre</FormLabel>
+                                        <FormControl>
+                                            <Input placeholder="Ej: AA-123-BB o Juan Pérez" {...field} />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                        </CardContent>
+                        <CardFooter className="flex justify-end gap-2">
+                            <Button type="button" variant="outline" onClick={() => router.back()}>Cancelar</Button>
+                            <Button type="submit" disabled={form.formState.isSubmitting}>
+                                {form.formState.isSubmitting ? 'Registrando...' : 'Registrar Salida'}
+                            </Button>
+                        </CardFooter>
+                    </form>
+                </Form>
+            </Card>
+        </div>
+    );
 }

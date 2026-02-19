@@ -12,6 +12,7 @@ export type Visitor = {
   purposeOfVisit: string;
   entryType: 'Transportista' | 'Personal';
   entryDateTime: string;
+  exitDateTime?: string;
   vehicleDetails?: VehicleDetails;
   hostName?: string;
   department?: string;

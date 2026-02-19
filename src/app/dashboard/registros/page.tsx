@@ -1,11 +1,15 @@
-import { generateMockVisitorData } from '@/ai/flows/generate-mock-visitor-data';
+'use client';
+
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Truck, User } from 'lucide-react';
 import type { Visitor } from '@/lib/types';
+import { useFirestore } from '@/firebase';
+import { collection, onSnapshot, query, orderBy } from 'firebase/firestore';
+import React, { useEffect, useState } from 'react';
 
-function VisitorRow({ visitor }: { visitor: Visitor }) {
+function VisitorRow({ visitor }: { visitor: Visitor & { id: string } }) {
   const isTransportista = visitor.entryType === 'Transportista';
   
   return (
@@ -36,13 +40,40 @@ function VisitorRow({ visitor }: { visitor: Visitor }) {
           {new Date(visitor.entryDateTime).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}
         </div>
       </TableCell>
+      <TableCell className="text-right">
+        {visitor.exitDateTime ? (
+          <div>
+            <div>{new Date(visitor.exitDateTime).toLocaleDateString('es-ES')}</div>
+            <div className="text-sm text-muted-foreground">
+              {new Date(visitor.exitDateTime).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}
+            </div>
+          </div>
+        ) : (
+          <Badge variant="destructive">Dentro</Badge>
+        )}
+      </TableCell>
     </TableRow>
   );
 }
 
+export default function RegistrosPage() {
+  const [visits, setVisits] = useState<(Visitor & { id: string })[]>([]);
+  const db = useFirestore();
 
-export default async function RegistrosPage() {
-  const visitors = await generateMockVisitorData({ count: 15 });
+  useEffect(() => {
+    if (!db) return;
+
+    const q = query(collection(db, 'visits'), orderBy('entryDateTime', 'desc'));
+    const unsubscribe = onSnapshot(q, (querySnapshot) => {
+      const visitsData: (Visitor & { id: string })[] = [];
+      querySnapshot.forEach((doc) => {
+        visitsData.push({ id: doc.id, ...doc.data() } as Visitor & { id: string });
+      });
+      setVisits(visitsData);
+    });
+
+    return () => unsubscribe();
+  }, [db]);
 
   return (
     <Card>
@@ -60,13 +91,22 @@ export default async function RegistrosPage() {
               <TableHead>Tipo</TableHead>
               <TableHead className="hidden lg:table-cell">Propósito</TableHead>
               <TableHead className="hidden md:table-cell">Detalles</TableHead>
-              <TableHead className="text-right">Fecha y Hora</TableHead>
+              <TableHead className="text-right">Entrada</TableHead>
+              <TableHead className="text-right">Salida</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {visitors.map((visitor) => (
-              <VisitorRow key={visitor.id} visitor={visitor} />
-            ))}
+            {visits.length > 0 ? (
+                visits.map((visitor) => (
+                    <VisitorRow key={visitor.id} visitor={visitor} />
+                ))
+            ) : (
+                <TableRow>
+                    <TableCell colSpan={6} className="h-24 text-center">
+                        No hay registros de visitas todavía.
+                    </TableCell>
+                </TableRow>
+            )}
           </TableBody>
         </Table>
       </CardContent>

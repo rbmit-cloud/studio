@@ -1,13 +1,16 @@
-import { generateMockVisitorData } from '@/ai/flows/generate-mock-visitor-data';
+'use client';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { Activity, Truck, Users, ArrowUpRight } from 'lucide-react';
+import { Activity, Truck, Users, ArrowUpRight, Clock } from 'lucide-react';
 import type { Visitor } from '@/lib/types';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
+import { useFirestore } from '@/firebase';
+import { collection, onSnapshot, query, orderBy, limit, where, getDocs } from 'firebase/firestore';
+import React, { useEffect, useState } from 'react';
 
-function VisitorRow({ visitor }: { visitor: Visitor }) {
+function VisitorRow({ visitor }: { visitor: Visitor & {id: string} }) {
   return (
     <TableRow>
       <TableCell>
@@ -27,8 +30,67 @@ function VisitorRow({ visitor }: { visitor: Visitor }) {
   );
 }
 
-export default async function DashboardPage() {
-  const recentVisitors = await generateMockVisitorData({ count: 5 });
+export default function DashboardPage() {
+    const [recentVisitors, setRecentVisitors] = useState<(Visitor & {id: string})[]>([]);
+    const [stats, setStats] = useState({
+        totalToday: 0,
+        transportistasToday: 0,
+        personalToday: 0,
+        peakTime: 'N/A'
+    });
+    const db = useFirestore();
+
+    const today = new Date();
+    const startOfDay = new Date(today.setHours(0, 0, 0, 0)).toISOString();
+    const endOfDay = new Date(today.setHours(23, 59, 59, 999)).toISOString();
+
+    useEffect(() => {
+        if (!db) return;
+
+        const qRecent = query(collection(db, 'visits'), orderBy('entryDateTime', 'desc'), limit(5));
+        const unsubscribeRecent = onSnapshot(qRecent, (snapshot) => {
+            const visitorsData: (Visitor & {id: string})[] = [];
+            snapshot.forEach((doc) => {
+                visitorsData.push({ id: doc.id, ...doc.data() } as Visitor & {id: string});
+            });
+            setRecentVisitors(visitorsData);
+        });
+
+        const qToday = query(collection(db, 'visits'), where('entryDateTime', '>=', startOfDay), where('entryDateTime', '<=', endOfDay));
+        const unsubscribeToday = onSnapshot(qToday, (snapshot) => {
+            const visitsToday = snapshot.docs.map(doc => doc.data() as Visitor);
+
+            const totalToday = visitsToday.length;
+            const transportistasToday = visitsToday.filter(v => v.entryType === 'Transportista').length;
+            const personalToday = totalToday - transportistasToday;
+
+            let peakTime = 'N/A';
+            if (totalToday > 0) {
+                const hours = visitsToday.map(v => new Date(v.entryDateTime).getHours());
+                const hourCounts = hours.reduce((acc, hour) => {
+                    acc[hour] = (acc[hour] || 0) + 1;
+                    return acc;
+                }, {} as Record<number, number>);
+                
+                const peakHour = Object.keys(hourCounts).length > 0 ?
+                    parseInt(Object.keys(hourCounts).reduce((a, b) => hourCounts[parseInt(a)] > hourCounts[parseInt(b)] ? a : b))
+                    : -1;
+                
+                if (peakHour !== -1) {
+                    peakTime = `${String(peakHour).padStart(2, '0')}:00 - ${String(peakHour + 1).padStart(2, '0')}:00`;
+                }
+            }
+
+            setStats({ totalToday, transportistasToday, personalToday, peakTime });
+        });
+
+        return () => {
+            unsubscribeRecent();
+            unsubscribeToday();
+        };
+
+    }, [db, startOfDay, endOfDay]);
+
 
   return (
     <div className="grid gap-6">
@@ -39,8 +101,7 @@ export default async function DashboardPage() {
             <Activity className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">128</div>
-            <p className="text-xs text-muted-foreground">+20.1% desde ayer</p>
+            <div className="text-2xl font-bold">{stats.totalToday}</div>
           </CardContent>
         </Card>
         <Card>
@@ -49,8 +110,7 @@ export default async function DashboardPage() {
             <Truck className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">45</div>
-            <p className="text-xs text-muted-foreground">+12% desde ayer</p>
+            <div className="text-2xl font-bold">{stats.transportistasToday}</div>
           </CardContent>
         </Card>
         <Card>
@@ -59,18 +119,17 @@ export default async function DashboardPage() {
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">83</div>
-            <p className="text-xs text-muted-foreground">+25.3% desde ayer</p>
+            <div className="text-2xl font-bold">{stats.personalToday}</div>
           </CardContent>
         </Card>
          <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Pico de Actividad</CardTitle>
-            <Activity className="h-4 w-4 text-muted-foreground" />
+            <Clock className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">11:30 AM</div>
-            <p className="text-xs text-muted-foreground">Hora de mayor afluencia</p>
+            <div className="text-2xl font-bold">{stats.peakTime}</div>
+            <p className="text-xs text-muted-foreground">Hora de mayor afluencia hoy</p>
           </CardContent>
         </Card>
       </div>
@@ -101,9 +160,17 @@ export default async function DashboardPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {recentVisitors.map((visitor) => (
-                <VisitorRow key={visitor.id} visitor={visitor} />
-              ))}
+              {recentVisitors.length > 0 ? (
+                recentVisitors.map((visitor) => (
+                    <VisitorRow key={visitor.id} visitor={visitor} />
+                ))
+              ) : (
+                <TableRow>
+                    <TableCell colSpan={4} className="h-24 text-center">
+                        No hay visitas recientes.
+                    </TableCell>
+                </TableRow>
+              )}
             </TableBody>
           </Table>
         </CardContent>
