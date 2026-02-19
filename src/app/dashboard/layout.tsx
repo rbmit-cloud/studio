@@ -42,7 +42,7 @@ export default function DashboardLayout({
                 <Truck className="text-primary-foreground h-6 w-6" />
             </div>
             <h2 className="text-xl font-bold text-foreground group-data-[collapsible=icon]:hidden">
-              VisitaLog Pro
+              ROBAMA
             </h2>
           </div>
         </SidebarHeader>

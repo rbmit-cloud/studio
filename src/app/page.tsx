@@ -9,7 +9,7 @@ export default function Home() {
     <main className="flex min-h-screen flex-col items-center justify-center p-8 bg-background">
       <div className="flex flex-col items-center gap-12">
         <div className="text-center">
-          <h1 className="text-4xl md:text-6xl font-bold text-primary">VisitaLog Pro</h1>
+          <h1 className="text-4xl md:text-6xl font-bold text-primary">ROBAMA</h1>
         </div>
         
         <DateTime />
@@ -20,7 +20,6 @@ export default function Home() {
               <Link href="/dashboard/personal/nuevo" className="flex flex-col items-center justify-center h-64 p-6 text-center rounded-lg">
                 <User className="w-20 h-20 mb-4 text-primary" />
                 <h2 className="text-2xl font-semibold text-card-foreground">Entrada Personal</h2>
-                <p className="mt-2 text-muted-foreground">Registrar la entrada de visitantes, personal y entrevistas.</p>
               </Link>
             </CardContent>
           </Card>
@@ -29,7 +28,6 @@ export default function Home() {
               <Link href="/dashboard/transportista/nuevo" className="flex flex-col items-center justify-center h-64 p-6 text-center rounded-lg">
                 <Truck className="w-20 h-20 mb-4 text-primary" />
                 <h2 className="text-2xl font-semibold text-card-foreground">Entrada Transportista</h2>
-                <p className="mt-2 text-muted-foreground">Registrar la entrada de camiones y vehículos de reparto.</p>
               </Link>
             </CardContent>
           </Card>
@@ -38,7 +36,6 @@ export default function Home() {
               <Link href="/dashboard/salida" className="flex flex-col items-center justify-center h-64 p-6 text-center rounded-lg">
                 <LogOut className="w-20 h-20 mb-4 text-primary" />
                 <h2 className="text-2xl font-semibold text-card-foreground">Registrar Salida</h2>
-                <p className="mt-2 text-muted-foreground">Registrar la salida de visitantes y transportistas.</p>
               </Link>
             </CardContent>
           </Card>
