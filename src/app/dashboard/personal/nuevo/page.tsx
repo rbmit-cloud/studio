@@ -70,7 +70,7 @@ export default function PersonalFormPage() {
         defaultValues: {
             visitorName: "",
             companyName: "",
-            purposeOfVisit: "Reunión de negocios",
+            purposeOfVisit: "",
             department: "",
             privacyPolicy: false,
         },
