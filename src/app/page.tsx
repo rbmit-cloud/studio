@@ -10,7 +10,7 @@ export default function Home() {
     <main className="flex min-h-screen flex-col items-center justify-center p-8 bg-background">
       <div className="flex flex-col items-center gap-12">
         
-        <Image src="/robama-logo.jpg" alt="Logo de Robama S.A." width={420} height={100} />
+        <Image src="/robama-logo.jpg" alt="Logo de Robama S.A." width={420} height={105} />
         <DateTime />
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full max-w-6xl">
