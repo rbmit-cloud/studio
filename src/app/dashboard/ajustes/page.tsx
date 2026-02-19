@@ -39,11 +39,18 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Badge } from "@/components/ui/badge";
 
 const formSchema = z.object({
   name: z.string().min(2, "El nombre debe tener al menos 2 caracteres."),
   department: z.string().min(2, "El departamento debe tener al menos 2 caracteres."),
   email: z.string().email("Debe ser un correo electrónico válido."),
+  isAdmin: z.boolean().default(false),
+  password: z.string().optional(),
+}).refine(data => !data.isAdmin || (data.password && data.password.length >= 6), {
+  message: "La contraseña debe tener al menos 6 caracteres para los administradores.",
+  path: ["password"],
 });
 
 export default function AjustesPage() {
@@ -56,8 +63,12 @@ export default function AjustesPage() {
       name: "",
       department: "",
       email: "",
+      isAdmin: false,
+      password: "",
     },
   });
+
+  const isAdmin = form.watch("isAdmin");
 
   useEffect(() => {
     if (!db) return;
@@ -85,7 +96,12 @@ export default function AjustesPage() {
     }
 
     try {
-      await addDoc(collection(db, "hosts"), values);
+      const dataToSave = { ...values };
+      if (!dataToSave.isAdmin) {
+        delete (dataToSave as Partial<typeof dataToSave>).password;
+      }
+      
+      await addDoc(collection(db, "hosts"), dataToSave);
       toast({
         title: "Anfitrión Añadido",
         description: `Se ha añadido a ${values.name} a la lista de anfitriones.`,
@@ -168,6 +184,40 @@ export default function AjustesPage() {
                   </FormItem>
                 )}
               />
+              <FormField
+                control={form.control}
+                name="isAdmin"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-center space-x-3 space-y-0 rounded-md border p-4">
+                    <FormControl>
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                    <div className="space-y-1 leading-none">
+                        <FormLabel>
+                            Administrador
+                        </FormLabel>
+                    </div>
+                  </FormItem>
+                )}
+              />
+              {isAdmin && (
+                <FormField
+                  control={form.control}
+                  name="password"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Contraseña</FormLabel>
+                      <FormControl>
+                        <Input type="password" placeholder="Establecer contraseña" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
             </CardContent>
             <CardFooter>
               <Button type="submit" disabled={form.formState.isSubmitting}>
@@ -196,7 +246,10 @@ export default function AjustesPage() {
               {hosts.length > 0 ? (
                 hosts.map((host) => (
                   <TableRow key={host.id}>
-                    <TableCell className="font-medium">{host.name}</TableCell>
+                    <TableCell className="font-medium">
+                        {host.name}
+                        {host.isAdmin && <Badge variant="outline" className="ml-2">Admin</Badge>}
+                    </TableCell>
                     <TableCell>{host.department}</TableCell>
                     <TableCell className="hidden sm:table-cell">{host.email}</TableCell>
                     <TableCell className="text-right">

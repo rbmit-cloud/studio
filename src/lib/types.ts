@@ -23,4 +23,6 @@ export type Host = {
   name: string;
   department: string;
   email: string;
+  isAdmin?: boolean;
+  password?: string;
 };
