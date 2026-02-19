@@ -1,3 +1,5 @@
+'use client';
+
 import Link from 'next/link';
 import Image from 'next/image';
 import { Truck, User, LogOut } from 'lucide-react';
@@ -5,12 +7,103 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { DateTime } from '@/components/date-time';
 
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useToast } from "@/hooks/use-toast";
+
+
 export default function Home() {
+  const router = useRouter();
+  const { toast } = useToast();
+  const [open, setOpen] = useState(false);
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+
+  const handleLogin = () => {
+    // Simple hardcoded check
+    if (username === 'admin' && password === 'Robama2024') {
+      toast({
+        title: "Inicio de sesión exitoso",
+        description: "Redirigiendo al panel de administración...",
+      });
+      router.push('/dashboard');
+    } else {
+      toast({
+        title: "Error de autenticación",
+        description: "Usuario o contraseña incorrectos.",
+        variant: "destructive",
+      });
+    }
+    // Reset fields and close dialog
+    setUsername('');
+    setPassword('');
+    setOpen(false); 
+  };
+
+
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-8 bg-background">
       <div className="flex flex-col items-center gap-4">
         
-        <Image src="/robama-logo.jpg" alt="Logo de Robama S.A." width={800} height={222} className="w-[800px] h-auto" />
+        <Dialog open={open} onOpenChange={setOpen}>
+            <DialogTrigger asChild>
+                <div className="cursor-pointer">
+                    <Image src="/robama-logo.jpg" alt="Logo de Robama S.A." width={800} height={222} className="w-[800px] h-auto" />
+                </div>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[425px]">
+                <DialogHeader>
+                    <DialogTitle>Administración</DialogTitle>
+                    <DialogDescription>
+                    Ingrese sus credenciales para acceder al panel de administración.
+                    </DialogDescription>
+                </DialogHeader>
+                <form onSubmit={(e) => { e.preventDefault(); handleLogin(); }}>
+                    <div className="grid gap-4 py-4">
+                        <div className="grid grid-cols-4 items-center gap-4">
+                        <Label htmlFor="username" className="text-right">
+                            Usuario
+                        </Label>
+                        <Input
+                            id="username"
+                            value={username}
+                            onChange={(e) => setUsername(e.target.value)}
+                            className="col-span-3"
+                            autoComplete="username"
+                        />
+                        </div>
+                        <div className="grid grid-cols-4 items-center gap-4">
+                        <Label htmlFor="password"className="text-right">
+                            Contraseña
+                        </Label>
+                        <Input
+                            id="password"
+                            type="password"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            className="col-span-3"
+                            autoComplete="current-password"
+                        />
+                        </div>
+                    </div>
+                    <DialogFooter>
+                        <Button type="submit">Iniciar Sesión</Button>
+                    </DialogFooter>
+                </form>
+            </DialogContent>
+        </Dialog>
+
         <DateTime />
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-y-4 md:gap-8 w-full max-w-6xl mt-2">
