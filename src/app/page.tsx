@@ -10,7 +10,6 @@ export default function Home() {
       <div className="flex flex-col items-center gap-12">
         <div className="text-center">
           <h1 className="text-4xl md:text-6xl font-bold text-primary">VisitaLog Pro</h1>
-          <p className="mt-2 text-lg md:text-xl text-muted-foreground">Sistema de Registro de Visitas</p>
         </div>
         
         <DateTime />
