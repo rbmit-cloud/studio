@@ -36,7 +36,7 @@ const VisitorSchema = z.object({
  * Input schema for generating mock visitor data.
  */
 const GenerateMockVisitorDataInputSchema = z.object({
-  count: z.number().int().min(1).max(10).default(5).describe('Number of mock visitor records to generate. Must be between 1 and 10.'),
+  count: z.number().int().min(1).max(20).default(5).describe('Number of mock visitor records to generate. Must be between 1 and 20.'),
 });
 export type GenerateMockVisitorDataInput = z.infer<typeof GenerateMockVisitorDataInputSchema>;
 
