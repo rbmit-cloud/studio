@@ -18,19 +18,19 @@ export default function Home() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full max-w-4xl">
           <Card className="transform transition-transform duration-300 hover:scale-105 hover:shadow-2xl">
             <CardContent className="p-0">
-              <Link href="/dashboard/transportista/nuevo" className="flex flex-col items-center justify-center h-64 p-6 text-center rounded-lg">
-                <Truck className="w-20 h-20 mb-4 text-primary" />
-                <h2 className="text-2xl font-semibold text-card-foreground">Entrada Transportista</h2>
-                <p className="mt-2 text-muted-foreground">Registrar la entrada de camiones y vehículos de reparto.</p>
+              <Link href="/dashboard/personal/nuevo" className="flex flex-col items-center justify-center h-64 p-6 text-center rounded-lg">
+                <User className="w-20 h-20 mb-4 text-primary" />
+                <h2 className="text-2xl font-semibold text-card-foreground">Entrada Personal</h2>
+                <p className="mt-2 text-muted-foreground">Registrar la entrada de visitantes, personal y entrevistas.</p>
               </Link>
             </CardContent>
           </Card>
           <Card className="transform transition-transform duration-300 hover:scale-105 hover:shadow-2xl">
             <CardContent className="p-0">
-              <Link href="/dashboard/personal/nuevo" className="flex flex-col items-center justify-center h-64 p-6 text-center rounded-lg">
-                <User className="w-20 h-20 mb-4 text-primary" />
-                <h2 className="text-2xl font-semibold text-card-foreground">Entrada Personal</h2>
-                <p className="mt-2 text-muted-foreground">Registrar la entrada de visitantes, personal y entrevistas.</p>
+              <Link href="/dashboard/transportista/nuevo" className="flex flex-col items-center justify-center h-64 p-6 text-center rounded-lg">
+                <Truck className="w-20 h-20 mb-4 text-primary" />
+                <h2 className="text-2xl font-semibold text-card-foreground">Entrada Transportista</h2>
+                <p className="mt-2 text-muted-foreground">Registrar la entrada de camiones y vehículos de reparto.</p>
               </Link>
             </CardContent>
           </Card>
