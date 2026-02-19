@@ -19,7 +19,7 @@ export function DateTime() {
     const capitalizedWeekday = weekday.charAt(0).toUpperCase() + weekday.slice(1);
     const capitalizedMonth = month.charAt(0).toUpperCase() + month.slice(1);
 
-    return `${capitalizedWeekday} ${day} de ${capitalizedMonth} de ${year}`;
+    return `${capitalizedWeekday}, ${day} de ${capitalizedMonth} de ${year}`;
   };
 
   const formatTime = (d: Date) => {
@@ -32,8 +32,8 @@ export function DateTime() {
 
   return (
     <div className="text-center">
-      <p suppressHydrationWarning className="text-4xl md:text-6xl font-bold text-primary">{formatTime(date)}</p>
-      <p suppressHydrationWarning className="text-lg md:text-2xl text-muted-foreground">{formatDate(date)}</p>
+      <p suppressHydrationWarning className="text-3xl md:text-5xl font-bold text-primary">{formatTime(date)}</p>
+      <p suppressHydrationWarning className="text-base md:text-xl text-muted-foreground">{formatDate(date)}</p>
     </div>
   );
 }
