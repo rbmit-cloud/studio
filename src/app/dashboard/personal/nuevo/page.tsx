@@ -31,6 +31,16 @@ import {
 } from "@/components/ui/card";
 import { useRouter } from "next/navigation";
 import { Checkbox } from "@/components/ui/checkbox";
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+  } from "@/components/ui/alert-dialog";
 
 const hosts = [
     { name: 'Carlos Rodríguez', department: 'Ventas' },
@@ -82,130 +92,145 @@ export default function PersonalFormPage() {
 
     return (
         <div className="flex justify-center">
-            <Card className="w-full max-w-2xl">
-                <Form {...form}>
-                    <form onSubmit={form.handleSubmit(onSubmit)}>
-                        <CardHeader>
-                            <CardTitle>Registro de Visita Personal</CardTitle>
-                            <CardDescription>Complete los datos para registrar la entrada del visitante.</CardDescription>
-                        </CardHeader>
-                        <CardContent className="grid gap-6">
-                            <div className="grid md:grid-cols-2 gap-4">
-                                <FormField
-                                    control={form.control}
-                                    name="visitorName"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Nombre y Apellidos</FormLabel>
-                                            <FormControl>
-                                                <Input placeholder="Ej: Ana Gómez" {...field} />
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-                                <FormField
-                                    control={form.control}
-                                    name="companyName"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Empresa</FormLabel>
-                                            <FormControl>
-                                                <Input placeholder="Ej: Soluciones Tech" {...field} />
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-                            </div>
-                            <div className="grid md:grid-cols-2 gap-4">
-                                <FormField
-                                    control={form.control}
-                                    name="hostName"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Persona a visitar</FormLabel>
-                                            <Select onValueChange={(value) => {
-                                                field.onChange(value);
-                                                const selectedHost = hosts.find(h => h.name === value);
-                                                if (selectedHost) {
-                                                    form.setValue('department', selectedHost.department, { shouldValidate: true });
-                                                }
-                                            }} defaultValue={field.value}>
+            <AlertDialog>
+                <Card className="w-full max-w-2xl">
+                    <Form {...form}>
+                        <form onSubmit={form.handleSubmit(onSubmit)}>
+                            <CardHeader>
+                                <CardTitle>Registro de Visita Personal</CardTitle>
+                                <CardDescription>Complete los datos para registrar la entrada del visitante.</CardDescription>
+                            </CardHeader>
+                            <CardContent className="grid gap-6">
+                                <div className="grid md:grid-cols-2 gap-4">
+                                    <FormField
+                                        control={form.control}
+                                        name="visitorName"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Nombre y Apellidos</FormLabel>
                                                 <FormControl>
-                                                    <SelectTrigger>
-                                                        <SelectValue placeholder="Seleccione una persona" />
-                                                    </SelectTrigger>
+                                                    <Input placeholder="Ej: Ana Gómez" {...field} />
                                                 </FormControl>
-                                                <SelectContent>
-                                                    {hosts.map(host => (
-                                                        <SelectItem key={host.name} value={host.name}>
-                                                            {host.name}
-                                                        </SelectItem>
-                                                    ))}
-                                                </SelectContent>
-                                            </Select>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                    <FormField
+                                        control={form.control}
+                                        name="companyName"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Empresa</FormLabel>
+                                                <FormControl>
+                                                    <Input placeholder="Ej: Soluciones Tech" {...field} />
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                </div>
+                                <div className="grid md:grid-cols-2 gap-4">
+                                    <FormField
+                                        control={form.control}
+                                        name="hostName"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Persona a visitar</FormLabel>
+                                                <Select onValueChange={(value) => {
+                                                    field.onChange(value);
+                                                    const selectedHost = hosts.find(h => h.name === value);
+                                                    if (selectedHost) {
+                                                        form.setValue('department', selectedHost.department, { shouldValidate: true });
+                                                    }
+                                                }} defaultValue={field.value}>
+                                                    <FormControl>
+                                                        <SelectTrigger>
+                                                            <SelectValue placeholder="Seleccione una persona" />
+                                                        </SelectTrigger>
+                                                    </FormControl>
+                                                    <SelectContent>
+                                                        {hosts.map(host => (
+                                                            <SelectItem key={host.name} value={host.name}>
+                                                                {host.name}
+                                                            </SelectItem>
+                                                        ))}
+                                                    </SelectContent>
+                                                </Select>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                    <FormField
+                                        control={form.control}
+                                        name="department"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Departamento</FormLabel>
+                                                <FormControl>
+                                                    <Input placeholder="Departamento" {...field} disabled />
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                </div>
+                                 <FormField
+                                    control={form.control}
+                                    name="purposeOfVisit"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Motivo de la visita</FormLabel>
+                                            <FormControl>
+                                                <Input {...field} />
+                                            </FormControl>
                                             <FormMessage />
                                         </FormItem>
                                     )}
                                 />
                                 <FormField
                                     control={form.control}
-                                    name="department"
+                                    name="privacyPolicy"
                                     render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Departamento</FormLabel>
-                                            <FormControl>
-                                                <Input placeholder="Departamento" {...field} disabled />
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
+                                    <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                                        <FormControl>
+                                        <Checkbox
+                                            checked={field.value}
+                                            onCheckedChange={field.onChange}
+                                        />
+                                        </FormControl>
+                                        <div className="space-y-1 leading-none">
+                                        <AlertDialogTrigger asChild>
+                                            <FormLabel className="cursor-pointer hover:underline">
+                                                He leído y acepto la Política de tratamiento de datos.
+                                            </FormLabel>
+                                        </AlertDialogTrigger>
+                                        <FormMessage />
+                                        </div>
+                                    </FormItem>
                                     )}
                                 />
-                            </div>
-                             <FormField
-                                control={form.control}
-                                name="purposeOfVisit"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Motivo de la visita</FormLabel>
-                                        <FormControl>
-                                            <Input {...field} />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                            <FormField
-                                control={form.control}
-                                name="privacyPolicy"
-                                render={({ field }) => (
-                                <FormItem className="flex flex-row items-start space-x-3 space-y-0">
-                                    <FormControl>
-                                    <Checkbox
-                                        checked={field.value}
-                                        onCheckedChange={field.onChange}
-                                    />
-                                    </FormControl>
-                                    <div className="space-y-1 leading-none">
-                                    <FormLabel>
-                                        He leído y acepto la Política de tratamiento de datos.
-                                    </FormLabel>
-                                    <FormMessage />
-                                    </div>
-                                </FormItem>
-                                )}
-                            />
-                        </CardContent>
-                        <CardFooter className="flex justify-end gap-2">
-                            <Button type="button" variant="outline" onClick={() => router.back()}>Cancelar</Button>
-                            <Button type="submit" disabled={form.formState.isSubmitting || !privacyPolicyAccepted}>
-                                {form.formState.isSubmitting ? 'Registrando...' : 'Registrar Entrada'}
-                            </Button>
-                        </CardFooter>
-                    </form>
-                </Form>
-            </Card>
+                            </CardContent>
+                            <CardFooter className="flex justify-end gap-2">
+                                <Button type="button" variant="outline" onClick={() => router.back()}>Cancelar</Button>
+                                <Button type="submit" disabled={form.formState.isSubmitting || !privacyPolicyAccepted}>
+                                    {form.formState.isSubmitting ? 'Registrando...' : 'Registrar Entrada'}
+                                </Button>
+                            </CardFooter>
+                        </form>
+                    </Form>
+                </Card>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Política de Tratamiento de Datos</AlertDialogTitle>
+                        <AlertDialogDescription className="text-foreground max-h-[60vh] overflow-y-auto">
+                        En cumplimiento del artículo 13 del Reglamento General de Protección de Datos (Reglamento UE 2016/679), y del artículo 11 de la Ley Orgánica de Protección de Datos Personales y garantía de los Derechos digitales (LO 3/2018), S.A. ROBAMA, le informa que sus datos serán tratados para el registro y control de las visitas que accedan a las instalaciones. La base jurídica del tratamiento es el interés legítimo. Los datos se conservarán durante el tiempo necesario para cumplir con la finalidad anteriormente descrita. Los datos no serán cedidos a terceros salvo existencia de obligación legal. Podrá ejercitar sus derechos de acceso, rectificación, supresión, limitación del tratamiento, oposición, oposición a decisiones individuales automatizadas, incluida la elaboración de perfiles o la portabilidad de sus datos dirigiéndose a info@robama.com. En todo caso, puede recabar la tutela de las autoridades de protección de datos.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogAction>Cerrar</AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </div>
     );
 }
