@@ -1,16 +1,16 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import { Truck, User, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { DateTime } from '@/components/date-time';
-import { RobamaLogo } from '@/components/ui/robama-logo';
 
 export default function Home() {
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-8 bg-background">
       <div className="flex flex-col items-center gap-12">
         
-        <RobamaLogo className="w-96 h-auto" />
+        <Image src="https://picsum.photos/seed/robama/420/100" alt="Robama Logo" width={420} height={100} data-ai-hint="company logo" />
         <DateTime />
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full max-w-6xl">
