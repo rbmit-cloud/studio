@@ -15,6 +15,13 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   Card,
   CardContent,
   CardDescription,
@@ -24,12 +31,24 @@ import {
 } from "@/components/ui/card";
 import { useRouter } from "next/navigation";
 
+const hosts = [
+    { name: 'Carlos Rodríguez', department: 'Ventas' },
+    { name: 'Ana Martínez', department: 'Recursos Humanos' },
+    { name: 'Luis García', department: 'Tecnología' },
+    { name: 'Sofía López', department: 'Marketing' },
+    { name: 'Javier Fernández', department: 'Administración' },
+];
+
 const formSchema = z.object({
-  visitorName: z.string().min(2, "El nombre debe tener al menos 2 caracteres."),
-  companyName: z.string().min(2, "La empresa debe tener al menos 2 caracteres."),
-  purposeOfVisit: z.string().min(5, "El propósito debe tener al menos 5 caracteres."),
-  vehicleType: z.string().min(2, "El tipo de vehículo es requerido."),
-  licensePlate: z.string().min(5, "La patente debe tener al menos 5 caracteres.").regex(/^[A-Z0-9-]{5,10}$/, 'Formato de patente inválido.'),
+  visitorName: z.string().min(2, "El nombre y apellidos deben tener al menos 2 caracteres."),
+  company: z.string().min(2, "La empresa debe tener al menos 2 caracteres."),
+  companyName: z.string().min(2, "La empresa de transportes debe tener al menos 2 caracteres."),
+  licensePlate: z.string().min(5, "La matrícula debe tener al menos 5 caracteres.").regex(/^[A-Z0-9-]{5,10}$/, 'Formato de matrícula inválido.'),
+  trailerLicensePlate: z.string().optional(),
+  hostName: z.string({
+    required_error: "Debe seleccionar una persona a visitar.",
+  }),
+  department: z.string().min(2, "El departamento es requerido."),
 });
 
 export default function TransportistaFormPage() {
@@ -38,10 +57,11 @@ export default function TransportistaFormPage() {
         resolver: zodResolver(formSchema),
         defaultValues: {
             visitorName: "",
+            company: "",
             companyName: "",
-            purposeOfVisit: "Entrega de mercadería",
-            vehicleType: "",
             licensePlate: "",
+            trailerLicensePlate: "",
+            department: "",
         },
     });
 
@@ -73,7 +93,7 @@ export default function TransportistaFormPage() {
                                     name="visitorName"
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel>Nombre del Conductor</FormLabel>
+                                            <FormLabel>Nombre y Apellidos</FormLabel>
                                             <FormControl>
                                                 <Input placeholder="Ej: Juan Pérez" {...field} />
                                             </FormControl>
@@ -83,38 +103,38 @@ export default function TransportistaFormPage() {
                                 />
                                 <FormField
                                     control={form.control}
-                                    name="companyName"
+                                    name="company"
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel>Empresa de Transporte</FormLabel>
+                                            <FormLabel>Empresa</FormLabel>
                                             <FormControl>
-                                                <Input placeholder="Ej: Transportes Rápidos S.A." {...field} />
+                                                <Input placeholder="Ej: Cliente final S.A." {...field} />
                                             </FormControl>
                                             <FormMessage />
                                         </FormItem>
                                     )}
                                 />
                             </div>
+                             <FormField
+                                control={form.control}
+                                name="companyName"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Empresa de Transportes</FormLabel>
+                                        <FormControl>
+                                            <Input placeholder="Ej: Transportes Rápidos S.A." {...field} />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
                             <div className="grid md:grid-cols-2 gap-4">
-                                <FormField
-                                    control={form.control}
-                                    name="vehicleType"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Tipo de Vehículo</FormLabel>
-                                            <FormControl>
-                                                <Input placeholder="Ej: Camión, Furgoneta" {...field} />
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
                                 <FormField
                                     control={form.control}
                                     name="licensePlate"
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel>Patente del Vehículo</FormLabel>
+                                            <FormLabel>Matrícula</FormLabel>
                                             <FormControl>
                                                 <Input placeholder="Ej: AA-123-BB" {...field} />
                                             </FormControl>
@@ -122,20 +142,65 @@ export default function TransportistaFormPage() {
                                         </FormItem>
                                     )}
                                 />
+                                <FormField
+                                    control={form.control}
+                                    name="trailerLicensePlate"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Matrícula Remolque (Opcional)</FormLabel>
+                                            <FormControl>
+                                                <Input placeholder="Ej: R-456-CC" {...field} />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
                             </div>
-                            <FormField
-                                control={form.control}
-                                name="purposeOfVisit"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Propósito de la Visita</FormLabel>
-                                        <FormControl>
-                                            <Input {...field} />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
+                            <div className="grid md:grid-cols-2 gap-4">
+                                    <FormField
+                                        control={form.control}
+                                        name="hostName"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Persona a visitar</FormLabel>
+                                                <Select onValueChange={(value) => {
+                                                    field.onChange(value);
+                                                    const selectedHost = hosts.find(h => h.name === value);
+                                                    if (selectedHost) {
+                                                        form.setValue('department', selectedHost.department, { shouldValidate: true });
+                                                    }
+                                                }} defaultValue={field.value}>
+                                                    <FormControl>
+                                                        <SelectTrigger>
+                                                            <SelectValue placeholder="Seleccione una persona" />
+                                                        </SelectTrigger>
+                                                    </FormControl>
+                                                    <SelectContent>
+                                                        {hosts.map(host => (
+                                                            <SelectItem key={host.name} value={host.name}>
+                                                                {host.name}
+                                                            </SelectItem>
+                                                        ))}
+                                                    </SelectContent>
+                                                </Select>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                    <FormField
+                                        control={form.control}
+                                        name="department"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Departamento</FormLabel>
+                                                <FormControl>
+                                                    <Input placeholder="Departamento" {...field} disabled />
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                </div>
                         </CardContent>
                         <CardFooter className="flex justify-end gap-2">
                             <Button type="button" variant="outline" onClick={() => router.back()}>Cancelar</Button>
