@@ -17,7 +17,6 @@ import {
   SidebarTrigger,
   SidebarInset,
 } from '@/components/ui/sidebar';
-import { RobamaLogo } from '@/components/ui/robama-logo';
 
 const navItems = [
   { href: '/dashboard', icon: Home, label: 'Dashboard' },
@@ -42,7 +41,7 @@ export default function DashboardLayout({
             <div className="bg-primary rounded-lg p-1.5 flex items-center justify-center">
                 <Truck className="text-primary-foreground h-6 w-6" />
             </div>
-            <RobamaLogo className="h-7 w-auto group-data-[collapsible=icon]:hidden" />
+            <h1 className="text-2xl font-bold text-foreground group-data-[collapsible=icon]:hidden">ROBAMA</h1>
           </div>
         </SidebarHeader>
         <SidebarContent>
