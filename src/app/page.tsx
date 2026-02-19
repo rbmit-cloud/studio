@@ -10,15 +10,15 @@ export default function Home() {
     <main className="flex min-h-screen flex-col items-center justify-center p-8 bg-background">
       <div className="flex flex-col items-center gap-4">
         
-        <Image src="/robama-logo.jpg" alt="Logo de Robama" width={600} height={150} />
+        <Image src="/robama-logo.jpg" alt="Logo de Robama S.A." width={800} height={200} />
         <DateTime />
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full max-w-6xl">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-y-4 md:gap-8 w-full max-w-6xl mt-4">
           <Card className="transform transition-transform duration-300 hover:scale-105 hover:shadow-red-2xl">
             <CardContent className="p-0">
-              <Link href="/dashboard/personal/nuevo" className="flex flex-col items-center justify-center h-64 p-6 text-center rounded-lg">
-                <User className="w-20 h-20 mb-4 text-primary" />
-                <h2 className="text-2xl font-semibold text-card-foreground">Entrada Personal</h2>
+              <Link href="/dashboard/personal/nuevo" className="flex flex-col items-center justify-center h-64 p-6 text-center rounded-lg active:bg-destructive active:text-destructive-foreground">
+                <User className="w-20 h-20 mb-4" />
+                <h2 className="text-2xl font-semibold">Entrada Personal</h2>
               </Link>
             </CardContent>
           </Card>
