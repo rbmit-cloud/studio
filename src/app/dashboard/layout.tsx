@@ -39,7 +39,7 @@ export default function DashboardLayout({
       <Sidebar>
         <SidebarHeader>
           <div className="flex items-center gap-2">
-            <Image src="/robama-logo.jpg" alt="Logo de Robama" width={140} height={35} className="group-data-[collapsible=icon]:hidden" />
+            <Image src="/robama-logo.jpg" alt="Logo de Robama S.A." width={140} height={35} className="group-data-[collapsible=icon]:hidden" />
             <div className="bg-primary rounded-lg p-1.5 items-center justify-center hidden group-data-[collapsible=icon]:flex">
                 <Truck className="text-primary-foreground h-6 w-6" />
             </div>
