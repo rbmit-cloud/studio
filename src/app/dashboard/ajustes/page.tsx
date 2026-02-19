@@ -56,6 +56,7 @@ const formSchema = z.object({
 export default function AjustesPage() {
   const db = useFirestore();
   const [hosts, setHosts] = useState<(Host)[]>([]);
+  const [isClient, setIsClient] = useState(false);
   
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -69,6 +70,10 @@ export default function AjustesPage() {
   });
 
   const isAdmin = form.watch("isAdmin");
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   useEffect(() => {
     if (!db) return;
@@ -133,6 +138,10 @@ export default function AjustesPage() {
             variant: "destructive",
         });
     }
+  }
+
+  if (!isClient) {
+    return null;
   }
 
   return (
