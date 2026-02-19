@@ -8,9 +8,9 @@ import { DateTime } from '@/components/date-time';
 export default function Home() {
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-8 bg-background">
-      <div className="flex flex-col items-center gap-12">
+      <div className="flex flex-col items-center gap-8">
         
-        <Image src="/robama-logo.jpg" alt="Logo de Robama S.A." width={420} height={105} />
+        <Image src="/robama-logo.jpg" alt="Logo de Robama" width={520} height={130} />
         <DateTime />
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full max-w-6xl">
