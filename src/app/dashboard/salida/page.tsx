@@ -24,10 +24,10 @@ import {
 } from "@/components/ui/card";
 import { useRouter } from "next/navigation";
 import { useFirestore } from "@/firebase";
-import { collection, getDocs, query, where, updateDoc, doc, DocumentData, QueryDocumentSnapshot } from "firebase/firestore";
+import { collection, getDocs, query, where, updateDoc, doc } from "firebase/firestore";
 
 const formSchema = z.object({
-  identifier: z.string().min(2, "El identificador debe tener al menos 2 caracteres."),
+  visitorName: z.string().min(2, "El nombre y apellidos deben tener al menos 2 caracteres."),
 });
 
 export default function SalidaPage() {
@@ -37,7 +37,7 @@ export default function SalidaPage() {
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
-            identifier: "",
+            visitorName: "",
         },
     });
 
@@ -51,26 +51,20 @@ export default function SalidaPage() {
             return;
         }
 
-        const { identifier } = values;
+        const { visitorName } = values;
 
         try {
-            const qByLicensePlate = query(collection(db, "visits"), where("vehicleDetails.licensePlate", "==", identifier.toUpperCase()));
-            const qByName = query(collection(db, "visits"), where("visitorName", "==", identifier));
-
-            const [licensePlateSnapshot, nameSnapshot] = await Promise.all([
-                getDocs(qByLicensePlate),
-                getDocs(qByName),
-            ]);
+            const q = query(collection(db, "visits"), where("visitorName", "==", visitorName));
             
-            const allDocs: QueryDocumentSnapshot<DocumentData>[] = [...licensePlateSnapshot.docs, ...nameSnapshot.docs];
+            const querySnapshot = await getDocs(q);
             
             // Filter for visits that are still inside (no exitDateTime)
-            const activeVisits = allDocs.filter(doc => !doc.data().exitDateTime);
+            const activeVisits = querySnapshot.docs.filter(doc => !doc.data().exitDateTime);
 
             if (activeVisits.length === 0) {
                 toast({
                     title: "Entrada no registrada",
-                    description: "No se encontró una entrada activa para este identificador.",
+                    description: "No se encontró una entrada activa para este visitante.",
                     variant: "destructive",
                 });
                 return;
@@ -112,18 +106,18 @@ export default function SalidaPage() {
                         <CardHeader>
                             <CardTitle>Registrar Salida</CardTitle>
                             <CardDescription>
-                                Ingrese la matrícula del vehículo o el nombre del visitante para registrar su salida.
+                                Ingrese el nombre y apellidos del visitante para registrar su salida.
                             </CardDescription>
                         </CardHeader>
                         <CardContent>
                             <FormField
                                 control={form.control}
-                                name="identifier"
+                                name="visitorName"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>Matrícula o Nombre</FormLabel>
+                                        <FormLabel>Nombre y Apellidos</FormLabel>
                                         <FormControl>
-                                            <Input placeholder="Ej: AA-123-BB o Juan Pérez" {...field} />
+                                            <Input placeholder="Ej: Juan Pérez" {...field} />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
