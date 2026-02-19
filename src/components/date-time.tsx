@@ -29,8 +29,8 @@ export function DateTime() {
 
   return (
     <div className="text-center">
-      <p className="text-5xl md:text-7xl font-bold text-primary">{formatTime(date)}</p>
-      <p className="text-lg md:text-2xl text-muted-foreground capitalize">{formatDate(date)}</p>
+      <p suppressHydrationWarning className="text-5xl md:text-7xl font-bold text-primary">{formatTime(date)}</p>
+      <p suppressHydrationWarning className="text-lg md:text-2xl text-muted-foreground capitalize">{formatDate(date)}</p>
     </div>
   );
 }
