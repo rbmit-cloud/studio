@@ -9,19 +9,23 @@ export * from './provider';
 
 function initializeFirebase() {
   if (typeof window !== 'undefined') {
+    // A valid apiKey is required for Auth. If it's not present, we can't initialize Auth.
+    const canInitializeAuth = !!firebaseConfig.apiKey;
+
     if (getApps().length > 0) {
       const app = getApp();
-      const auth = getAuth(app);
+      const auth = canInitializeAuth ? getAuth(app) : null;
       const firestore = getFirestore(app);
       return { app, auth, firestore };
     } else {
       try {
         const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
+        const auth = canInitializeAuth ? getAuth(app) : null;
         const firestore = getFirestore(app);
         return { app, auth, firestore };
       } catch (e) {
-        console.error('Failed to initialize firebase', e);
+        // This will catch if initializeApp itself fails due to bad config.
+        console.error('Failed to initialize Firebase app', e);
         return { app: null, auth: null, firestore: null };
       }
     }
