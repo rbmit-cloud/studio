@@ -66,6 +66,8 @@ export default function PersonalFormPage() {
         },
     });
 
+    const privacyPolicyAccepted = form.watch('privacyPolicy');
+
     function onSubmit(values: z.infer<typeof formSchema>) {
         console.log(values);
         toast({
@@ -197,7 +199,7 @@ export default function PersonalFormPage() {
                         </CardContent>
                         <CardFooter className="flex justify-end gap-2">
                             <Button type="button" variant="outline" onClick={() => router.back()}>Cancelar</Button>
-                            <Button type="submit" disabled={form.formState.isSubmitting}>
+                            <Button type="submit" disabled={form.formState.isSubmitting || !privacyPolicyAccepted}>
                                 {form.formState.isSubmitting ? 'Registrando...' : 'Registrar Entrada'}
                             </Button>
                         </CardFooter>
