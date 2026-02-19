@@ -30,6 +30,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { useRouter } from "next/navigation";
+import { Checkbox } from "@/components/ui/checkbox";
 
 const hosts = [
     { name: 'Carlos Rodríguez', department: 'Ventas' },
@@ -47,6 +48,9 @@ const formSchema = z.object({
     required_error: "Debe seleccionar una persona a visitar.",
   }),
   department: z.string().min(2, "El departamento es requerido."),
+  privacyPolicy: z.boolean().refine(val => val === true, {
+    message: "Debe aceptar la política de tratamiento de datos.",
+  }),
 });
 
 export default function PersonalFormPage() {
@@ -58,6 +62,7 @@ export default function PersonalFormPage() {
             companyName: "",
             purposeOfVisit: "Reunión de negocios",
             department: "",
+            privacyPolicy: false,
         },
     });
 
@@ -169,9 +174,29 @@ export default function PersonalFormPage() {
                                     </FormItem>
                                 )}
                             />
+                            <FormField
+                                control={form.control}
+                                name="privacyPolicy"
+                                render={({ field }) => (
+                                <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                                    <FormControl>
+                                    <Checkbox
+                                        checked={field.value}
+                                        onCheckedChange={field.onChange}
+                                    />
+                                    </FormControl>
+                                    <div className="space-y-1 leading-none">
+                                    <FormLabel>
+                                        He leído y acepto la Política de tratamiento de datos.
+                                    </FormLabel>
+                                    <FormMessage />
+                                    </div>
+                                </FormItem>
+                                )}
+                            />
                         </CardContent>
                         <CardFooter className="flex justify-end gap-2">
-                             <Button type="button" variant="outline" onClick={() => router.back()}>Cancelar</Button>
+                            <Button type="button" variant="outline" onClick={() => router.back()}>Cancelar</Button>
                             <Button type="submit" disabled={form.formState.isSubmitting}>
                                 {form.formState.isSubmitting ? 'Registrando...' : 'Registrar Entrada'}
                             </Button>
