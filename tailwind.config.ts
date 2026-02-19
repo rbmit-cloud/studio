@@ -11,6 +11,7 @@ export default {
     extend: {
       boxShadow: {
         'red-2xl': '0 25px 50px -12px hsl(var(--destructive) / 0.25)',
+        'blue-2xl': '0 25px 50px -12px hsl(var(--info) / 0.25)',
       },
       fontFamily: {
         body: ['Inter', 'sans-serif'],
@@ -47,6 +48,10 @@ export default {
         destructive: {
           DEFAULT: 'hsl(var(--destructive))',
           foreground: 'hsl(var(--destructive-foreground))',
+        },
+        info: {
+          DEFAULT: 'hsl(var(--info))',
+          foreground: 'hsl(var(--info-foreground))',
         },
         border: 'hsl(var(--border))',
         input: 'hsl(var(--input))',
