@@ -3,13 +3,15 @@ import { Truck, User, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { DateTime } from '@/components/date-time';
+import { RobamaLogo } from '@/components/ui/robama-logo';
 
 export default function Home() {
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-8 bg-background">
       <div className="flex flex-col items-center gap-12">
-        <div className="text-center">
-          <h1 className="text-5xl md:text-7xl font-bold text-primary">ROBAMA</h1>
+        <div className="text-center flex flex-col items-center">
+          <RobamaLogo className="w-auto h-20" />
+          <p className="text-muted-foreground text-xl mt-2">Simply good chemistry</p>
         </div>
         
         <DateTime />
