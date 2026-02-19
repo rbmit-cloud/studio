@@ -41,6 +41,7 @@ import {
     AlertDialogTitle,
     AlertDialogTrigger,
   } from "@/components/ui/alert-dialog";
+import { useEffect, useState } from "react";
 
 const hosts = [
     { name: 'Carlos Rodríguez', department: 'Ventas' },
@@ -66,6 +67,12 @@ const formSchema = z.object({
 });
 
 export default function TransportistaFormPage() {
+    const [isClient, setIsClient] = useState(false);
+
+    useEffect(() => {
+        setIsClient(true);
+    }, []);
+
     const router = useRouter();
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -92,6 +99,10 @@ export default function TransportistaFormPage() {
         setTimeout(() => {
             router.push('/dashboard/registros');
         }, 1000);
+    }
+
+    if (!isClient) {
+        return null;
     }
 
     return (
