@@ -42,6 +42,8 @@ import {
     AlertDialogTrigger,
   } from "@/components/ui/alert-dialog";
 import { useEffect, useState } from "react";
+import { useFirestore } from "@/firebase";
+import { addDoc, collection } from "firebase/firestore";
 
 const hosts = [
     { name: 'Carlos Rodríguez', department: 'Ventas' },
@@ -66,12 +68,13 @@ const formSchema = z.object({
 
 export default function PersonalFormPage() {
     const [isClient, setIsClient] = useState(false);
+    const db = useFirestore();
+    const router = useRouter();
 
     useEffect(() => {
         setIsClient(true);
     }, []);
     
-    const router = useRouter();
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
@@ -85,16 +88,40 @@ export default function PersonalFormPage() {
 
     const privacyPolicyAccepted = form.watch('privacyPolicy');
 
-    function onSubmit(values: z.infer<typeof formSchema>) {
-        console.log(values);
-        toast({
-            title: "Registro Exitoso",
-            description: `La visita de ${values.visitorName} ha sido registrada.`,
-        });
-        form.reset();
-        setTimeout(() => {
-            router.push('/dashboard/registros');
-        }, 1000);
+    async function onSubmit(values: z.infer<typeof formSchema>) {
+        if (!db) {
+            toast({
+                title: "Error",
+                description: "La base de datos no está disponible.",
+                variant: "destructive"
+            });
+            return;
+        }
+
+        try {
+            const { privacyPolicy, ...dataToSave } = values;
+            await addDoc(collection(db, "visits"), {
+                ...dataToSave,
+                entryType: 'Personal',
+                entryDateTime: new Date().toISOString(),
+            });
+
+            toast({
+                title: "Registro Exitoso",
+                description: `La visita de ${values.visitorName} ha sido registrada.`,
+            });
+            form.reset();
+            setTimeout(() => {
+                router.push('/dashboard/registros');
+            }, 1000);
+        } catch (error) {
+            console.error("Error adding document: ", error);
+            toast({
+                title: "Error al registrar",
+                description: "Ocurrió un error al guardar la visita. Por favor, inténtelo de nuevo.",
+                variant: "destructive"
+            });
+        }
     }
 
     if (!isClient) {

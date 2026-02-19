@@ -1,0 +1,81 @@
+{
+  "entities": {
+    "VehicleDetails": {
+      "title": "Vehicle Details",
+      "description": "Details of a vehicle.",
+      "type": "object",
+      "properties": {
+        "licensePlate": {
+          "type": "string",
+          "description": "Vehicle license plate number."
+        },
+        "trailerLicensePlate": {
+          "type": "string",
+          "description": "Trailer license plate number, if any."
+        }
+      },
+      "required": [
+        "licensePlate"
+      ]
+    },
+    "Visit": {
+      "title": "Visit",
+      "description": "A record of a visitor.",
+      "type": "object",
+      "properties": {
+        "visitorName": {
+          "type": "string"
+        },
+        "companyName": {
+          "type": "string",
+          "description": "The visitor's company (e.g. their employer or transport company)."
+        },
+        "clientCompany": {
+          "type": "string",
+          "description": "For transporters, the company they are visiting on behalf of."
+        },
+        "purposeOfVisit": {
+          "type": "string"
+        },
+        "entryType": {
+          "type": "string",
+          "enum": [
+            "Transportista",
+            "Personal"
+          ]
+        },
+        "entryDateTime": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "vehicleDetails": {
+          "$ref": "#/backend/entities/VehicleDetails"
+        },
+        "hostName": {
+          "type": "string"
+        },
+        "department": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "visitorName",
+        "companyName",
+        "purposeOfVisit",
+        "entryType",
+        "entryDateTime"
+      ]
+    }
+  },
+  "auth": {
+    "providers": []
+  },
+  "firestore": {
+    "/visits/{visitId}": {
+      "schema": {
+        "$ref": "#/backend/entities/Visit"
+      },
+      "description": "Collection of all visitor records."
+    }
+  }
+}

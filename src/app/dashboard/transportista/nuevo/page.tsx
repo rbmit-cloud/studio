@@ -42,6 +42,8 @@ import {
     AlertDialogTrigger,
   } from "@/components/ui/alert-dialog";
 import { useEffect, useState } from "react";
+import { useFirestore } from "@/firebase";
+import { addDoc, collection } from "firebase/firestore";
 
 const hosts = [
     { name: 'Carlos Rodríguez', department: 'Ventas' },
@@ -57,6 +59,7 @@ const formSchema = z.object({
   companyName: z.string().min(2, "La empresa de transportes debe tener al menos 2 caracteres."),
   licensePlate: z.string().min(5, "La matrícula debe tener al menos 5 caracteres.").regex(/^[A-Z0-9-]{5,10}$/, 'Formato de matrícula inválido.'),
   trailerLicensePlate: z.string().optional(),
+  purposeOfVisit: z.string().min(5, "El motivo de la visita debe tener al menos 5 caracteres."),
   hostName: z.string({
     required_error: "Debe seleccionar una persona a visitar.",
   }),
@@ -68,12 +71,13 @@ const formSchema = z.object({
 
 export default function TransportistaFormPage() {
     const [isClient, setIsClient] = useState(false);
+    const db = useFirestore();
+    const router = useRouter();
 
     useEffect(() => {
         setIsClient(true);
     }, []);
 
-    const router = useRouter();
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
@@ -82,6 +86,7 @@ export default function TransportistaFormPage() {
             companyName: "",
             licensePlate: "",
             trailerLicensePlate: "",
+            purposeOfVisit: "",
             department: "",
             privacyPolicy: false,
         },
@@ -89,16 +94,45 @@ export default function TransportistaFormPage() {
 
     const privacyPolicyAccepted = form.watch('privacyPolicy');
 
-    function onSubmit(values: z.infer<typeof formSchema>) {
-        console.log(values);
-        toast({
-            title: "Registro Exitoso",
-            description: `El transportista ${values.visitorName} ha sido registrado.`,
-        });
-        form.reset();
-        setTimeout(() => {
-            router.push('/dashboard/registros');
-        }, 1000);
+    async function onSubmit(values: z.infer<typeof formSchema>) {
+        if (!db) {
+            toast({
+                title: "Error",
+                description: "La base de datos no está disponible.",
+                variant: "destructive"
+            });
+            return;
+        }
+
+        try {
+            const { privacyPolicy, company, ...rest } = values;
+            await addDoc(collection(db, "visits"), {
+                ...rest,
+                clientCompany: company,
+                entryType: 'Transportista',
+                entryDateTime: new Date().toISOString(),
+                vehicleDetails: {
+                    licensePlate: values.licensePlate,
+                    trailerLicensePlate: values.trailerLicensePlate
+                }
+            });
+
+            toast({
+                title: "Registro Exitoso",
+                description: `El transportista ${values.visitorName} ha sido registrado.`,
+            });
+            form.reset();
+            setTimeout(() => {
+                router.push('/dashboard/registros');
+            }, 1000);
+        } catch (error) {
+            console.error("Error adding document: ", error);
+            toast({
+                title: "Error al registrar",
+                description: "Ocurrió un error al guardar la visita. Por favor, inténtelo de nuevo.",
+                variant: "destructive"
+            });
+        }
     }
 
     if (!isClient) {
@@ -135,7 +169,7 @@ export default function TransportistaFormPage() {
                                         name="company"
                                         render={({ field }) => (
                                             <FormItem>
-                                                <FormLabel>Empresa</FormLabel>
+                                                <FormLabel>Empresa (Cliente Final)</FormLabel>
                                                 <FormControl>
                                                     <Input placeholder="Ej: Cliente final S.A." {...field} />
                                                 </FormControl>
@@ -185,6 +219,19 @@ export default function TransportistaFormPage() {
                                         )}
                                     />
                                 </div>
+                                <FormField
+                                    control={form.control}
+                                    name="purposeOfVisit"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Motivo de la visita</FormLabel>
+                                            <FormControl>
+                                                <Input placeholder="Ej: Entrega de mercancía" {...field} />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
                                 <div className="grid md:grid-cols-2 gap-4">
                                     <FormField
                                         control={form.control}
