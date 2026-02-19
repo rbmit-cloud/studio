@@ -1,0 +1,15 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Esto permite el acceso público a las colecciones de visitas y anfitriones.
+    // Es una configuración para el desarrollo y debería restringirse con autenticación antes de pasar a producción.
+    match /visits/{visitId} {
+      allow read, write: if true;
+    }
+
+    match /hosts/{hostId} {
+      allow read, write: if true;
+    }
+  }
+}
