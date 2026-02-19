@@ -69,6 +69,31 @@
         "entryType",
         "entryDateTime"
       ]
+    },
+    "Host": {
+      "title": "Host",
+      "description": "An employee who can be visited.",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Full name of the host."
+        },
+        "department": {
+          "type": "string",
+          "description": "Department the host belongs to."
+        },
+        "email": {
+          "type": "string",
+          "format": "email",
+          "description": "Email address of the host."
+        }
+      },
+      "required": [
+        "name",
+        "department",
+        "email"
+      ]
     }
   },
   "auth": {
@@ -80,6 +105,12 @@
         "$ref": "#/backend/entities/Visit"
       },
       "description": "Collection of all visitor records."
+    },
+    "/hosts/{hostId}": {
+      "schema": {
+        "$ref": "#/backend/entities/Host"
+      },
+      "description": "Collection of all hosts that can be visited."
     }
   }
 }

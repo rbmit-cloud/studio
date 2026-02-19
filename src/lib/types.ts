@@ -17,3 +17,10 @@ export type Visitor = {
   hostName?: string;
   department?: string;
 };
+
+export type Host = {
+  id: string;
+  name: string;
+  department: string;
+  email: string;
+};

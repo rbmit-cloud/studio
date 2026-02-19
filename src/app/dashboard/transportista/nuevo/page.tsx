@@ -43,15 +43,8 @@ import {
   } from "@/components/ui/alert-dialog";
 import { useEffect, useState } from "react";
 import { useFirestore } from "@/firebase";
-import { addDoc, collection } from "firebase/firestore";
-
-const hosts = [
-    { name: 'Carlos Rodríguez', department: 'Ventas' },
-    { name: 'Ana Martínez', department: 'Recursos Humanos' },
-    { name: 'Luis García', department: 'Tecnología' },
-    { name: 'Sofía López', department: 'Marketing' },
-    { name: 'Javier Fernández', department: 'Administración' },
-];
+import { addDoc, collection, onSnapshot, orderBy, query } from "firebase/firestore";
+import type { Host } from "@/lib/types";
 
 const formSchema = z.object({
   visitorName: z.string().min(2, "El nombre y apellidos deben tener al menos 2 caracteres."),
@@ -73,10 +66,27 @@ export default function TransportistaFormPage() {
     const [isClient, setIsClient] = useState(false);
     const db = useFirestore();
     const router = useRouter();
+    const [hosts, setHosts] = useState<Omit<Host, 'id' | 'email'>[]>([]);
 
     useEffect(() => {
         setIsClient(true);
     }, []);
+
+    useEffect(() => {
+        if (!db) return;
+    
+        const q = query(collection(db, 'hosts'), orderBy('name', 'asc'));
+        const unsubscribe = onSnapshot(q, (snapshot) => {
+            const hostsData: Omit<Host, 'id' | 'email'>[] = [];
+            snapshot.forEach((doc) => {
+                const data = doc.data();
+                hostsData.push({ name: data.name, department: data.department });
+            });
+            setHosts(hostsData);
+        });
+    
+        return () => unsubscribe();
+    }, [db]);
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),

@@ -70,7 +70,7 @@ export default function DashboardLayout({
           <SidebarMenu>
             <SidebarMenuItem>
                 <SidebarMenuButton asChild tooltip={{ children: 'Ajustes', side: 'right' }}>
-                    <Link href="#">
+                    <Link href="/dashboard/ajustes">
                         <Settings />
                         <span>Ajustes</span>
                     </Link>
