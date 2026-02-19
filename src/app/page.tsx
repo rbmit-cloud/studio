@@ -21,32 +21,62 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
+import { useFirestore } from '@/firebase';
+import { collection, getDocs, query, where } from 'firebase/firestore';
 
 
 export default function Home() {
   const router = useRouter();
   const { toast } = useToast();
+  const db = useFirestore();
   const [open, setOpen] = useState(false);
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  const handleLogin = () => {
-    // Simple hardcoded check
-    if (username === 'admin' && password === 'Robama2024') {
-      toast({
-        title: "Inicio de sesión exitoso",
-        description: "Redirigiendo al panel de administración...",
-      });
-      router.push('/dashboard');
-    } else {
-      toast({
-        title: "Error de autenticación",
-        description: "Usuario o contraseña incorrectos.",
-        variant: "destructive",
-      });
+  const handleLogin = async () => {
+    if (!db) {
+        toast({
+            title: "Error",
+            description: "La base de datos no está disponible.",
+            variant: "destructive"
+        });
+        return;
     }
-    // Reset fields and close dialog
-    setUsername('');
+
+    try {
+        const q = query(
+            collection(db, "hosts"),
+            where("email", "==", email),
+            where("isAdmin", "==", true),
+            where("password", "==", password)
+        );
+
+        const querySnapshot = await getDocs(q);
+
+        if (querySnapshot.empty) {
+            toast({
+                title: "Error de autenticación",
+                description: "Correo electrónico o contraseña incorrectos, o no es un administrador.",
+                variant: "destructive",
+            });
+        } else {
+            toast({
+                title: "Inicio de sesión exitoso",
+                description: "Redirigiendo al panel de administración...",
+            });
+            router.push('/dashboard');
+        }
+
+    } catch (error) {
+        console.error("Error during login: ", error);
+        toast({
+            title: "Error de inicio de sesión",
+            description: "Ocurrió un error al intentar iniciar sesión.",
+            variant: "destructive",
+        });
+    }
+
+    setEmail('');
     setPassword('');
     setOpen(false); 
   };
@@ -72,15 +102,16 @@ export default function Home() {
                 <form onSubmit={(e) => { e.preventDefault(); handleLogin(); }}>
                     <div className="grid gap-4 py-4">
                         <div className="grid grid-cols-4 items-center gap-4">
-                        <Label htmlFor="username" className="text-right">
-                            Usuario
+                        <Label htmlFor="email" className="text-right">
+                            Correo Electrónico
                         </Label>
                         <Input
-                            id="username"
-                            value={username}
-                            onChange={(e) => setUsername(e.target.value)}
+                            id="email"
+                            type="email"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
                             className="col-span-3"
-                            autoComplete="username"
+                            autoComplete="email"
                         />
                         </div>
                         <div className="grid grid-cols-4 items-center gap-4">
