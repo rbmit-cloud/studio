@@ -41,6 +41,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const formSchema = z.object({
   name: z.string().min(2, "El nombre debe tener al menos 2 caracteres."),
@@ -56,7 +57,6 @@ const formSchema = z.object({
 export default function AjustesPage() {
   const db = useFirestore();
   const [hosts, setHosts] = useState<(Host)[]>([]);
-  const [isClient, setIsClient] = useState(false);
   
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -72,10 +72,6 @@ export default function AjustesPage() {
   const isAdmin = form.watch("isAdmin");
 
   useEffect(() => {
-    setIsClient(true);
-  }, []);
-
-  useEffect(() => {
     if (!db) return;
 
     const q = query(collection(db, "hosts"), orderBy("name", "asc"));
@@ -85,6 +81,13 @@ export default function AjustesPage() {
         hostsData.push({ id: doc.id, ...doc.data() } as Host);
       });
       setHosts(hostsData);
+    }, (error) => {
+        console.error("Error fetching hosts:", error);
+        toast({
+            title: "Error al cargar anfitriones",
+            description: "No se pudieron cargar los datos. Por favor, recargue la página.",
+            variant: "destructive"
+        });
     });
 
     return () => unsubscribe();
@@ -93,20 +96,27 @@ export default function AjustesPage() {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     if (!db) {
       toast({
-        title: "Error",
-        description: "La base de datos no está disponible.",
+        title: "Error de conexión",
+        description: "No se pudo conectar a la base de datos. Por favor, inténtelo de nuevo.",
         variant: "destructive"
       });
       return;
     }
 
     try {
-      const dataToSave = { ...values };
-      if (!dataToSave.isAdmin) {
-        delete (dataToSave as Partial<typeof dataToSave>).password;
+      const dataToSave: Omit<Host, 'id'> = {
+        name: values.name,
+        department: values.department,
+        email: values.email,
+        isAdmin: values.isAdmin,
+      };
+
+      if (values.isAdmin && values.password) {
+        dataToSave.password = values.password;
       }
       
       await addDoc(collection(db, "hosts"), dataToSave);
+      
       toast({
         title: "Anfitrión Añadido",
         description: `Se ha añadido a ${values.name} a la lista de anfitriones.`,
@@ -123,7 +133,14 @@ export default function AjustesPage() {
   }
 
   async function deleteHost(hostId: string) {
-    if (!db) return;
+    if (!db) {
+        toast({
+            title: "Error de conexión",
+            description: "No se pudo conectar a la base de datos.",
+            variant: "destructive"
+        });
+        return;
+    }
     try {
         await deleteDoc(doc(db, "hosts", hostId));
         toast({
@@ -140,8 +157,33 @@ export default function AjustesPage() {
     }
   }
 
-  if (!isClient) {
-    return null;
+  if (!db) {
+    return (
+        <div className="grid gap-6 md:grid-cols-2">
+            <Card>
+                <CardHeader>
+                    <CardTitle>Mantenimiento de Anfitriones</CardTitle>
+                    <CardDescription>Añada o elimine personas que pueden ser visitadas.</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                    <Skeleton className="h-10 w-full" />
+                    <Skeleton className="h-10 w-full" />
+                    <Skeleton className="h-10 w-full" />
+                </CardContent>
+            </Card>
+            <Card>
+                <CardHeader>
+                    <CardTitle>Lista de Anfitriones</CardTitle>
+                    <CardDescription>Personas actualmente disponibles para visitas.</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                    <Skeleton className="h-12 w-full" />
+                    <Skeleton className="h-12 w-full" />
+                    <Skeleton className="h-12 w-full" />
+                </CardContent>
+            </Card>
+        </div>
+    )
   }
 
   return (
