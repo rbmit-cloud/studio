@@ -7,28 +7,25 @@ import { firebaseConfig } from './config';
 
 export * from './provider';
 
-let app: FirebaseApp | null = null;
-let auth: Auth | null = null;
-let firestore: Firestore | null = null;
-
+// This function will be called from the provider, which is a client component.
+// It's safe to assume this runs on the client.
 function initializeFirebase() {
-  if (typeof window !== 'undefined') {
-    if (!app) { // Only initialize once
-      try {
-        app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
-        const canInitializeAuth = !!firebaseConfig.apiKey;
-        auth = canInitializeAuth ? getAuth(app) : null;
-        firestore = getFirestore(app);
-      } catch (e) {
-        console.error('Failed to initialize Firebase app', e);
-        // Reset so we can try again if needed
-        app = null;
-        auth = null;
-        firestore = null;
-      }
-    }
+  try {
+    // Check if Firebase has already been initialized.
+    const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
+    
+    // Get auth and firestore instances.
+    // We check for apiKey to avoid "invalid-api-key" error when auth is not configured.
+    const canInitializeAuth = !!firebaseConfig.apiKey;
+    const auth = canInitializeAuth ? getAuth(app) : null;
+    const firestore = getFirestore(app);
+
+    return { app, auth, firestore };
+  } catch (e) {
+      console.error('Failed to initialize Firebase app', e);
+      // Return nulls if initialization fails
+      return { app: null, auth: null, firestore: null };
   }
-  return { app, auth, firestore };
 }
 
 export { initializeFirebase };
