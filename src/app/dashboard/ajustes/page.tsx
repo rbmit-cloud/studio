@@ -54,7 +54,6 @@ const formSchema = z.object({
 });
 
 export default function AjustesPage() {
-  const [isClient, setIsClient] = useState(false);
   const db = useFirestore();
   const [hosts, setHosts] = useState<(Host)[]>([]);
   
@@ -72,11 +71,7 @@ export default function AjustesPage() {
   const isAdmin = form.watch("isAdmin");
 
   useEffect(() => {
-    setIsClient(true);
-  }, []);
-
-  useEffect(() => {
-    if (!db || !isClient) return;
+    if (!db) return;
 
     const q = query(collection(db, "hosts"), orderBy("name", "asc"));
     const unsubscribe = onSnapshot(q, (snapshot) => {
@@ -95,7 +90,7 @@ export default function AjustesPage() {
     });
 
     return () => unsubscribe();
-  }, [db, isClient]);
+  }, [db]);
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     if (!db) {
@@ -126,11 +121,11 @@ export default function AjustesPage() {
         description: `Se ha añadido a ${values.name} a la lista de anfitriones.`,
       });
       form.reset();
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error adding document: ", error);
       toast({
         title: "Error al añadir anfitrión",
-        description: "Ocurrió un error al guardar. Por favor, inténtelo de nuevo.",
+        description: error.message || "Ocurrió un error al guardar. Por favor, inténtelo de nuevo.",
         variant: "destructive"
       });
     }
@@ -151,18 +146,14 @@ export default function AjustesPage() {
             title: "Anfitrión Eliminado",
             description: "El anfitrión ha sido eliminado correctamente.",
         });
-    } catch (error) {
+    } catch (error: any) {
         console.error("Error deleting document: ", error);
         toast({
             title: "Error al eliminar",
-            description: "No se pudo eliminar el anfitrión.",
+            description: error.message || "No se pudo eliminar el anfitrión.",
             variant: "destructive",
         });
     }
-  }
-
-  if (!isClient) {
-    return null;
   }
 
   return (
