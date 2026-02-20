@@ -33,9 +33,15 @@ export default function FirebaseProvider({ children }: { children: ReactNode }) 
   });
 
   useEffect(() => {
-    const { app, auth, firestore } = initializeFirebase();
-    setFirebase({ app, auth, firestore });
+    const instances = initializeFirebase();
+    setFirebase(instances);
   }, []);
+
+  // Do not render children until Firebase is initialized.
+  // This prevents any child component from accessing Firebase before it's ready.
+  if (!firebase.app) {
+    return null; // Or a loading spinner
+  }
 
   return (
     <FirebaseContext.Provider value={firebase}>
@@ -58,5 +64,10 @@ export const useAuth = () => {
 
 export const useFirestore = () => {
   const { firestore } = useFirebase();
+  // With the new provider logic, firestore will be available when components render.
+  // Throwing an error here if it's null can help debug future issues.
+  if (!firestore) {
+    throw new Error('Firebase Firestore is not initialized.');
+  }
   return firestore;
 };

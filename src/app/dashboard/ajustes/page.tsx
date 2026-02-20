@@ -41,7 +41,6 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
-import { Skeleton } from "@/components/ui/skeleton";
 
 const formSchema = z.object({
   name: z.string().min(2, "El nombre debe tener al menos 2 caracteres."),
@@ -155,35 +154,6 @@ export default function AjustesPage() {
             variant: "destructive",
         });
     }
-  }
-
-  if (!db) {
-    return (
-        <div className="grid gap-6 md:grid-cols-2">
-            <Card>
-                <CardHeader>
-                    <CardTitle>Mantenimiento de Anfitriones</CardTitle>
-                    <CardDescription>Añada o elimine personas que pueden ser visitadas.</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                    <Skeleton className="h-10 w-full" />
-                    <Skeleton className="h-10 w-full" />
-                    <Skeleton className="h-10 w-full" />
-                </CardContent>
-            </Card>
-            <Card>
-                <CardHeader>
-                    <CardTitle>Lista de Anfitriones</CardTitle>
-                    <CardDescription>Personas actualmente disponibles para visitas.</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-2">
-                    <Skeleton className="h-12 w-full" />
-                    <Skeleton className="h-12 w-full" />
-                    <Skeleton className="h-12 w-full" />
-                </CardContent>
-            </Card>
-        </div>
-    )
   }
 
   return (

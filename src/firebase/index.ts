@@ -7,30 +7,28 @@ import { firebaseConfig } from './config';
 
 export * from './provider';
 
+let app: FirebaseApp | null = null;
+let auth: Auth | null = null;
+let firestore: Firestore | null = null;
+
 function initializeFirebase() {
   if (typeof window !== 'undefined') {
-    // A valid apiKey is required for Auth. If it's not present, we can't initialize Auth.
-    const canInitializeAuth = !!firebaseConfig.apiKey;
-
-    if (getApps().length > 0) {
-      const app = getApp();
-      const auth = canInitializeAuth ? getAuth(app) : null;
-      const firestore = getFirestore(app);
-      return { app, auth, firestore };
-    } else {
+    if (!app) { // Only initialize once
       try {
-        const app = initializeApp(firebaseConfig);
-        const auth = canInitializeAuth ? getAuth(app) : null;
-        const firestore = getFirestore(app);
-        return { app, auth, firestore };
+        app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
+        const canInitializeAuth = !!firebaseConfig.apiKey;
+        auth = canInitializeAuth ? getAuth(app) : null;
+        firestore = getFirestore(app);
       } catch (e) {
-        // This will catch if initializeApp itself fails due to bad config.
         console.error('Failed to initialize Firebase app', e);
-        return { app: null, auth: null, firestore: null };
+        // Reset so we can try again if needed
+        app = null;
+        auth = null;
+        firestore = null;
       }
     }
   }
-  return { app: null, auth: null, firestore: null };
+  return { app, auth, firestore };
 }
 
 export { initializeFirebase };
