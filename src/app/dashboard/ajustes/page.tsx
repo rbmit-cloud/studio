@@ -54,6 +54,7 @@ const formSchema = z.object({
 });
 
 export default function AjustesPage() {
+  const [isClient, setIsClient] = useState(false);
   const db = useFirestore();
   const [hosts, setHosts] = useState<(Host)[]>([]);
   
@@ -71,7 +72,11 @@ export default function AjustesPage() {
   const isAdmin = form.watch("isAdmin");
 
   useEffect(() => {
-    if (!db) return;
+    setIsClient(true);
+  }, []);
+
+  useEffect(() => {
+    if (!db || !isClient) return;
 
     const q = query(collection(db, "hosts"), orderBy("name", "asc"));
     const unsubscribe = onSnapshot(q, (snapshot) => {
@@ -90,7 +95,7 @@ export default function AjustesPage() {
     });
 
     return () => unsubscribe();
-  }, [db]);
+  }, [db, isClient]);
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     if (!db) {
@@ -154,6 +159,10 @@ export default function AjustesPage() {
             variant: "destructive",
         });
     }
+  }
+
+  if (!isClient) {
+    return null;
   }
 
   return (
