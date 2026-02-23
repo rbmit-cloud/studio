@@ -53,7 +53,7 @@ const formSchema = z.object({
   hostName: z.string({
     required_error: "Debe seleccionar una persona a visitar.",
   }),
-  department: z.string().min(2, "El departamento es requerido."),
+  department: z.string().optional(),
   privacyPolicy: z.boolean().refine(val => val === true, {
     message: "Debe aceptar la política de tratamiento de datos.",
   }),
@@ -188,7 +188,7 @@ export default function PersonalFormPage() {
                                                     field.onChange(value);
                                                     const selectedHost = hosts.find(h => h.name === value);
                                                     if (selectedHost) {
-                                                        form.setValue('department', selectedHost.department, { shouldValidate: true });
+                                                        form.setValue('department', selectedHost.department || '', { shouldValidate: true });
                                                     }
                                                 }} defaultValue={field.value}>
                                                     <FormControl>

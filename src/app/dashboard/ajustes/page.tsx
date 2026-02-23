@@ -44,7 +44,7 @@ import { Badge } from "@/components/ui/badge";
 
 const formSchema = z.object({
   name: z.string().min(2, "El nombre debe tener al menos 2 caracteres."),
-  department: z.string().min(2, "El departamento debe tener al menos 2 caracteres."),
+  department: z.string().optional(),
   email: z.string().email("Debe ser un correo electrónico válido."),
   isAdmin: z.boolean().default(false),
   password: z.string().optional(),
@@ -114,8 +114,7 @@ export default function AjustesPage() {
     }
     
     try {
-      const docRef = await addDoc(collection(db, "hosts"), dataToSave);
-      console.log("Document written with ID: ", docRef.id);
+      await addDoc(collection(db, "hosts"), dataToSave);
       toast({
         title: "Anfitrión Añadido",
         description: `Se ha añadido a ${values.name} a la lista de anfitriones.`,

@@ -50,6 +50,7 @@
         },
         "exitDateTime": {
           "type": "string",
+  
           "format": "date-time"
         },
         "vehicleDetails": {
@@ -99,7 +100,6 @@
       },
       "required": [
         "name",
-        "department",
         "email"
       ]
     }

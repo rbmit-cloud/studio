@@ -21,7 +21,7 @@ export type Visitor = {
 export type Host = {
   id: string;
   name: string;
-  department: string;
+  department?: string;
   email: string;
   isAdmin?: boolean;
   password?: string;
