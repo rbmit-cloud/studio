@@ -34,6 +34,11 @@ export default function FirebaseProvider({ children }: { children: ReactNode }) 
 
   useEffect(() => {
     const instances = initializeFirebase();
+    if (instances.app) {
+      console.log('✅ Conectado correctamente al proyecto de Firebase:', instances.app.options.projectId);
+    } else {
+      console.error('❌ Fallo al inicializar Firebase. Revisa tu configuración y variables de entorno.');
+    }
     setFirebase(instances);
   }, []);
 
