@@ -92,14 +92,14 @@ export default function AjustesPage() {
     return () => unsubscribe();
   }, [db]);
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
+  function onSubmit(values: z.infer<typeof formSchema>) {
     if (!db) {
       toast({
         title: "Error de conexión",
         description: "No se pudo conectar a la base de datos.",
         variant: "destructive"
       });
-      return;
+      return Promise.reject(new Error("No hay conexión con la base de datos"));
     }
 
     const dataToSave: Omit<Host, 'id'> = {
@@ -113,21 +113,24 @@ export default function AjustesPage() {
       dataToSave.password = values.password;
     }
     
-    try {
-        await addDoc(collection(db, "hosts"), dataToSave);
+    return addDoc(collection(db, "hosts"), dataToSave)
+      .then((docRef) => {
+        console.log("Document written with ID: ", docRef.id);
         toast({
           title: "Anfitrión Añadido",
           description: `Se ha añadido a ${values.name} a la lista de anfitriones.`,
         });
         form.reset();
-    } catch (error: any) {
+      })
+      .catch((error: any) => {
         console.error("Error adding document: ", error);
         toast({
           title: "Error al añadir anfitrión",
           description: error.message || "Ocurrió un error al guardar. Por favor, inténtelo de nuevo.",
           variant: "destructive"
         });
-    }
+        throw error;
+      });
   }
 
   async function deleteHost(hostId: string) {

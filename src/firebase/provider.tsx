@@ -10,8 +10,11 @@ import {
 import type { FirebaseApp } from 'firebase/app';
 import type { Auth } from 'firebase/auth';
 import type { Firestore } from 'firebase/firestore';
-
-import { initializeFirebase } from '.';
+import { getApp, getApps, initializeApp } from 'firebase/app';
+import { getAuth } from 'firebase/auth';
+import { getFirestore } from 'firebase/firestore';
+import { firebaseConfig } from './config';
+import { useToast } from '@/hooks/use-toast';
 
 interface FirebaseContextType {
   app: FirebaseApp | null;
@@ -31,21 +34,51 @@ export default function FirebaseProvider({ children }: { children: ReactNode }) 
     auth: null,
     firestore: null,
   });
+  const [error, setError] = useState<string | null>(null);
+  const { toast } = useToast();
 
   useEffect(() => {
-    const instances = initializeFirebase();
-    if (instances.app) {
-      console.log('✅ Conectado correctamente al proyecto de Firebase:', instances.app.options.projectId);
-    } else {
-      console.error('❌ Fallo al inicializar Firebase. Revisa tu configuración y variables de entorno.');
+    // Check if the config is valid before doing anything.
+    if (!firebaseConfig?.projectId) {
+      const errorMessage = "Configuración de Firebase incompleta. Revisa las variables de entorno.";
+      console.error(errorMessage);
+      setError(errorMessage);
+      return;
     }
-    setFirebase(instances);
+
+    try {
+      const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
+      const auth = getAuth(app);
+      const firestore = getFirestore(app);
+
+      setFirebase({ app, auth, firestore });
+      console.log('✅ Conectado correctamente al proyecto de Firebase:', app.options.projectId);
+      
+    } catch (e: any) {
+      const errorMessage = `Fallo al inicializar Firebase: ${e.message}`;
+      console.error(errorMessage, e);
+      setError(errorMessage);
+    }
   }, []);
 
-  // Do not render children until Firebase is initialized.
-  // This prevents any child component from accessing Firebase before it's ready.
+  if (error) {
+    return (
+      <div className="flex h-screen w-full items-center justify-center bg-background text-foreground">
+        <div className="w-full max-w-md rounded-lg border border-destructive bg-card p-6 text-center">
+          <h1 className="text-2xl font-bold text-destructive">Error de Configuración</h1>
+          <p className="mt-4 text-card-foreground">{error}</p>
+          <p className="mt-2 text-sm text-muted-foreground">La aplicación no puede funcionar sin una conexión válida a Firebase.</p>
+        </div>
+      </div>
+    );
+  }
+
   if (!firebase.app) {
-    return null; // Or a loading spinner
+    return (
+        <div className="flex h-screen w-full items-center justify-center">
+            <p>Conectando con Firebase...</p>
+        </div>
+    );
   }
 
   return (
@@ -69,8 +102,6 @@ export const useAuth = () => {
 
 export const useFirestore = () => {
   const { firestore } = useFirebase();
-  // With the new provider logic, firestore will be available when components render.
-  // Throwing an error here if it's null can help debug future issues.
   if (!firestore) {
     throw new Error('Firebase Firestore is not initialized.');
   }
