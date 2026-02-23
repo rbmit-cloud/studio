@@ -113,21 +113,22 @@ export default function AjustesPage() {
       dataToSave.password = values.password;
     }
     
-    try {
-        await addDoc(collection(db, "hosts"), dataToSave);
+    return addDoc(collection(db, "hosts"), dataToSave)
+      .then(() => {
         toast({
           title: "Anfitrión Añadido",
           description: `Se ha añadido a ${values.name} a la lista de anfitriones.`,
         });
         form.reset();
-    } catch (error: any) {
+      })
+      .catch((error: any) => {
         console.error("Error adding document: ", error);
         toast({
           title: "Error al añadir anfitrión",
           description: error.message || "Ocurrió un error al guardar. Por favor, inténtelo de nuevo.",
           variant: "destructive"
         });
-    }
+      });
   }
 
   async function deleteHost(hostId: string) {
