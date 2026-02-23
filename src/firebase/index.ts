@@ -11,12 +11,6 @@ export * from './provider';
 // It's safe to assume this runs on the client.
 function initializeFirebase() {
   try {
-    // If the config is missing, don't initialize Firebase.
-    if (!firebaseConfig.projectId) {
-      console.error("Firebase config is missing or incomplete. Please check your environment variables. The application will not connect to Firebase.");
-      return { app: null, auth: null, firestore: null };
-    }
-
     // Check if Firebase has already been initialized.
     const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
     
