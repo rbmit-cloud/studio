@@ -34,18 +34,8 @@ export default function FirebaseProvider({ children }: { children: ReactNode }) 
     auth: null,
     firestore: null,
   });
-  const [error, setError] = useState<string | null>(null);
-  const { toast } = useToast();
 
   useEffect(() => {
-    // Check if the config is valid before doing anything.
-    if (!firebaseConfig?.projectId) {
-      const errorMessage = "Configuración de Firebase incompleta. Revisa las variables de entorno.";
-      console.error(errorMessage);
-      setError(errorMessage);
-      return;
-    }
-
     try {
       const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
       const auth = getAuth(app);
@@ -55,23 +45,9 @@ export default function FirebaseProvider({ children }: { children: ReactNode }) 
       console.log('✅ Conectado correctamente al proyecto de Firebase:', app.options.projectId);
       
     } catch (e: any) {
-      const errorMessage = `Fallo al inicializar Firebase: ${e.message}`;
-      console.error(errorMessage, e);
-      setError(errorMessage);
+      console.error(`Fallo al inicializar Firebase: ${e.message}`, e);
     }
   }, []);
-
-  if (error) {
-    return (
-      <div className="flex h-screen w-full items-center justify-center bg-background text-foreground">
-        <div className="w-full max-w-md rounded-lg border border-destructive bg-card p-6 text-center">
-          <h1 className="text-2xl font-bold text-destructive">Error de Configuración</h1>
-          <p className="mt-4 text-card-foreground">{error}</p>
-          <p className="mt-2 text-sm text-muted-foreground">La aplicación no puede funcionar sin una conexión válida a Firebase.</p>
-        </div>
-      </div>
-    );
-  }
 
   if (!firebase.app) {
     return (

@@ -92,45 +92,43 @@ export default function AjustesPage() {
     return () => unsubscribe();
   }, [db]);
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
+  async function onSubmit(values: z.infer<typeof formSchema>) {
     if (!db) {
       toast({
         title: "Error de conexión",
         description: "No se pudo conectar a la base de datos.",
         variant: "destructive"
       });
-      return Promise.reject(new Error("No hay conexión con la base de datos"));
+      return;
     }
-
+  
     const dataToSave: Omit<Host, 'id'> = {
       name: values.name,
       department: values.department,
       email: values.email,
       isAdmin: values.isAdmin,
     };
-
+  
     if (values.isAdmin && values.password) {
       dataToSave.password = values.password;
     }
     
-    return addDoc(collection(db, "hosts"), dataToSave)
-      .then((docRef) => {
-        console.log("Document written with ID: ", docRef.id);
-        toast({
-          title: "Anfitrión Añadido",
-          description: `Se ha añadido a ${values.name} a la lista de anfitriones.`,
-        });
-        form.reset();
-      })
-      .catch((error: any) => {
-        console.error("Error adding document: ", error);
-        toast({
-          title: "Error al añadir anfitrión",
-          description: error.message || "Ocurrió un error al guardar. Por favor, inténtelo de nuevo.",
-          variant: "destructive"
-        });
-        throw error;
+    try {
+      const docRef = await addDoc(collection(db, "hosts"), dataToSave);
+      console.log("Document written with ID: ", docRef.id);
+      toast({
+        title: "Anfitrión Añadido",
+        description: `Se ha añadido a ${values.name} a la lista de anfitriones.`,
       });
+      form.reset();
+    } catch (error: any) {
+      console.error("Error adding document: ", error);
+      toast({
+        title: "Error al añadir anfitrión",
+        description: error.message || "Ocurrió un error al guardar. Por favor, inténtelo de nuevo.",
+        variant: "destructive"
+      });
+    }
   }
 
   async function deleteHost(hostId: string) {
