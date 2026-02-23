@@ -92,9 +92,7 @@ export default function AjustesPage() {
     return () => unsubscribe();
   }, [db]);
 
-  // Changed to a synchronous function that uses promise chaining (.then/.catch)
-  // This is to prevent the UI from "hanging" if the await call never resolves.
-  function onSubmit(values: z.infer<typeof formSchema>) {
+  async function onSubmit(values: z.infer<typeof formSchema>) {
     if (!db) {
       toast({
         title: "Error de conexión",
@@ -115,24 +113,21 @@ export default function AjustesPage() {
       dataToSave.password = values.password;
     }
     
-    // Using .then() and .catch() to handle the async operation
-    // without blocking the form submission process.
-    addDoc(collection(db, "hosts"), dataToSave)
-      .then(() => {
+    try {
+        await addDoc(collection(db, "hosts"), dataToSave);
         toast({
           title: "Anfitrión Añadido",
           description: `Se ha añadido a ${values.name} a la lista de anfitriones.`,
         });
         form.reset();
-      })
-      .catch((error: any) => {
+    } catch (error: any) {
         console.error("Error adding document: ", error);
         toast({
           title: "Error al añadir anfitrión",
           description: error.message || "Ocurrió un error al guardar. Por favor, inténtelo de nuevo.",
           variant: "destructive"
         });
-      });
+    }
   }
 
   async function deleteHost(hostId: string) {
