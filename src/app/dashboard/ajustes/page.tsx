@@ -1,4 +1,3 @@
-
 'use client';
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -24,7 +23,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { useFirestore } from "@/firebase";
-import { addDoc, collection, onSnapshot, query, orderBy, doc, deleteDoc, where, getDocs } from "firebase/firestore";
+import { addDoc, collection, onSnapshot, query, orderBy, doc, deleteDoc, where, getDocs, updateDoc } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import type { Host } from "@/lib/types";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -42,6 +41,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
 
 const formSchema = z.object({
   name: z.string().min(2, "El nombre debe tener al menos 2 caracteres."),
@@ -49,14 +49,15 @@ const formSchema = z.object({
   email: z.string().email("Debe ser un correo electrónico válido."),
   isAdmin: z.boolean().default(false),
   password: z.string().optional(),
-}).refine(data => !data.isAdmin || (data.password && data.password.length >= 6), {
+}).refine(data => !data.isAdmin || (data.password && data.password.length >= 6) || !data.password, {
   message: "La contraseña debe tener al menos 6 caracteres para los administradores.",
   path: ["password"],
 });
 
 export default function AjustesPage() {
   const db = useFirestore();
-  const [hosts, setHosts] = useState<(Host)[]>([]);
+  const [hosts, setHosts] = useState<Host[]>([]);
+  const [selectedHost, setSelectedHost] = useState<Host | null>(null);
   
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -93,6 +94,23 @@ export default function AjustesPage() {
     return () => unsubscribe();
   }, [db]);
 
+  const handleCancelEdit = () => {
+    setSelectedHost(null);
+    form.reset({
+        name: "",
+        department: "",
+        email: "",
+        isAdmin: false,
+        password: "",
+    });
+  };
+
+  const handleSelectHost = (host: Host) => {
+    setSelectedHost(host);
+    form.reset({ ...host, password: "" });
+  };
+
+
   async function onSubmit(values: z.infer<typeof formSchema>) {
     if (!db) {
       toast({
@@ -107,8 +125,10 @@ export default function AjustesPage() {
       const hostsRef = collection(db, "hosts");
       const q = query(hostsRef, where("name", "==", values.name));
       const querySnapshot = await getDocs(q);
+      
+      const duplicate = querySnapshot.docs.find(doc => doc.id !== selectedHost?.id);
 
-      if (!querySnapshot.empty) {
+      if (duplicate) {
         toast({
           title: "Anfitrión Duplicado",
           description: "Ya existe un anfitrión con ese nombre.",
@@ -116,29 +136,40 @@ export default function AjustesPage() {
         });
         return;
       }
-
-      const dataToSave: Omit<Host, 'id'> = {
+      
+      const dataToSave: Omit<Host, 'id' | 'password'> & { password?: string } = {
         name: values.name,
-        department: values.department,
+        department: values.department || "",
         email: values.email,
         isAdmin: values.isAdmin,
       };
-    
-      if (values.isAdmin && values.password) {
+
+      if (values.password) {
         dataToSave.password = values.password;
       }
 
-      await addDoc(hostsRef, dataToSave);
-      toast({
-        title: "Anfitrión Añadido",
-        description: `Se ha añadido a ${values.name} a la lista de anfitriones.`,
-      });
-      form.reset();
+      if (selectedHost) {
+        const hostDocRef = doc(db, "hosts", selectedHost.id);
+        await updateDoc(hostDocRef, dataToSave);
+        toast({
+            title: "Anfitrión Actualizado",
+            description: `Se ha actualizado a ${values.name}.`,
+        });
+      } else {
+        await addDoc(hostsRef, dataToSave);
+        toast({
+          title: "Anfitrión Añadido",
+          description: `Se ha añadido a ${values.name} a la lista de anfitriones.`,
+        });
+      }
+
+      handleCancelEdit();
+
     } catch (error: any) {
-      console.error("Error adding document: ", error);
+      console.error("Error submitting form: ", error);
       toast({
-        title: "Error al añadir anfitrión",
-        description: error.message || "Ocurrió un error al guardar. Por favor, inténtelo de nuevo.",
+        title: selectedHost ? "Error al actualizar" : "Error al añadir anfitrión",
+        description: error.message || "Ocurrió un error. Por favor, inténtelo de nuevo.",
         variant: "destructive"
       });
     }
@@ -159,6 +190,9 @@ export default function AjustesPage() {
             title: "Anfitrión Eliminado",
             description: "El anfitrión ha sido eliminado correctamente.",
         });
+        if (selectedHost?.id === hostId) {
+            handleCancelEdit();
+        }
     } catch (error: any) {
         console.error("Error deleting document: ", error);
         toast({
@@ -175,8 +209,8 @@ export default function AjustesPage() {
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)}>
             <CardHeader>
-              <CardTitle>Mantenimiento de Anfitriones</CardTitle>
-              <CardDescription>Añada o elimine personas que pueden ser visitadas.</CardDescription>
+              <CardTitle>{selectedHost ? 'Editar Anfitrión' : 'Mantenimiento de Anfitriones'}</CardTitle>
+              <CardDescription>{selectedHost ? 'Modifique los datos del anfitrión y guarde los cambios.' : 'Añada o elimine personas que pueden ser visitadas.'}</CardDescription>
             </CardHeader>
             <CardContent className="grid gap-4">
               <FormField
@@ -243,7 +277,7 @@ export default function AjustesPage() {
                   name="password"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Contraseña</FormLabel>
+                      <FormLabel>Contraseña {selectedHost && '(Dejar en blanco para no cambiar)'}</FormLabel>
                       <FormControl>
                         <Input type="password" placeholder="Establecer contraseña" {...field} />
                       </FormControl>
@@ -253,10 +287,15 @@ export default function AjustesPage() {
                 />
               )}
             </CardContent>
-            <CardFooter>
-              <Button type="submit" disabled={form.formState.isSubmitting}>
-                {form.formState.isSubmitting ? 'Guardando...' : 'Añadir Anfitrión'}
-              </Button>
+            <CardFooter className="flex justify-between">
+                <Button type="submit" disabled={form.formState.isSubmitting}>
+                  {form.formState.isSubmitting ? 'Guardando...' : (selectedHost ? 'Actualizar Anfitrión' : 'Añadir Anfitrión')}
+                </Button>
+              {selectedHost && (
+                <Button type="button" variant="outline" onClick={handleCancelEdit}>
+                    Cancelar Edición
+                </Button>
+              )}
             </CardFooter>
           </form>
         </Form>
@@ -264,7 +303,7 @@ export default function AjustesPage() {
       <Card>
         <CardHeader>
           <CardTitle>Lista de Anfitriones</CardTitle>
-          <CardDescription>Personas actualmente disponibles para visitas.</CardDescription>
+          <CardDescription>Personas actualmente disponibles para visitas. Haga clic en una fila para editar.</CardDescription>
         </CardHeader>
         <CardContent>
           <Table>
@@ -279,7 +318,14 @@ export default function AjustesPage() {
             <TableBody>
               {hosts.length > 0 ? (
                 hosts.map((host) => (
-                  <TableRow key={host.id}>
+                  <TableRow 
+                    key={host.id}
+                    onClick={() => handleSelectHost(host)}
+                    className={cn(
+                        "cursor-pointer",
+                        selectedHost?.id === host.id && "bg-muted/50"
+                    )}
+                  >
                     <TableCell className="font-medium">
                         {host.name}
                         {host.isAdmin && <Badge variant="outline" className="ml-2">Admin</Badge>}
@@ -289,7 +335,7 @@ export default function AjustesPage() {
                     <TableCell className="text-right">
                         <AlertDialog>
                             <AlertDialogTrigger asChild>
-                                <Button variant="ghost" size="icon">
+                                <Button variant="ghost" size="icon" onClick={(e) => e.stopPropagation()}>
                                     <Trash2 className="h-4 w-4 text-destructive" />
                                 </Button>
                             </AlertDialogTrigger>
@@ -302,7 +348,7 @@ export default function AjustesPage() {
                                 </AlertDialogHeader>
                                 <AlertDialogFooter>
                                 <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                                <AlertDialogAction onClick={() => deleteHost(host.id)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                                <AlertDialogAction onClick={(e) => { e.stopPropagation(); deleteHost(host.id); }} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
                                     Eliminar
                                 </AlertDialogAction>
                                 </AlertDialogFooter>
