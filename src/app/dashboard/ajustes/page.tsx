@@ -1,3 +1,4 @@
+
 'use client';
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -23,7 +24,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { useFirestore } from "@/firebase";
-import { addDoc, collection, onSnapshot, query, orderBy, doc, deleteDoc } from "firebase/firestore";
+import { addDoc, collection, onSnapshot, query, orderBy, doc, deleteDoc, where, getDocs } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import type { Host } from "@/lib/types";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -102,19 +103,32 @@ export default function AjustesPage() {
       return;
     }
   
-    const dataToSave: Omit<Host, 'id'> = {
-      name: values.name,
-      department: values.department,
-      email: values.email,
-      isAdmin: values.isAdmin,
-    };
-  
-    if (values.isAdmin && values.password) {
-      dataToSave.password = values.password;
-    }
-    
     try {
-      await addDoc(collection(db, "hosts"), dataToSave);
+      const hostsRef = collection(db, "hosts");
+      const q = query(hostsRef, where("name", "==", values.name));
+      const querySnapshot = await getDocs(q);
+
+      if (!querySnapshot.empty) {
+        toast({
+          title: "Anfitrión Duplicado",
+          description: "Ya existe un anfitrión con ese nombre.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const dataToSave: Omit<Host, 'id'> = {
+        name: values.name,
+        department: values.department,
+        email: values.email,
+        isAdmin: values.isAdmin,
+      };
+    
+      if (values.isAdmin && values.password) {
+        dataToSave.password = values.password;
+      }
+
+      await addDoc(hostsRef, dataToSave);
       toast({
         title: "Anfitrión Añadido",
         description: `Se ha añadido a ${values.name} a la lista de anfitriones.`,
