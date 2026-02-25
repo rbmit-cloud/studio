@@ -5,6 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { List, Truck, User, LogOut } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 import {
   SidebarProvider,
@@ -67,26 +68,22 @@ export default function DashboardLayout({
           </SidebarMenu>
         </SidebarContent>
         <SidebarFooter>
-          <SidebarMenu>
-            <SidebarMenuItem>
-              <SidebarMenuButton asChild tooltip={{ children: 'Salir', side: 'right' }}>
-                <Link href="/">
-                  <LogOut />
-                  <span>Salir</span>
-                </Link>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          </SidebarMenu>
         </SidebarFooter>
       </Sidebar>
       <SidebarInset>
-        <header className="flex h-14 items-center gap-4 border-b bg-card px-6">
-            <SidebarTrigger className="md:hidden"/>
-            <div className="flex-1">
+        <header className="flex h-14 items-center justify-between border-b bg-card px-6">
+            <div className="flex items-center gap-4">
+                <SidebarTrigger className="md:hidden"/>
                 <h1 className="text-lg font-semibold">
                     {pageTitle}
                 </h1>
             </div>
+            <Button asChild variant="outline" size="sm">
+                <Link href="/">
+                    Salir
+                    <LogOut className="ml-2 h-4 w-4" />
+                </Link>
+            </Button>
         </header>
         <main className="flex-1 overflow-y-auto p-4 md:p-6">{children}</main>
       </SidebarInset>
