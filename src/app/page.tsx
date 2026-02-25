@@ -64,7 +64,7 @@ export default function Home() {
                 title: "Inicio de sesión exitoso",
                 description: "Redirigiendo al panel de administración...",
             });
-            router.push('/dashboard');
+            router.push('/admin');
         }
 
     } catch (error) {

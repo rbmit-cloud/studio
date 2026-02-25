@@ -4,7 +4,7 @@ import * as React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
-import { Home, List, Truck, User, LogOut, Settings, BarChart3 } from 'lucide-react';
+import { List, Truck, User, LogOut } from 'lucide-react';
 
 import {
   SidebarProvider,
@@ -20,11 +20,9 @@ import {
 } from '@/components/ui/sidebar';
 
 const navItems = [
-  { href: '/dashboard', icon: Home, label: 'Dashboard' },
   { href: '/dashboard/registros', icon: List, label: 'Registros' },
   { href: '/dashboard/transportista/nuevo', icon: Truck, label: 'Nuevo Transportista' },
   { href: '/dashboard/personal/nuevo', icon: User, label: 'Nueva Visita' },
-  { href: '/dashboard/analytics', icon: BarChart3, label: 'Analíticas' },
 ];
 
 export default function DashboardLayout({
@@ -33,6 +31,8 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+
+  const pageTitle = navItems.find(item => pathname.startsWith(item.href))?.label || 'Dashboard';
 
   return (
     <SidebarProvider>
@@ -51,7 +51,7 @@ export default function DashboardLayout({
               <SidebarMenuItem key={item.href}>
                 <SidebarMenuButton
                   asChild
-                  isActive={pathname.startsWith(item.href) && (item.href !== '/dashboard' || pathname === '/dashboard')}
+                  isActive={pathname.startsWith(item.href)}
                   tooltip={{
                     children: item.label,
                     side: 'right',
@@ -69,14 +69,6 @@ export default function DashboardLayout({
         <SidebarFooter>
           <SidebarMenu>
             <SidebarMenuItem>
-                <SidebarMenuButton asChild tooltip={{ children: 'Ajustes', side: 'right' }}>
-                    <Link href="/dashboard/ajustes">
-                        <Settings />
-                        <span>Ajustes</span>
-                    </Link>
-                </SidebarMenuButton>
-            </SidebarMenuItem>
-            <SidebarMenuItem>
               <SidebarMenuButton asChild tooltip={{ children: 'Salir', side: 'right' }}>
                 <Link href="/">
                   <LogOut />
@@ -92,7 +84,7 @@ export default function DashboardLayout({
             <SidebarTrigger className="md:hidden"/>
             <div className="flex-1">
                 <h1 className="text-lg font-semibold">
-                    {navItems.find(item => pathname.startsWith(item.href) && (item.href !== '/dashboard' || pathname === '/dashboard'))?.label || 'Dashboard'}
+                    {pageTitle}
                 </h1>
             </div>
         </header>
