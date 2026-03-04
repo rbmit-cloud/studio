@@ -16,7 +16,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -32,6 +31,7 @@ export default function Home() {
   const [open, setOpen] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [loginDestination, setLoginDestination] = useState<string>('');
 
   const handleLogin = async () => {
     if (!db) {
@@ -62,9 +62,9 @@ export default function Home() {
         } else {
             toast({
                 title: "Inicio de sesión exitoso",
-                description: "Redirigiendo al panel de administración...",
+                description: "Redirigiendo...",
             });
-            router.push('/admin');
+            router.push(loginDestination);
         }
 
     } catch (error) {
@@ -79,24 +79,38 @@ export default function Home() {
     setEmail('');
     setPassword('');
     setOpen(false); 
+    setLoginDestination('');
   };
+  
+  const handleOpenDialog = (destination: string) => {
+    setLoginDestination(destination);
+    setOpen(true);
+  }
+
+  const handleCloseDialog = (isOpen: boolean) => {
+    if (!isOpen) {
+        setEmail('');
+        setPassword('');
+        setLoginDestination('');
+    }
+    setOpen(isOpen);
+  }
 
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-8 bg-background">
       <div className="flex flex-col items-center gap-4">
         
-        <Dialog open={open} onOpenChange={setOpen}>
-            <DialogTrigger asChild>
-                <div className="cursor-pointer">
-                    <Image src="/robama-logo.jpg" alt="Logo de Robama S.A." width={800} height={222} className="w-[800px] h-auto" />
-                </div>
-            </DialogTrigger>
+        <div className="cursor-pointer" onClick={() => handleOpenDialog('/admin')}>
+            <Image src="/robama-logo.jpg" alt="Logo de Robama S.A." width={800} height={222} className="w-[800px] h-auto" />
+        </div>
+        
+        <Dialog open={open} onOpenChange={handleCloseDialog}>
             <DialogContent className="sm:max-w-[425px]">
                 <DialogHeader>
-                    <DialogTitle>Administración</DialogTitle>
+                    <DialogTitle>Acceso Restringido</DialogTitle>
                     <DialogDescription>
-                    Ingrese sus credenciales para acceder al panel de administración.
+                    Ingrese sus credenciales para acceder a esta sección.
                     </DialogDescription>
                 </DialogHeader>
                 <form onSubmit={(e) => { e.preventDefault(); handleLogin(); }}>
@@ -165,10 +179,10 @@ export default function Home() {
         </div>
         
         <div className="flex items-center justify-center gap-4 mt-2">
-            <Button asChild variant="outline">
-              <Link href="/dashboard/registros">Ver Registro de Visitas</Link>
+            <Button variant="outline" onClick={() => handleOpenDialog('/dashboard/registros')}>
+              Ver Registro de Visitas
             </Button>
-            <Button variant="outline" onClick={() => setOpen(true)}>
+            <Button variant="outline" onClick={() => handleOpenDialog('/admin')}>
                 Administración
             </Button>
         </div>
