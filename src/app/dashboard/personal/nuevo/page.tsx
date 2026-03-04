@@ -122,7 +122,7 @@ export default function PersonalFormPage() {
             });
             form.reset();
             setTimeout(() => {
-                router.push('/dashboard/registros');
+                router.push('/');
             }, 1000);
         } catch (error) {
             console.error("Error adding document: ", error);
