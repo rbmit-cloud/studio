@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Truck, User } from 'lucide-react';
 import type { Visitor } from '@/lib/types';
 import { useFirestore } from '@/firebase';
-import { collection, onSnapshot, query, orderBy } from 'firebase/firestore';
+import { collection, onSnapshot, query, orderBy, updateDoc, type DocumentReference } from 'firebase/firestore';
 import React, { useEffect, useState } from 'react';
 
 function VisitorRow({ visitor }: { visitor: Visitor & { id: string } }) {
@@ -64,11 +64,46 @@ export default function RegistrosPage() {
     if (!db) return;
 
     const q = query(collection(db, 'visits'), orderBy('entryDateTime', 'desc'));
+    
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
       const visitsData: (Visitor & { id: string })[] = [];
+      const updatesToPerform: { ref: DocumentReference, data: { exitDateTime: string } }[] = [];
+
       querySnapshot.forEach((doc) => {
-        visitsData.push({ id: doc.id, ...doc.data() } as Visitor & { id: string });
+        const visit = { id: doc.id, ...doc.data() } as Visitor & { id: string };
+
+        // Lógica de cierre automático
+        if (!visit.exitDateTime) {
+          const entryDateTime = new Date(visit.entryDateTime);
+          const checkoutTime = new Date(entryDateTime);
+          
+          // Establecer a las 8:00 AM del día siguiente
+          checkoutTime.setDate(checkoutTime.getDate() + 1);
+          checkoutTime.setHours(8, 0, 0, 0);
+
+          const now = new Date();
+
+          if (now > checkoutTime) {
+            // Si la hora actual es posterior a la hora de cierre automático, actualiza la visita
+            const newExitTime = checkoutTime.toISOString();
+            updatesToPerform.push({ ref: doc.ref, data: { exitDateTime: newExitTime } });
+            
+            // Actualiza también el objeto que vamos a meter en el estado para una actualización inmediata de la UI
+            visit.exitDateTime = newExitTime;
+          }
+        }
+        
+        visitsData.push(visit);
       });
+
+      // Realiza todas las actualizaciones en paralelo
+      if (updatesToPerform.length > 0) {
+        const updatePromises = updatesToPerform.map(update => updateDoc(update.ref, update.data));
+        Promise.all(updatePromises).catch(error => {
+          console.error("Error al actualizar visitas automáticamente: ", error);
+        });
+      }
+
       setVisits(visitsData);
     });
 
