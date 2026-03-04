@@ -69,6 +69,13 @@ export default function RegistrosPage() {
   const db = useFirestore();
 
   useEffect(() => {
+    // Por defecto, mostrar las visitas del día actual al cargar la página en el cliente.
+    const today = new Date();
+    setDateFrom(today);
+    setDateTo(today);
+  }, []);
+
+  useEffect(() => {
     if (!db) return;
 
     const q = query(collection(db, 'visits'), orderBy('entryDateTime', 'desc'));
