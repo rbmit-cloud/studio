@@ -33,7 +33,7 @@ export default function DashboardLayout({
 }) {
   const pathname = usePathname();
 
-  if (pathname === '/dashboard/personal/nuevo' || pathname === '/dashboard/transportista/nuevo') {
+  if (pathname === '/dashboard/personal/nuevo' || pathname === '/dashboard/transportista/nuevo' || pathname === '/dashboard/salida') {
     return (
       <div className="flex min-h-screen w-full flex-col items-center bg-muted/40">
         <header className="sticky top-0 z-30 flex h-20 w-full items-center justify-center border-b bg-background px-4 sm:px-6">
