@@ -117,7 +117,7 @@ export default function SalidaPage() {
                                     <FormItem>
                                         <FormLabel>Nombre y Apellidos</FormLabel>
                                         <FormControl>
-                                            <Input placeholder="Ej: Juan Pérez" {...field} />
+                                            <Input placeholder="Ej: Juan Pérez" {...field} autoComplete="off" />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>

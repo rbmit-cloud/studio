@@ -125,7 +125,7 @@ export default function Home() {
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                             className="col-span-3"
-                            autoComplete="email"
+                            autoComplete="off"
                         />
                         </div>
                         <div className="grid grid-cols-4 items-center gap-4">
@@ -138,7 +138,7 @@ export default function Home() {
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                             className="col-span-3"
-                            autoComplete="current-password"
+                            autoComplete="off"
                         />
                         </div>
                     </div>

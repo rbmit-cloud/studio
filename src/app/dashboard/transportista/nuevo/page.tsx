@@ -182,7 +182,7 @@ export default function TransportistaFormPage() {
                                             <FormItem>
                                                 <FormLabel>Nombre y Apellidos</FormLabel>
                                                 <FormControl>
-                                                    <Input placeholder="Ej: Juan Pérez" {...field} />
+                                                    <Input placeholder="Ej: Juan Pérez" {...field} autoComplete="off" />
                                                 </FormControl>
                                                 <FormMessage />
                                             </FormItem>
@@ -195,7 +195,7 @@ export default function TransportistaFormPage() {
                                             <FormItem>
                                                 <FormLabel>Empresa (Cliente Final)</FormLabel>
                                                 <FormControl>
-                                                    <Input placeholder="Ej: Cliente final S.A." {...field} />
+                                                    <Input placeholder="Ej: Cliente final S.A." {...field} autoComplete="off" />
                                                 </FormControl>
                                                 <FormMessage />
                                             </FormItem>
@@ -209,7 +209,7 @@ export default function TransportistaFormPage() {
                                         <FormItem>
                                             <FormLabel>Empresa de Transportes</FormLabel>
                                             <FormControl>
-                                                <Input placeholder="Ej: Transportes Rápidos S.A." {...field} />
+                                                <Input placeholder="Ej: Transportes Rápidos S.A." {...field} autoComplete="off" />
                                             </FormControl>
                                             <FormMessage />
                                         </FormItem>
@@ -223,7 +223,7 @@ export default function TransportistaFormPage() {
                                             <FormItem>
                                                 <FormLabel>Matrícula</FormLabel>
                                                 <FormControl>
-                                                    <Input placeholder="Ej: AA-123-BB" {...field} />
+                                                    <Input placeholder="Ej: AA-123-BB" {...field} autoComplete="off" />
                                                 </FormControl>
                                                 <FormMessage />
                                             </FormItem>
@@ -236,7 +236,7 @@ export default function TransportistaFormPage() {
                                             <FormItem>
                                                 <FormLabel>Matrícula Remolque (Opcional)</FormLabel>
                                                 <FormControl>
-                                                    <Input placeholder="Ej: R-456-CC" {...field} />
+                                                    <Input placeholder="Ej: R-456-CC" {...field} autoComplete="off" />
                                                 </FormControl>
                                                 <FormMessage />
                                             </FormItem>
@@ -250,7 +250,7 @@ export default function TransportistaFormPage() {
                                         <FormItem>
                                             <FormLabel>Motivo de la visita</FormLabel>
                                             <FormControl>
-                                                <Input placeholder="Ej: Entrega de mercancía" {...field} />
+                                                <Input placeholder="Ej: Entrega de mercancía" {...field} autoComplete="off" />
                                             </FormControl>
                                             <FormMessage />
                                         </FormItem>

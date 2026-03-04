@@ -171,7 +171,7 @@ export default function PersonalFormPage() {
                                             <FormItem>
                                                 <FormLabel>Nombre y Apellidos</FormLabel>
                                                 <FormControl>
-                                                    <Input placeholder="Ej: Ana Gómez" {...field} />
+                                                    <Input placeholder="Ej: Ana Gómez" {...field} autoComplete="off" />
                                                 </FormControl>
                                                 <FormMessage />
                                             </FormItem>
@@ -184,7 +184,7 @@ export default function PersonalFormPage() {
                                             <FormItem>
                                                 <FormLabel>Empresa</FormLabel>
                                                 <FormControl>
-                                                    <Input placeholder="Ej: Soluciones Tech" {...field} />
+                                                    <Input placeholder="Ej: Soluciones Tech" {...field} autoComplete="off" />
                                                 </FormControl>
                                                 <FormMessage />
                                             </FormItem>
@@ -243,7 +243,7 @@ export default function PersonalFormPage() {
                                         <FormItem>
                                             <FormLabel>Motivo de la visita</FormLabel>
                                             <FormControl>
-                                                <Input {...field} />
+                                                <Input {...field} autoComplete="off" />
                                             </FormControl>
                                             <FormMessage />
                                         </FormItem>

@@ -221,7 +221,7 @@ export default function AjustesPage() {
                   <FormItem>
                     <FormLabel>Nombre y Apellidos</FormLabel>
                     <FormControl>
-                      <Input placeholder="Ej: Ana Gómez" {...field} />
+                      <Input placeholder="Ej: Ana Gómez" {...field} autoComplete="off" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -234,7 +234,7 @@ export default function AjustesPage() {
                   <FormItem>
                     <FormLabel>Departamento (Opcional)</FormLabel>
                     <FormControl>
-                      <Input placeholder="Ej: Ventas" {...field} />
+                      <Input placeholder="Ej: Ventas" {...field} autoComplete="off" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -247,7 +247,7 @@ export default function AjustesPage() {
                   <FormItem>
                     <FormLabel>Correo Electrónico</FormLabel>
                     <FormControl>
-                      <Input placeholder="Ej: ana.gomez@empresa.com" {...field} />
+                      <Input type="email" placeholder="Ej: ana.gomez@empresa.com" {...field} autoComplete="off" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -280,7 +280,7 @@ export default function AjustesPage() {
                     <FormItem>
                       <FormLabel>Contraseña {selectedHost && '(Dejar en blanco para no cambiar)'}</FormLabel>
                       <FormControl>
-                        <Input type="password" placeholder="Establecer contraseña" {...field} />
+                        <Input type="password" placeholder="Establecer contraseña" {...field} autoComplete="off" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
