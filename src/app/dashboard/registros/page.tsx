@@ -125,6 +125,19 @@ export default function RegistrosPage() {
     return () => unsubscribe();
   }, [db]);
 
+  const activeVisitsToday = useMemo(() => {
+    const todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0);
+
+    const todayEnd = new Date();
+    todayEnd.setHours(23, 59, 59, 999);
+
+    return visits.filter(visit => {
+      const entryDate = new Date(visit.entryDateTime);
+      return !visit.exitDateTime && entryDate >= todayStart && entryDate <= todayEnd;
+    });
+  }, [visits]);
+
   const filteredVisits = useMemo(() => {
     return visits.filter(visit => {
       const visitDate = new Date(visit.entryDateTime);
@@ -148,97 +161,135 @@ export default function RegistrosPage() {
   }, [visits, dateFrom, dateTo]);
 
   return (
-    <Card>
-      <CardHeader>
-        <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
-            <div>
-                <CardTitle>Registro de Visitas</CardTitle>
-                <CardDescription>
-                Aquí se muestra un historial completo de todas las visitas registradas.
-                </CardDescription>
-            </div>
-            <div className="flex items-center gap-2 flex-wrap">
-                <Popover>
-                    <PopoverTrigger asChild>
-                        <Button
-                            variant={"outline"}
-                            className={cn(
-                                "w-full sm:w-[240px] justify-start text-left font-normal",
-                                !dateFrom && "text-muted-foreground"
-                            )}
-                        >
-                            <CalendarIcon className="mr-2 h-4 w-4" />
-                            {dateFrom ? format(dateFrom, "PPP", { locale: es }) : <span>Desde fecha</span>}
-                        </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0">
-                        <Calendar
-                            mode="single"
-                            selected={dateFrom}
-                            onSelect={setDateFrom}
-                            initialFocus
-                        />
-                    </PopoverContent>
-                </Popover>
-                <Popover>
-                    <PopoverTrigger asChild>
-                        <Button
-                            variant={"outline"}
-                            className={cn(
-                                "w-full sm:w-[240px] justify-start text-left font-normal",
-                                !dateTo && "text-muted-foreground"
-                            )}
-                        >
-                            <CalendarIcon className="mr-2 h-4 w-4" />
-                            {dateTo ? format(dateTo, "PPP", { locale: es }) : <span>Hasta fecha</span>}
-                        </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0">
-                        <Calendar
-                            mode="single"
-                            selected={dateTo}
-                            onSelect={setDateTo}
-                            disabled={{ before: dateFrom }}
-                            initialFocus
-                        />
-                    </PopoverContent>
-                </Popover>
-                {(dateFrom || dateTo) && (
-                    <Button variant="ghost" size="sm" onClick={() => { setDateFrom(undefined); setDateTo(undefined); }}>
-                        <X className="h-4 w-4 mr-1" />
-                        Limpiar
-                    </Button>
-                )}
-            </div>
-        </div>
-      </CardHeader>
-      <CardContent>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Visitante</TableHead>
-              <TableHead>Tipo</TableHead>
-              <TableHead className="hidden lg:table-cell">Propósito</TableHead>
-              <TableHead className="hidden md:table-cell">Detalles</TableHead>
-              <TableHead className="text-right">Entrada</TableHead>
-              <TableHead className="text-right">Salida</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {filteredVisits.length > 0 ? (
-                filteredVisits.map((visitor) => (
-                    <VisitorRow key={visitor.id} visitor={visitor} />
-                ))
-            ) : (
-                <TableRow>
-                    <TableCell colSpan={6} className="h-24 text-center">
-                        {dateFrom || dateTo ? 'No hay registros que coincidan con su búsqueda.' : 'No hay registros de visitas todavía.'}
-                    </TableCell>
-                </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </CardContent>
-    </Card>
+    <div className="flex flex-col gap-6">
+      <Card>
+        <CardHeader>
+          <CardTitle>Visitas Activas Hoy</CardTitle>
+          <CardDescription>
+            Visitantes que se encuentran actualmente en las instalaciones.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Visitante</TableHead>
+                <TableHead>Tipo</TableHead>
+                <TableHead className="hidden lg:table-cell">Propósito</TableHead>
+                <TableHead className="hidden md:table-cell">Detalles</TableHead>
+                <TableHead className="text-right">Entrada</TableHead>
+                <TableHead className="text-right">Salida</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {activeVisitsToday.length > 0 ? (
+                  activeVisitsToday.map((visitor) => (
+                      <VisitorRow key={visitor.id} visitor={visitor} />
+                  ))
+              ) : (
+                  <TableRow>
+                      <TableCell colSpan={6} className="h-24 text-center">
+                          No hay visitas activas en este momento.
+                      </TableCell>
+                  </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
+              <div>
+                  <CardTitle>Registro de Visitas</CardTitle>
+                  <CardDescription>
+                  Aquí se muestra un historial completo de todas las visitas registradas.
+                  </CardDescription>
+              </div>
+              <div className="flex items-center gap-2 flex-wrap">
+                  <Popover>
+                      <PopoverTrigger asChild>
+                          <Button
+                              variant={"outline"}
+                              className={cn(
+                                  "w-full sm:w-[240px] justify-start text-left font-normal",
+                                  !dateFrom && "text-muted-foreground"
+                              )}
+                          >
+                              <CalendarIcon className="mr-2 h-4 w-4" />
+                              {dateFrom ? format(dateFrom, "PPP", { locale: es }) : <span>Desde fecha</span>}
+                          </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0">
+                          <Calendar
+                              mode="single"
+                              selected={dateFrom}
+                              onSelect={setDateFrom}
+                              initialFocus
+                          />
+                      </PopoverContent>
+                  </Popover>
+                  <Popover>
+                      <PopoverTrigger asChild>
+                          <Button
+                              variant={"outline"}
+                              className={cn(
+                                  "w-full sm:w-[240px] justify-start text-left font-normal",
+                                  !dateTo && "text-muted-foreground"
+                              )}
+                          >
+                              <CalendarIcon className="mr-2 h-4 w-4" />
+                              {dateTo ? format(dateTo, "PPP", { locale: es }) : <span>Hasta fecha</span>}
+                          </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0">
+                          <Calendar
+                              mode="single"
+                              selected={dateTo}
+                              onSelect={setDateTo}
+                              disabled={{ before: dateFrom }}
+                              initialFocus
+                          />
+                      </PopoverContent>
+                  </Popover>
+                  {(dateFrom || dateTo) && (
+                      <Button variant="ghost" size="sm" onClick={() => { setDateFrom(undefined); setDateTo(undefined); }}>
+                          <X className="h-4 w-4 mr-1" />
+                          Limpiar
+                      </Button>
+                  )}
+              </div>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Visitante</TableHead>
+                <TableHead>Tipo</TableHead>
+                <TableHead className="hidden lg:table-cell">Propósito</TableHead>
+                <TableHead className="hidden md:table-cell">Detalles</TableHead>
+                <TableHead className="text-right">Entrada</TableHead>
+                <TableHead className="text-right">Salida</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {filteredVisits.length > 0 ? (
+                  filteredVisits.map((visitor) => (
+                      <VisitorRow key={visitor.id} visitor={visitor} />
+                  ))
+              ) : (
+                  <TableRow>
+                      <TableCell colSpan={6} className="h-24 text-center">
+                          {dateFrom || dateTo ? 'No hay registros que coincidan con su búsqueda.' : 'No hay registros de visitas todavía.'}
+                      </TableCell>
+                  </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
+    </div>
   );
 }
