@@ -33,6 +33,21 @@ export default function DashboardLayout({
 }) {
   const pathname = usePathname();
 
+  if (pathname === '/dashboard/personal/nuevo') {
+    return (
+      <div className="flex min-h-screen w-full flex-col items-center bg-muted/40">
+        <header className="sticky top-0 z-30 flex h-20 w-full items-center justify-center border-b bg-background px-4 sm:px-6">
+          <Link href="/">
+            <Image src="/robama-logo.jpg" alt="Logo de Robama S.A." width={280} height={70} />
+          </Link>
+        </header>
+        <main className="flex w-full flex-1 flex-col items-center gap-4 p-4 md:gap-8 md:p-6">
+          {children}
+        </main>
+      </div>
+    );
+  }
+
   const pageTitle = navItems.find(item => pathname.startsWith(item.href))?.label || 'Dashboard';
 
   return (
