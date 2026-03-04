@@ -3,7 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
-import { toast } from "@/hooks/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -27,7 +27,7 @@ import { addDoc, collection, onSnapshot, query, orderBy, doc, deleteDoc, where, 
 import { useEffect, useState } from "react";
 import type { Host } from "@/lib/types";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Trash2 } from "lucide-react";
+import { ChevronDown, FileDown, Trash2 } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -42,6 +42,7 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
 const formSchema = z.object({
   name: z.string().min(2, "El nombre debe tener al menos 2 caracteres."),
@@ -59,6 +60,7 @@ export default function AjustesPage() {
   const db = useFirestore();
   const [hosts, setHosts] = useState<Host[]>([]);
   const [selectedHost, setSelectedHost] = useState<Host | null>(null);
+  const { toast } = useToast();
   
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -204,6 +206,39 @@ export default function AjustesPage() {
     }
   }
 
+  const handleExportHostsCsv = () => {
+    if (!hosts || hosts.length === 0) {
+        toast({ title: 'No hay anfitriones para exportar.', variant: 'destructive' });
+        return;
+    }
+    const headers = ['Nombre', 'Departamento', 'Email', 'Administrador'];
+    const csvRows = hosts.map(host => {
+        const row = [
+            host.name,
+            host.department,
+            host.email,
+            host.isAdmin ? 'Sí' : 'No'
+        ];
+        return row.map(value => `"${String(value || '').replace(/"/g, '""')}"`).join(',');
+    });
+    
+    const csvContent = [headers.join(','), ...csvRows].join('\n');
+    const blob = new Blob([`\uFEFF${csvContent}`], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', 'anfitriones.csv');
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+};
+
+  const handleSendHostsEmail = () => {
+      const subject = "Exportación de Lista de Anfitriones";
+      const body = "Por favor, primero descargue el archivo CSV usando la opción 'Descargar CSV' y luego adjúntelo a este correo.";
+      window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  };
+
   return (
     <div className="grid gap-6 md:grid-cols-2">
       <Card>
@@ -303,8 +338,29 @@ export default function AjustesPage() {
       </Card>
       <Card>
         <CardHeader>
-          <CardTitle>Lista de Anfitriones</CardTitle>
-          <CardDescription>Personas actualmente disponibles para visitas. Haga clic en una fila para editar.</CardDescription>
+          <div className="flex justify-between items-center">
+            <div>
+              <CardTitle>Lista de Anfitriones</CardTitle>
+              <CardDescription>Personas actualmente disponibles para visitas. Haga clic en una fila para editar.</CardDescription>
+            </div>
+            <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                    <Button variant="outline">
+                        <FileDown className="mr-2 h-4 w-4" />
+                        Exportar
+                        <ChevronDown className="ml-2 h-4 w-4" />
+                    </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                    <DropdownMenuItem onClick={handleExportHostsCsv}>
+                        Descargar CSV
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={handleSendHostsEmail}>
+                        Enviar por Email
+                    </DropdownMenuItem>
+                </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         </CardHeader>
         <CardContent>
           <Table>

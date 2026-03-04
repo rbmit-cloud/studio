@@ -3,7 +3,7 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { Truck, User, Calendar as CalendarIcon, X } from 'lucide-react';
+import { Truck, User, Calendar as CalendarIcon, X, FileDown, ChevronDown } from 'lucide-react';
 import type { Visitor } from '@/lib/types';
 import { useFirestore } from '@/firebase';
 import { collection, onSnapshot, query, orderBy, updateDoc, type DocumentReference } from 'firebase/firestore';
@@ -14,6 +14,8 @@ import { Calendar } from '@/components/ui/calendar';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
+import { useToast } from '@/hooks/use-toast';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 
 function VisitorRow({ visitor }: { visitor: Visitor & { id: string } }) {
   const isTransportista = visitor.entryType === 'Transportista';
@@ -67,6 +69,7 @@ export default function RegistrosPage() {
   const [dateFrom, setDateFrom] = useState<Date | undefined>();
   const [dateTo, setDateTo] = useState<Date | undefined>();
   const db = useFirestore();
+  const { toast } = useToast();
 
   useEffect(() => {
     // Por defecto, mostrar las visitas del día actual al cargar la página en el cliente.
@@ -159,6 +162,73 @@ export default function RegistrosPage() {
       return true;
     });
   }, [visits, dateFrom, dateTo]);
+
+  const handleExportCsv = () => {
+    if (!filteredVisits || filteredVisits.length === 0) {
+        toast({
+            title: 'No hay datos para exportar',
+            description: 'Filtre un rango de fechas con visitas para poder exportar.',
+            variant: 'destructive',
+        });
+        return;
+    }
+
+    const headers = [
+        "Tipo Entrada",
+        "Nombre Visitante",
+        "Empresa",
+        "Cliente Final (Transporte)",
+        "Motivo Visita",
+        "Anfitrión",
+        "Departamento Anfitrión",
+        "Matrícula Camión",
+        "Matrícula Remolque",
+        "Fecha Entrada",
+        "Hora Entrada",
+        "Fecha Salida",
+        "Hora Salida"
+    ];
+
+    const csvRows = filteredVisits.map(visit => {
+        const entryDateTime = new Date(visit.entryDateTime);
+        const exitDateTime = visit.exitDateTime ? new Date(visit.exitDateTime) : null;
+        
+        const row = [
+            visit.entryType,
+            visit.visitorName,
+            visit.companyName,
+            visit.entryType === 'Transportista' ? visit.clientCompany || '' : '',
+            visit.purposeOfVisit,
+            visit.hostName || '',
+            visit.department || '',
+            visit.entryType === 'Transportista' ? visit.vehicleDetails?.licensePlate || '' : '',
+            visit.entryType === 'Transportista' ? visit.vehicleDetails?.trailerLicensePlate || '' : '',
+            entryDateTime.toLocaleDateString('es-ES'),
+            entryDateTime.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }),
+            exitDateTime ? exitDateTime.toLocaleDateString('es-ES') : 'Dentro',
+            exitDateTime ? exitDateTime.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }) : ''
+        ];
+        
+        return row.map(value => `"${String(value || '').replace(/"/g, '""')}"`).join(',');
+    });
+
+    const csvContent = [headers.join(','), ...csvRows].join('\n');
+    const blob = new Blob([`\uFEFF${csvContent}`], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', 'registro_visitas.csv');
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const handleSendEmail = () => {
+    const subject = "Exportación de Registros de Visitas";
+    const body = "Por favor, primero descargue el archivo CSV usando la opción 'Descargar CSV' y luego adjúntelo a este correo.";
+    window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  };
+
 
   return (
     <div className="flex flex-col gap-6">
@@ -259,6 +329,23 @@ export default function RegistrosPage() {
                           Limpiar
                       </Button>
                   )}
+                  <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                          <Button variant="outline">
+                              <FileDown className="mr-2 h-4 w-4" />
+                              Exportar
+                              <ChevronDown className="ml-2 h-4 w-4" />
+                          </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent>
+                          <DropdownMenuItem onClick={handleExportCsv}>
+                              Descargar CSV
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={handleSendEmail}>
+                              Enviar por Email
+                          </DropdownMenuItem>
+                      </DropdownMenuContent>
+                  </DropdownMenu>
               </div>
           </div>
         </CardHeader>
