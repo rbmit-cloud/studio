@@ -48,6 +48,28 @@ export default function DashboardLayout({
     );
   }
 
+  if (pathname.startsWith('/dashboard/registros')) {
+    return (
+        <div className="flex min-h-screen w-full flex-col">
+            <header className="sticky top-0 z-30 flex h-16 items-center justify-between gap-4 border-b bg-background px-4 sm:px-6">
+                <Link href="/">
+                    <Image src="/robama-logo.jpg" alt="Logo de Robama S.A." width={140} height={35} />
+                </Link>
+                <h1 className="flex-1 text-center text-xl font-semibold">Registro de Visitas</h1>
+                <Button asChild variant="outline" size="sm">
+                    <Link href="/">
+                        Salir
+                        <LogOut className="ml-2 h-4 w-4" />
+                    </Link>
+                </Button>
+            </header>
+            <main className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-6">
+                {children}
+            </main>
+        </div>
+    );
+  }
+
   const pageTitle = navItems.find(item => pathname.startsWith(item.href))?.label || 'Dashboard';
 
   return (
