@@ -3,11 +3,17 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { Truck, User } from 'lucide-react';
+import { Truck, User, Calendar as CalendarIcon, X } from 'lucide-react';
 import type { Visitor } from '@/lib/types';
 import { useFirestore } from '@/firebase';
 import { collection, onSnapshot, query, orderBy, updateDoc, type DocumentReference } from 'firebase/firestore';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Button } from '@/components/ui/button';
+import { Calendar } from '@/components/ui/calendar';
+import { format } from 'date-fns';
+import { es } from 'date-fns/locale';
+import { cn } from '@/lib/utils';
 
 function VisitorRow({ visitor }: { visitor: Visitor & { id: string } }) {
   const isTransportista = visitor.entryType === 'Transportista';
@@ -58,6 +64,8 @@ function VisitorRow({ visitor }: { visitor: Visitor & { id: string } }) {
 
 export default function RegistrosPage() {
   const [visits, setVisits] = useState<(Visitor & { id: string })[]>([]);
+  const [dateFrom, setDateFrom] = useState<Date | undefined>();
+  const [dateTo, setDateTo] = useState<Date | undefined>();
   const db = useFirestore();
 
   useEffect(() => {
@@ -110,13 +118,92 @@ export default function RegistrosPage() {
     return () => unsubscribe();
   }, [db]);
 
+  const filteredVisits = useMemo(() => {
+    return visits.filter(visit => {
+      const visitDate = new Date(visit.entryDateTime);
+      
+      if (dateFrom) {
+          const fromDate = new Date(dateFrom);
+          fromDate.setHours(0,0,0,0); // Start of day
+          if (visitDate < fromDate) {
+              return false;
+          }
+      }
+      if (dateTo) {
+          const toDate = new Date(dateTo);
+          toDate.setHours(23, 59, 59, 999); // End of day
+          if (visitDate > toDate) {
+              return false;
+          }
+      }
+      return true;
+    });
+  }, [visits, dateFrom, dateTo]);
+
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Registro de Visitas</CardTitle>
-        <CardDescription>
-          Aquí se muestra un historial completo de todas las visitas registradas.
-        </CardDescription>
+        <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
+            <div>
+                <CardTitle>Registro de Visitas</CardTitle>
+                <CardDescription>
+                Aquí se muestra un historial completo de todas las visitas registradas.
+                </CardDescription>
+            </div>
+            <div className="flex items-center gap-2 flex-wrap">
+                <Popover>
+                    <PopoverTrigger asChild>
+                        <Button
+                            variant={"outline"}
+                            className={cn(
+                                "w-full sm:w-[240px] justify-start text-left font-normal",
+                                !dateFrom && "text-muted-foreground"
+                            )}
+                        >
+                            <CalendarIcon className="mr-2 h-4 w-4" />
+                            {dateFrom ? format(dateFrom, "PPP", { locale: es }) : <span>Desde fecha</span>}
+                        </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0">
+                        <Calendar
+                            mode="single"
+                            selected={dateFrom}
+                            onSelect={setDateFrom}
+                            initialFocus
+                        />
+                    </PopoverContent>
+                </Popover>
+                <Popover>
+                    <PopoverTrigger asChild>
+                        <Button
+                            variant={"outline"}
+                            className={cn(
+                                "w-full sm:w-[240px] justify-start text-left font-normal",
+                                !dateTo && "text-muted-foreground"
+                            )}
+                        >
+                            <CalendarIcon className="mr-2 h-4 w-4" />
+                            {dateTo ? format(dateTo, "PPP", { locale: es }) : <span>Hasta fecha</span>}
+                        </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0">
+                        <Calendar
+                            mode="single"
+                            selected={dateTo}
+                            onSelect={setDateTo}
+                            disabled={{ before: dateFrom }}
+                            initialFocus
+                        />
+                    </PopoverContent>
+                </Popover>
+                {(dateFrom || dateTo) && (
+                    <Button variant="ghost" size="sm" onClick={() => { setDateFrom(undefined); setDateTo(undefined); }}>
+                        <X className="h-4 w-4 mr-1" />
+                        Limpiar
+                    </Button>
+                )}
+            </div>
+        </div>
       </CardHeader>
       <CardContent>
         <Table>
@@ -131,14 +218,14 @@ export default function RegistrosPage() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {visits.length > 0 ? (
-                visits.map((visitor) => (
+            {filteredVisits.length > 0 ? (
+                filteredVisits.map((visitor) => (
                     <VisitorRow key={visitor.id} visitor={visitor} />
                 ))
             ) : (
                 <TableRow>
                     <TableCell colSpan={6} className="h-24 text-center">
-                        No hay registros de visitas todavía.
+                        {dateFrom || dateTo ? 'No hay registros que coincidan con su búsqueda.' : 'No hay registros de visitas todavía.'}
                     </TableCell>
                 </TableRow>
             )}
