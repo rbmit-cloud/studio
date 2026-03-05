@@ -346,7 +346,7 @@ export default function RegistrosPage() {
                   Aquí se muestra un historial completo de todas las visitas registradas.
                   </CardDescription>
               </div>
-              <div className="flex items-center gap-2 flex-wrap">
+              <div className="flex flex-wrap items-center gap-2 md:flex-nowrap">
                   <Popover>
                       <PopoverTrigger asChild>
                           <Button
