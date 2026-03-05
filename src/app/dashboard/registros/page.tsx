@@ -33,15 +33,8 @@ function VisitorRow({ visitor }: { visitor: Visitor & { id: string } }) {
             </div>
         </div>
       </TableCell>
-      <TableCell>
-        <Badge variant={isTransportista ? 'secondary' : 'outline'}>
-          {visitor.entryType}
-        </Badge>
-      </TableCell>
-      <TableCell className="hidden lg:table-cell">{visitor.purposeOfVisit}</TableCell>
-      <TableCell className="hidden md:table-cell">
-        {isTransportista ? visitor.vehicleDetails?.licensePlate : visitor.hostName}
-      </TableCell>
+      <TableCell className="hidden md:table-cell">{visitor.purposeOfVisit}</TableCell>
+      <TableCell className="hidden lg:table-cell">{visitor.hostName}</TableCell>
       <TableCell className="text-right">
         <div>{new Date(visitor.entryDateTime).toLocaleDateString('es-ES')}</div>
         <div className="text-sm text-muted-foreground">
@@ -244,9 +237,8 @@ export default function RegistrosPage() {
             <TableHeader>
               <TableRow>
                 <TableHead>Visitante</TableHead>
-                <TableHead>Tipo</TableHead>
-                <TableHead className="hidden lg:table-cell">Propósito</TableHead>
-                <TableHead className="hidden md:table-cell">Detalles</TableHead>
+                <TableHead className="hidden md:table-cell">Propósito</TableHead>
+                <TableHead className="hidden lg:table-cell">Anfitrión</TableHead>
                 <TableHead className="text-right">Entrada</TableHead>
                 <TableHead className="text-right">Salida</TableHead>
               </TableRow>
@@ -258,7 +250,7 @@ export default function RegistrosPage() {
                   ))
               ) : (
                   <TableRow>
-                      <TableCell colSpan={6} className="h-24 text-center">
+                      <TableCell colSpan={5} className="h-24 text-center">
                           No hay visitas activas en este momento.
                       </TableCell>
                   </TableRow>
@@ -352,14 +344,13 @@ export default function RegistrosPage() {
         <CardContent>
           <Table>
             <TableHeader>
-              <TableRow>
-                <TableHead>Visitante</TableHead>
-                <TableHead>Tipo</TableHead>
-                <TableHead className="hidden lg:table-cell">Propósito</TableHead>
-                <TableHead className="hidden md:table-cell">Detalles</TableHead>
-                <TableHead className="text-right">Entrada</TableHead>
-                <TableHead className="text-right">Salida</TableHead>
-              </TableRow>
+                <TableRow>
+                    <TableHead>Visitante</TableHead>
+                    <TableHead className="hidden md:table-cell">Propósito</TableHead>
+                    <TableHead className="hidden lg:table-cell">Anfitrión</TableHead>
+                    <TableHead className="text-right">Entrada</TableHead>
+                    <TableHead className="text-right">Salida</TableHead>
+                </TableRow>
             </TableHeader>
             <TableBody>
               {filteredVisits.length > 0 ? (
@@ -368,7 +359,7 @@ export default function RegistrosPage() {
                   ))
               ) : (
                   <TableRow>
-                      <TableCell colSpan={6} className="h-24 text-center">
+                      <TableCell colSpan={5} className="h-24 text-center">
                           {dateFrom || dateTo ? 'No hay registros que coincidan con su búsqueda.' : 'No hay registros de visitas todavía.'}
                       </TableCell>
                   </TableRow>
