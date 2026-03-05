@@ -85,7 +85,7 @@ export default function SalidaPage() {
             });
             form.reset();
             setTimeout(() => {
-                router.push('/dashboard/registros');
+                router.push('/');
             }, 1000);
 
         } catch (error) {
