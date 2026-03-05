@@ -392,12 +392,6 @@ export default function RegistrosPage() {
                           />
                       </PopoverContent>
                   </Popover>
-                  {(dateFrom || dateTo) && (
-                      <Button variant="ghost" size="sm" onClick={() => { setDateFrom(undefined); setDateTo(undefined); }}>
-                          <X className="h-4 w-4 mr-1" />
-                          Limpiar
-                      </Button>
-                  )}
                   <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                           <Button variant="outline">
@@ -415,6 +409,12 @@ export default function RegistrosPage() {
                           </DropdownMenuItem>
                       </DropdownMenuContent>
                   </DropdownMenu>
+                  {(dateFrom || dateTo) && (
+                      <Button variant="ghost" size="sm" onClick={() => { setDateFrom(undefined); setDateTo(undefined); }}>
+                          <X className="h-4 w-4 mr-1" />
+                          Limpiar
+                      </Button>
+                  )}
               </div>
           </div>
         </CardHeader>
