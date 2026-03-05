@@ -61,6 +61,8 @@ export default function RegistrosPage() {
   const [visits, setVisits] = useState<(Visitor & { id: string })[]>([]);
   const [dateFrom, setDateFrom] = useState<Date | undefined>();
   const [dateTo, setDateTo] = useState<Date | undefined>();
+  const [openDateFrom, setOpenDateFrom] = useState(false);
+  const [openDateTo, setOpenDateTo] = useState(false);
   const db = useFirestore();
   const { toast } = useToast();
 
@@ -344,7 +346,7 @@ export default function RegistrosPage() {
                   <CardTitle>Registro de Visitas</CardTitle>
               </div>
               <div className="flex flex-wrap items-center gap-2 md:flex-nowrap">
-                  <Popover>
+                  <Popover open={openDateFrom} onOpenChange={setOpenDateFrom}>
                       <PopoverTrigger asChild>
                           <Button
                               variant={"outline"}
@@ -361,12 +363,15 @@ export default function RegistrosPage() {
                           <Calendar
                               mode="single"
                               selected={dateFrom}
-                              onSelect={setDateFrom}
+                              onSelect={(date) => {
+                                setDateFrom(date);
+                                setOpenDateFrom(false);
+                              }}
                               initialFocus
                           />
                       </PopoverContent>
                   </Popover>
-                  <Popover>
+                  <Popover open={openDateTo} onOpenChange={setOpenDateTo}>
                       <PopoverTrigger asChild>
                           <Button
                               variant={"outline"}
@@ -383,7 +388,10 @@ export default function RegistrosPage() {
                           <Calendar
                               mode="single"
                               selected={dateTo}
-                              onSelect={setDateTo}
+                              onSelect={(date) => {
+                                setDateTo(date);
+                                setOpenDateTo(false);
+                              }}
                               disabled={{ before: dateFrom }}
                               initialFocus
                           />
