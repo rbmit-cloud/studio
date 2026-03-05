@@ -121,17 +121,8 @@ export default function RegistrosPage() {
     return () => unsubscribe();
   }, [db]);
 
-  const activeVisitsToday = useMemo(() => {
-    const todayStart = new Date();
-    todayStart.setHours(0, 0, 0, 0);
-
-    const todayEnd = new Date();
-    todayEnd.setHours(23, 59, 59, 999);
-
-    return visits.filter(visit => {
-      const entryDate = new Date(visit.entryDateTime);
-      return !visit.exitDateTime && entryDate >= todayStart && entryDate <= todayEnd;
-    });
+  const activeVisits = useMemo(() => {
+    return visits.filter(visit => !visit.exitDateTime);
   }, [visits]);
 
   const filteredVisits = useMemo(() => {
@@ -221,16 +212,102 @@ export default function RegistrosPage() {
     const body = "Por favor, primero descargue el archivo CSV usando la opción 'Descargar CSV' y luego adjúntelo a este correo.";
     window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
   };
+  
+  const handleExportActiveVisitsCsv = () => {
+    if (!activeVisits || activeVisits.length === 0) {
+        toast({
+            title: 'No hay visitas activas para exportar',
+            variant: 'destructive',
+        });
+        return;
+    }
+
+    const headers = [
+        "Tipo Entrada",
+        "Nombre Visitante",
+        "Empresa",
+        "Cliente Final (Transporte)",
+        "Motivo Visita",
+        "Anfitrión",
+        "Departamento Anfitrión",
+        "Matrícula Camión",
+        "Matrícula Remolque",
+        "Fecha Entrada",
+        "Hora Entrada",
+        "Fecha Salida",
+        "Hora Salida"
+    ];
+
+    const csvRows = activeVisits.map(visit => {
+        const entryDateTime = new Date(visit.entryDateTime);
+        const exitDateTime = visit.exitDateTime ? new Date(visit.exitDateTime) : null;
+        
+        const row = [
+            visit.entryType,
+            visit.visitorName,
+            visit.companyName,
+            visit.entryType === 'Transportista' ? visit.clientCompany || '' : '',
+            visit.purposeOfVisit,
+            visit.hostName || '',
+            visit.department || '',
+            visit.entryType === 'Transportista' ? visit.vehicleDetails?.licensePlate || '' : '',
+            visit.entryType === 'Transportista' ? visit.vehicleDetails?.trailerLicensePlate || '' : '',
+            entryDateTime.toLocaleDateString('es-ES'),
+            entryDateTime.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }),
+            exitDateTime ? exitDateTime.toLocaleDateString('es-ES') : 'Dentro',
+            exitDateTime ? exitDateTime.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }) : ''
+        ];
+        
+        return row.map(value => `"${String(value || '').replace(/"/g, '""')}"`).join(',');
+    });
+
+    const csvContent = [headers.join(','), ...csvRows].join('\n');
+    const blob = new Blob([`\uFEFF${csvContent}`], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', 'visitas_activas.csv');
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const handleSendActiveVisitsEmail = () => {
+    const subject = "Exportación de Visitas Activas";
+    const body = "Por favor, primero descargue el archivo CSV usando la opción 'Descargar CSV' y luego adjúntelo a este correo.";
+    window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  };
 
 
   return (
     <div className="flex flex-col gap-6">
       <Card>
         <CardHeader>
-          <CardTitle>Visitas Activas Hoy</CardTitle>
-          <CardDescription>
-            Visitantes que se encuentran actualmente en las instalaciones.
-          </CardDescription>
+          <div className="flex justify-between items-center">
+              <div>
+                  <CardTitle>Visitas Activas</CardTitle>
+                  <CardDescription>
+                  Visitantes que se encuentran actualmente en las instalaciones.
+                  </CardDescription>
+              </div>
+              <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                      <Button variant="outline">
+                          <FileDown className="mr-2 h-4 w-4" />
+                          Exportar
+                          <ChevronDown className="ml-2 h-4 w-4" />
+                      </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent>
+                      <DropdownMenuItem onClick={handleExportActiveVisitsCsv}>
+                          Descargar CSV
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={handleSendActiveVisitsEmail}>
+                          Enviar por Email
+                      </DropdownMenuItem>
+                  </DropdownMenuContent>
+              </DropdownMenu>
+          </div>
         </CardHeader>
         <CardContent>
           <Table>
@@ -244,8 +321,8 @@ export default function RegistrosPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {activeVisitsToday.length > 0 ? (
-                  activeVisitsToday.map((visitor) => (
+              {activeVisits.length > 0 ? (
+                  activeVisits.map((visitor) => (
                       <VisitorRow key={visitor.id} visitor={visitor} />
                   ))
               ) : (
