@@ -356,7 +356,7 @@ export default function RegistrosPage() {
                               )}
                           >
                               <CalendarIcon className="mr-2 h-4 w-4" />
-                              {dateFrom ? format(dateFrom, "P", { locale: es }) : <span>Desde fecha</span>}
+                              {dateFrom ? format(dateFrom, "dd/MM/yyyy", { locale: es }) : <span>Desde fecha</span>}
                           </Button>
                       </PopoverTrigger>
                       <PopoverContent className="w-auto p-0">
@@ -368,6 +368,7 @@ export default function RegistrosPage() {
                                 setOpenDateFrom(false);
                               }}
                               initialFocus
+                              locale={es}
                           />
                       </PopoverContent>
                   </Popover>
@@ -381,7 +382,7 @@ export default function RegistrosPage() {
                               )}
                           >
                               <CalendarIcon className="mr-2 h-4 w-4" />
-                              {dateTo ? format(dateTo, "P", { locale: es }) : <span>Hasta fecha</span>}
+                              {dateTo ? format(dateTo, "dd/MM/yyyy", { locale: es }) : <span>Hasta fecha</span>}
                           </Button>
                       </PopoverTrigger>
                       <PopoverContent className="w-auto p-0">
@@ -394,6 +395,7 @@ export default function RegistrosPage() {
                               }}
                               disabled={{ before: dateFrom }}
                               initialFocus
+                              locale={es}
                           />
                       </PopoverContent>
                   </Popover>
