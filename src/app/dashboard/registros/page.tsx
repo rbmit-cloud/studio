@@ -342,9 +342,6 @@ export default function RegistrosPage() {
           <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
               <div>
                   <CardTitle>Registro de Visitas</CardTitle>
-                  <CardDescription>
-                  Aquí se muestra un historial completo de todas las visitas registradas.
-                  </CardDescription>
               </div>
               <div className="flex flex-wrap items-center gap-2 md:flex-nowrap">
                   <Popover>
