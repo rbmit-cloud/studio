@@ -3,17 +3,15 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { Truck, User, Calendar as CalendarIcon, X, FileDown, ChevronDown } from 'lucide-react';
+import { Truck, User, X, FileDown, ChevronDown } from 'lucide-react';
 import type { Visitor } from '@/lib/types';
 import { useFirestore } from '@/firebase';
 import { collection, onSnapshot, query, orderBy, updateDoc, type DocumentReference } from 'firebase/firestore';
 import React, { useEffect, useState, useMemo } from 'react';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Button } from '@/components/ui/button';
-import { Calendar } from '@/components/ui/calendar';
+import { Input } from '@/components/ui/input';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 
@@ -61,8 +59,6 @@ export default function RegistrosPage() {
   const [visits, setVisits] = useState<(Visitor & { id: string })[]>([]);
   const [dateFrom, setDateFrom] = useState<Date | undefined>();
   const [dateTo, setDateTo] = useState<Date | undefined>();
-  const [openDateFrom, setOpenDateFrom] = useState(false);
-  const [openDateTo, setOpenDateTo] = useState(false);
   const db = useFirestore();
   const { toast } = useToast();
 
@@ -346,59 +342,33 @@ export default function RegistrosPage() {
                   <CardTitle>Registro de Visitas</CardTitle>
               </div>
               <div className="flex flex-wrap items-center gap-2 md:flex-nowrap">
-                  <Popover open={openDateFrom} onOpenChange={setOpenDateFrom}>
-                      <PopoverTrigger asChild>
-                          <Button
-                              variant={"outline"}
-                              className={cn(
-                                  "w-full sm:w-[240px] justify-start text-left font-normal",
-                                  !dateFrom && "text-muted-foreground"
-                              )}
-                          >
-                              <CalendarIcon className="mr-2 h-4 w-4" />
-                              {dateFrom ? format(dateFrom, "dd/MM/yyyy", { locale: es }) : <span>Desde fecha</span>}
-                          </Button>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0">
-                          <Calendar
-                              mode="single"
-                              selected={dateFrom}
-                              onSelect={(date) => {
-                                setDateFrom(date);
-                                setOpenDateFrom(false);
-                              }}
-                              initialFocus
-                              locale={es}
-                          />
-                      </PopoverContent>
-                  </Popover>
-                  <Popover open={openDateTo} onOpenChange={setOpenDateTo}>
-                      <PopoverTrigger asChild>
-                          <Button
-                              variant={"outline"}
-                              className={cn(
-                                  "w-full sm:w-[240px] justify-start text-left font-normal",
-                                  !dateTo && "text-muted-foreground"
-                              )}
-                          >
-                              <CalendarIcon className="mr-2 h-4 w-4" />
-                              {dateTo ? format(dateTo, "dd/MM/yyyy", { locale: es }) : <span>Hasta fecha</span>}
-                          </Button>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0">
-                          <Calendar
-                              mode="single"
-                              selected={dateTo}
-                              onSelect={(date) => {
-                                setDateTo(date);
-                                setOpenDateTo(false);
-                              }}
-                              disabled={{ before: dateFrom }}
-                              initialFocus
-                              locale={es}
-                          />
-                      </PopoverContent>
-                  </Popover>
+                  <div className="grid w-full sm:w-[240px] gap-1.5">
+                      <label htmlFor="date-from" className="text-sm text-muted-foreground px-1">Desde fecha</label>
+                      <Input
+                          id="date-from"
+                          type="date"
+                          value={dateFrom ? format(dateFrom, 'yyyy-MM-dd') : ''}
+                          onChange={(e) => {
+                              const value = e.target.value;
+                              setDateFrom(value ? new Date(value + 'T00:00:00') : undefined);
+                          }}
+                          className="w-full"
+                      />
+                  </div>
+                  <div className="grid w-full sm:w-[240px] gap-1.5">
+                        <label htmlFor="date-to" className="text-sm text-muted-foreground px-1">Hasta fecha</label>
+                        <Input
+                            id="date-to"
+                            type="date"
+                            value={dateTo ? format(dateTo, 'yyyy-MM-dd') : ''}
+                            onChange={(e) => {
+                                const value = e.target.value;
+                                setDateTo(value ? new Date(value + 'T00:00:00') : undefined);
+                            }}
+                            min={dateFrom ? format(dateFrom, 'yyyy-MM-dd') : undefined}
+                            className="w-full"
+                        />
+                  </div>
                   <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                           <Button variant="outline">
