@@ -31,12 +31,12 @@ function Calendar({
         ),
         nav_button_previous: "absolute left-1",
         nav_button_next: "absolute right-1",
-        table: "w-full border-collapse",
-        head_row: "border-b",
+        table: "w-full border-collapse rdp-table",
+        head_row: "border-b rdp-head_row",
         head_cell:
-          "w-9 text-muted-foreground font-normal text-[0.8rem] p-2",
-        row: "border-b",
-        cell: "h-9 w-9 text-center text-sm p-0 relative [&:has([aria-selected])]:bg-accent",
+          "text-muted-foreground font-normal text-[0.8rem] p-2 rdp-head_cell",
+        row: "border-b rdp-row",
+        cell: "text-center text-sm p-0 relative [&:has([aria-selected])]:bg-accent rdp-cell",
         day: cn(
           buttonVariants({ variant: "ghost" }),
           "h-9 w-9 p-0 font-normal aria-selected:opacity-100"

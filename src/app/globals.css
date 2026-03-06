@@ -115,3 +115,19 @@
     @apply bg-background text-foreground;
   }
 }
+
+.rdp-table {
+  display: table !important;
+  width: 100%;
+}
+.rdp-head_row, .rdp-row {
+  display: table-row !important;
+}
+.rdp-head_cell, .rdp-cell {
+  display: table-cell !important;
+  text-align: center !important;
+  vertical-align: middle !important;
+}
+.rdp-head_cell {
+    padding-bottom: 0.5rem !important;
+}
