@@ -47,7 +47,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 const formSchema = z.object({
   name: z.string().min(2, "El nombre debe tener al menos 2 caracteres."),
   department: z.string().optional(),
-  email: z.string().email("Debe ser un correo electrónico válido."),
+  email: z.string().email("Debe ser un correo electrónico válido.").or(z.literal("")).optional(),
   isAdmin: z.boolean().default(false),
   password: z.string().optional(),
 }).refine(data => !data.isAdmin || (data.password && data.password.length >= 6) || (data.isAdmin && !data.password), {
@@ -110,7 +110,7 @@ export default function AjustesPage() {
 
   const handleSelectHost = (host: Host) => {
     setSelectedHost(host);
-    form.reset({ ...host, password: "" });
+    form.reset({ ...host, email: host.email || '', password: "" });
   };
 
 
@@ -143,7 +143,7 @@ export default function AjustesPage() {
       const dataToSave: Partial<Host> = {
         name: values.name,
         department: values.department || "",
-        email: values.email,
+        email: values.email || "",
         isAdmin: values.isAdmin,
       };
 
@@ -280,7 +280,7 @@ export default function AjustesPage() {
                 name="email"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Correo Electrónico</FormLabel>
+                    <FormLabel>Correo Electrónico (Opcional)</FormLabel>
                     <FormControl>
                       <Input type="email" placeholder="Ej: ana.gomez@empresa.com" {...field} autoComplete="off" />
                     </FormControl>

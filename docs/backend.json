@@ -99,8 +99,7 @@
         }
       },
       "required": [
-        "name",
-        "email"
+        "name"
       ]
     }
   },

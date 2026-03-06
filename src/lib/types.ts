@@ -22,7 +22,7 @@ export type Host = {
   id: string;
   name: string;
   department?: string;
-  email: string;
+  email?: string;
   isAdmin?: boolean;
   password?: string;
 };
