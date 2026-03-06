@@ -55,7 +55,7 @@ function Calendar({
         ...classNames,
       }}
       formatters={{
-        formatWeekdayName: (day) => es.localize?.day(day.getDay(), { width: 'narrow' }) || ''
+        formatWeekdayName: (day) => (es.localize?.day(day.getDay(), { width: 'narrow' }) || '').toUpperCase()
       }}
       components={{
         IconLeft: ({ ...props }) => <ChevronUp className="h-4 w-4" />,
