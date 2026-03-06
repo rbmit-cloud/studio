@@ -385,8 +385,8 @@ export default function RegistrosPage() {
                       </DropdownMenuContent>
                   </DropdownMenu>
                   {(dateFrom || dateTo) && (
-                      <Button variant="ghost" size="sm" onClick={() => { setDateFrom(undefined); setDateTo(undefined); }}>
-                          <X className="h-4 w-4 mr-1" />
+                      <Button variant="outline" onClick={() => { setDateFrom(undefined); setDateTo(undefined); }}>
+                          <X className="h-4 w-4 mr-2" />
                           Limpiar
                       </Button>
                   )}
