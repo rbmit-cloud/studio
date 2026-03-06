@@ -341,8 +341,8 @@ export default function RegistrosPage() {
               <div>
                   <CardTitle>Registro de Visitas</CardTitle>
               </div>
-              <div className="flex flex-wrap items-center gap-2 md:flex-nowrap">
-                  <div className="grid w-full sm:w-[240px] gap-1.5">
+              <div className="flex flex-wrap items-end gap-2 md:flex-nowrap">
+                  <div className="grid gap-1.5">
                       <label htmlFor="date-from" className="text-sm text-muted-foreground px-1">Desde fecha</label>
                       <Input
                           id="date-from"
@@ -352,10 +352,9 @@ export default function RegistrosPage() {
                               const value = e.target.value;
                               setDateFrom(value ? new Date(value + 'T00:00:00') : undefined);
                           }}
-                          className="w-full"
                       />
                   </div>
-                  <div className="grid w-full sm:w-[240px] gap-1.5">
+                  <div className="grid gap-1.5">
                         <label htmlFor="date-to" className="text-sm text-muted-foreground px-1">Hasta fecha</label>
                         <Input
                             id="date-to"
@@ -366,7 +365,6 @@ export default function RegistrosPage() {
                                 setDateTo(value ? new Date(value + 'T00:00:00') : undefined);
                             }}
                             min={dateFrom ? format(dateFrom, 'yyyy-MM-dd') : undefined}
-                            className="w-full"
                         />
                   </div>
                   <DropdownMenu>
