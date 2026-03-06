@@ -3,17 +3,19 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { Truck, User, X, FileDown, ChevronDown } from 'lucide-react';
+import { Truck, User, X, FileDown, ChevronDown, Calendar as CalendarIcon } from 'lucide-react';
 import type { Visitor } from '@/lib/types';
 import { useFirestore } from '@/firebase';
 import { collection, onSnapshot, query, orderBy, updateDoc, type DocumentReference } from 'firebase/firestore';
 import React, { useEffect, useState, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { useToast } from '@/hooks/use-toast';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Calendar } from '@/components/ui/calendar';
+import { cn } from '@/lib/utils';
 
 function VisitorRow({ visitor }: { visitor: Visitor & { id: string } }) {
   const isTransportista = visitor.entryType === 'Transportista';
@@ -64,9 +66,13 @@ export default function RegistrosPage() {
 
   useEffect(() => {
     // Por defecto, mostrar las visitas del día actual al cargar la página en el cliente.
-    const today = new Date();
-    setDateFrom(today);
-    setDateTo(today);
+    const todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0);
+    setDateFrom(todayStart);
+
+    const todayEnd = new Date();
+    todayEnd.setHours(23, 59, 59, 999);
+    setDateTo(todayEnd);
   }, []);
 
   useEffect(() => {
@@ -126,21 +132,8 @@ export default function RegistrosPage() {
   const filteredVisits = useMemo(() => {
     return visits.filter(visit => {
       const visitDate = new Date(visit.entryDateTime);
-      
-      if (dateFrom) {
-          const fromDate = new Date(dateFrom);
-          fromDate.setHours(0,0,0,0); // Start of day
-          if (visitDate < fromDate) {
-              return false;
-          }
-      }
-      if (dateTo) {
-          const toDate = new Date(dateTo);
-          toDate.setHours(23, 59, 59, 999); // End of day
-          if (visitDate > toDate) {
-              return false;
-          }
-      }
+      if (dateFrom && visitDate < dateFrom) return false;
+      if (dateTo && visitDate > dateTo) return false;
       return true;
     });
   }, [visits, dateFrom, dateTo]);
@@ -342,34 +335,72 @@ export default function RegistrosPage() {
                   <CardTitle>Registro de Visitas</CardTitle>
               </div>
               <div className="flex flex-wrap items-end gap-2 md:flex-nowrap">
-                  <div className="grid gap-1.5">
-                      <label htmlFor="date-from" className="text-sm text-muted-foreground px-1">Desde fecha</label>
-                      <Input
-                          id="date-from"
-                          type="date"
-                          value={dateFrom ? format(dateFrom, 'yyyy-MM-dd') : ''}
-                          onChange={(e) => {
-                              const value = e.target.value;
-                              setDateFrom(value ? new Date(value + 'T00:00:00') : undefined);
-                          }}
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        id="date-from"
+                        variant={"outline"}
+                        className={cn(
+                          "w-[220px] justify-start text-left font-normal h-10",
+                          !dateFrom && "text-muted-foreground"
+                        )}
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {dateFrom ? format(dateFrom, "PPP", { locale: es }) : <span>Desde fecha</span>}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0">
+                      <Calendar
+                        mode="single"
+                        selected={dateFrom}
+                        onSelect={(date) => {
+                          if (date) {
+                            const newDate = new Date(date);
+                            newDate.setHours(0, 0, 0, 0);
+                            setDateFrom(newDate);
+                          } else {
+                            setDateFrom(undefined);
+                          }
+                        }}
+                        initialFocus
                       />
-                  </div>
-                  <div className="grid gap-1.5">
-                        <label htmlFor="date-to" className="text-sm text-muted-foreground px-1">Hasta fecha</label>
-                        <Input
-                            id="date-to"
-                            type="date"
-                            value={dateTo ? format(dateTo, 'yyyy-MM-dd') : ''}
-                            onChange={(e) => {
-                                const value = e.target.value;
-                                setDateTo(value ? new Date(value + 'T00:00:00') : undefined);
-                            }}
-                            min={dateFrom ? format(dateFrom, 'yyyy-MM-dd') : undefined}
-                        />
-                  </div>
+                    </PopoverContent>
+                  </Popover>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        id="date-to"
+                        variant={"outline"}
+                        className={cn(
+                          "w-[220px] justify-start text-left font-normal h-10",
+                          !dateTo && "text-muted-foreground"
+                        )}
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {dateTo ? format(dateTo, "PPP", { locale: es }) : <span>Hasta fecha</span>}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0">
+                      <Calendar
+                        mode="single"
+                        selected={dateTo}
+                        onSelect={(date) => {
+                          if (date) {
+                            const newDate = new Date(date);
+                            newDate.setHours(23, 59, 59, 999);
+                            setDateTo(newDate);
+                          } else {
+                            setDateTo(undefined);
+                          }
+                        }}
+                        disabled={dateFrom ? { before: dateFrom } : undefined}
+                        initialFocus
+                      />
+                    </PopoverContent>
+                  </Popover>
                   <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                          <Button variant="outline">
+                          <Button variant="outline" className='h-10'>
                               <FileDown className="mr-2 h-4 w-4" />
                               Exportar
                               <ChevronDown className="ml-2 h-4 w-4" />
@@ -385,7 +416,7 @@ export default function RegistrosPage() {
                       </DropdownMenuContent>
                   </DropdownMenu>
                   {(dateFrom || dateTo) && (
-                      <Button variant="outline" onClick={() => { setDateFrom(undefined); setDateTo(undefined); }}>
+                      <Button variant="outline" className="h-10" onClick={() => { setDateFrom(undefined); setDateTo(undefined); }}>
                           <X className="h-4 w-4 mr-2" />
                           Limpiar
                       </Button>
