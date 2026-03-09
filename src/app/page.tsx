@@ -101,9 +101,7 @@ export default function Home() {
     <main className="flex min-h-screen flex-col items-center justify-center p-8 bg-background">
       <div className="flex flex-col items-center gap-4">
         
-        <div className="cursor-pointer" onClick={() => handleOpenDialog('/admin')}>
-            <Image src="/robama-logo.jpg" alt="Logo de Robama S.A." width={800} height={222} className="w-[800px] h-auto" />
-        </div>
+        <Image src="/robama-logo.jpg" alt="Logo de Robama S.A." width={800} height={222} className="w-[800px] h-auto" />
         
         <Dialog open={open} onOpenChange={handleCloseDialog}>
             <DialogContent className="sm:max-w-[425px]">
