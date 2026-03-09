@@ -84,7 +84,7 @@ export default function Home() {
                 case 'auth/user-not-found':
                 case 'auth/wrong-password':
                 case 'auth/invalid-credential':
-                    description = "Correo electrónico o contraseña incorrectos.";
+                    description = "Correo electrónico o contraseña incorrectos. Asegúrese de que el usuario ha sido creado en la sección 'Authentication' de la Consola de Firebase.";
                     break;
                 case 'auth/invalid-email':
                     description = "El formato del correo electrónico no es válido.";
