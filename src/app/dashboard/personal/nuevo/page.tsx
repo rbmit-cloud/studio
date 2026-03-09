@@ -131,8 +131,8 @@ export default function PersonalFormPage() {
             });
 
             toast({
-                title: "Registro Exitoso",
-                description: `La visita de ${values.visitorName} ha sido registrada.`,
+                title: "Bienvenido/a a Robama",
+                description: `El registro de ${values.visitorName} se ha completado.`,
             });
             form.reset();
             setTimeout(() => {

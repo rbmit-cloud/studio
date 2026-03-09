@@ -142,8 +142,8 @@ export default function TransportistaFormPage() {
             });
 
             toast({
-                title: "Registro Exitoso",
-                description: `El transportista ${values.visitorName} ha sido registrado.`,
+                title: "Bienvenido/a a Robama",
+                description: `El registro del transportista ${values.visitorName} se ha completado.`,
             });
             form.reset();
             setTimeout(() => {
