@@ -99,7 +99,7 @@ export default function Home() {
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-8 bg-background">
-      <div className="flex flex-col items-center gap-3">
+      <div className="flex flex-col items-center gap-2">
         
         <Image src="/robama-logo.jpg" alt="Logo de Robama S.A." width={600} height={167} className="w-[600px] h-auto" />
         
