@@ -44,15 +44,15 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
+// Remove password from schema and add email requirement for admins
 const formSchema = z.object({
   name: z.string().min(2, "El nombre debe tener al menos 2 caracteres."),
   department: z.string().optional(),
   email: z.string().email("Debe ser un correo electrónico válido.").or(z.literal("")).optional(),
   isAdmin: z.boolean().default(false),
-  password: z.string().optional(),
-}).refine(data => !data.isAdmin || (data.password && data.password.length >= 6) || (data.isAdmin && !data.password), {
-  message: "La contraseña debe tener al menos 6 caracteres para los administradores.",
-  path: ["password"],
+}).refine(data => !data.isAdmin || (data.email && data.email.length > 0), {
+  message: "El correo electrónico es obligatorio para los administradores.",
+  path: ["email"],
 });
 
 
@@ -69,11 +69,8 @@ export default function AjustesPage() {
       department: "",
       email: "",
       isAdmin: false,
-      password: "",
     },
   });
-
-  const isAdmin = form.watch("isAdmin");
 
   useEffect(() => {
     if (!db) return;
@@ -104,13 +101,12 @@ export default function AjustesPage() {
         department: "",
         email: "",
         isAdmin: false,
-        password: "",
     });
   };
 
   const handleSelectHost = (host: Host) => {
     setSelectedHost(host);
-    form.reset({ ...host, email: host.email || '', password: "" });
+    form.reset({ ...host, email: host.email || '' });
   };
 
 
@@ -126,12 +122,12 @@ export default function AjustesPage() {
   
     try {
       const hostsRef = collection(db, "hosts");
-      const q = query(hostsRef, where("name", "==", values.name));
-      const querySnapshot = await getDocs(q);
       
-      const duplicate = querySnapshot.docs.find(doc => doc.id !== selectedHost?.id);
-
-      if (duplicate) {
+      // Check for duplicate name
+      const nameQuery = query(hostsRef, where("name", "==", values.name));
+      const nameSnapshot = await getDocs(nameQuery);
+      const duplicateName = nameSnapshot.docs.find(doc => doc.id !== selectedHost?.id);
+      if (duplicateName) {
         toast({
           title: "Anfitrión Duplicado",
           description: "Ya existe un anfitrión con ese nombre.",
@@ -139,17 +135,28 @@ export default function AjustesPage() {
         });
         return;
       }
+
+      // Check for duplicate email if provided
+      if (values.email) {
+        const emailQuery = query(hostsRef, where("email", "==", values.email));
+        const emailSnapshot = await getDocs(emailQuery);
+        const duplicateEmail = emailSnapshot.docs.find(doc => doc.id !== selectedHost?.id);
+        if (duplicateEmail) {
+          toast({
+            title: "Correo Duplicado",
+            description: "Ya existe un anfitrión con ese correo electrónico.",
+            variant: "destructive",
+          });
+          return;
+        }
+      }
       
-      const dataToSave: Partial<Host> = {
+      const dataToSave: Omit<Host, 'id'> = {
         name: values.name,
         department: values.department || "",
         email: values.email || "",
         isAdmin: values.isAdmin,
       };
-
-      if (values.password) {
-        dataToSave.password = values.password;
-      }
 
       if (selectedHost) {
         const hostDocRef = doc(db, "hosts", selectedHost.id);
@@ -165,6 +172,12 @@ export default function AjustesPage() {
           description: `Se ha añadido a ${values.name} a la lista de anfitriones.`,
         });
       }
+      
+      toast({
+        title: "Gestión de usuarios",
+        description: "Recuerde gestionar las credenciales de los administradores en Firebase Authentication.",
+        duration: 5000,
+      })
 
       handleCancelEdit();
 
@@ -280,7 +293,7 @@ export default function AjustesPage() {
                 name="email"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Correo Electrónico (Opcional)</FormLabel>
+                    <FormLabel>Correo Electrónico (Requerido para administradores)</FormLabel>
                     <FormControl>
                       <Input type="email" placeholder="Ej: ana.gomez@empresa.com" {...field} autoComplete="off" />
                     </FormControl>
@@ -307,21 +320,6 @@ export default function AjustesPage() {
                   </FormItem>
                 )}
               />
-              {isAdmin && (
-                <FormField
-                  control={form.control}
-                  name="password"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Contraseña {selectedHost && '(Dejar en blanco para no cambiar)'}</FormLabel>
-                      <FormControl>
-                        <Input type="password" placeholder="Establecer contraseña" {...field} autoComplete="off" />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              )}
             </CardContent>
             <CardFooter className="flex justify-between">
                 <Button type="submit" disabled={form.formState.isSubmitting}>

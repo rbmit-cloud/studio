@@ -24,5 +24,4 @@ export type Host = {
   department?: string;
   email?: string;
   isAdmin?: boolean;
-  password?: string;
 };

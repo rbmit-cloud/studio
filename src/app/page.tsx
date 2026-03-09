@@ -20,46 +20,55 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { useFirestore } from '@/firebase';
+import { useAuth, useFirestore } from '@/firebase';
 import { collection, getDocs, query, where } from 'firebase/firestore';
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { FirebaseError } from 'firebase/app';
 
 
 export default function Home() {
   const router = useRouter();
   const { toast } = useToast();
   const db = useFirestore();
+  const auth = useAuth();
   const [open, setOpen] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loginDestination, setLoginDestination] = useState<string>('');
 
   const handleLogin = async () => {
-    if (!db) {
+    if (!auth || !db) {
         toast({
             title: "Error",
-            description: "La base de datos no está disponible.",
+            description: "El servicio de autenticación no está disponible.",
             variant: "destructive"
         });
         return;
     }
 
     try {
+        // Step 1: Authenticate user with Firebase Auth
+        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
+
+        // Step 2: Check if the authenticated user is an admin in Firestore
         const q = query(
             collection(db, "hosts"),
-            where("email", "==", email),
-            where("isAdmin", "==", true),
-            where("password", "==", password)
+            where("email", "==", user.email),
+            where("isAdmin", "==", true)
         );
-
         const querySnapshot = await getDocs(q);
 
         if (querySnapshot.empty) {
+            // This case means the user is authenticated but not an admin in our system.
+            await auth.signOut(); // Sign out the non-admin user
             toast({
-                title: "Error de autenticación",
-                description: "Correo electrónico o contraseña incorrectos, o no es un administrador.",
+                title: "Acceso denegado",
+                description: "No tiene permisos de administrador para acceder a esta sección.",
                 variant: "destructive",
             });
         } else {
+            // User is authenticated and is an admin
             toast({
                 title: "Inicio de sesión exitoso",
                 description: "Redirigiendo...",
@@ -67,19 +76,35 @@ export default function Home() {
             router.push(loginDestination);
         }
 
-    } catch (error) {
+    } catch (error: any) {
         console.error("Error during login: ", error);
+        let description = "Ocurrió un error al intentar iniciar sesión.";
+        if (error instanceof FirebaseError) {
+            switch (error.code) {
+                case 'auth/user-not-found':
+                case 'auth/wrong-password':
+                case 'auth/invalid-credential':
+                    description = "Correo electrónico o contraseña incorrectos.";
+                    break;
+                case 'auth/invalid-email':
+                    description = "El formato del correo electrónico no es válido.";
+                    break;
+                default:
+                    description = "Error de autenticación. Por favor, inténtelo de nuevo.";
+            }
+        }
         toast({
             title: "Error de inicio de sesión",
-            description: "Ocurrió un error al intentar iniciar sesión.",
+            description,
             variant: "destructive",
         });
+    } finally {
+        // Clear fields and close dialog regardless of outcome
+        setEmail('');
+        setPassword('');
+        setOpen(false); 
+        setLoginDestination('');
     }
-
-    setEmail('');
-    setPassword('');
-    setOpen(false); 
-    setLoginDestination('');
   };
   
   const handleOpenDialog = (destination: string) => {

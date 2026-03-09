@@ -92,10 +92,6 @@
         "isAdmin": {
           "type": "boolean",
           "description": "Whether the host is an administrator."
-        },
-        "password": {
-          "type": "string",
-          "description": "Password for the host, if they are an administrator."
         }
       },
       "required": [
@@ -104,7 +100,9 @@
     }
   },
   "auth": {
-    "providers": []
+    "providers": [
+      "Email"
+    ]
   },
   "firestore": {
     "/visits/{visitId}": {
