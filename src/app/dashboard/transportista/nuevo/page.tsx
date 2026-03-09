@@ -52,7 +52,7 @@ const formSchema = z.object({
   companyName: z.string().min(2, "La empresa de transportes debe tener al menos 2 caracteres."),
   licensePlate: z.string().min(5, "La matrícula debe tener al menos 5 caracteres.").regex(/^[A-Z0-9-]{5,10}$/, 'Formato de matrícula inválido.'),
   trailerLicensePlate: z.string().optional(),
-  purposeOfVisit: z.string().min(5, "El motivo de la visita debe tener al menos 5 caracteres."),
+  purposeOfVisit: z.string(),
   hostName: z.string({
     required_error: "Debe seleccionar una persona a visitar.",
   }),

@@ -49,7 +49,7 @@ import type { Host } from "@/lib/types";
 const formSchema = z.object({
   visitorName: z.string().min(2, "El nombre y apellidos deben tener al menos 2 caracteres."),
   companyName: z.string().min(2, "La empresa debe tener al menos 2 caracteres."),
-  purposeOfVisit: z.string().min(5, "El motivo de la visita debe tener al menos 5 caracteres."),
+  purposeOfVisit: z.string(),
   hostName: z.string({
     required_error: "Debe seleccionar una persona a visitar.",
   }),
