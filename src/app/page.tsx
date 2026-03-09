@@ -99,7 +99,7 @@ export default function Home() {
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-8 bg-background">
-      <div className="flex flex-col items-center gap-4">
+      <div className="flex flex-col items-center gap-3">
         
         <Image src="/robama-logo.jpg" alt="Logo de Robama S.A." width={600} height={167} className="w-[600px] h-auto" />
         
@@ -149,7 +149,7 @@ export default function Home() {
 
         <DateTime />
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-y-4 md:gap-8 w-full max-w-6xl">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-y-4 md:gap-8 w-full max-w-6xl mt-6">
           <Card className="transform transition-transform duration-300 hover:scale-105 hover:shadow-red-2xl">
             <CardContent className="p-0">
               <Link href="/dashboard/personal/nuevo" className="flex flex-col items-center justify-center h-64 p-6 text-center rounded-lg active:bg-destructive active:text-destructive-foreground">
@@ -176,7 +176,7 @@ export default function Home() {
           </Card>
         </div>
         
-        <div className="flex items-center justify-center gap-4">
+        <div className="flex items-center justify-center gap-4 mt-6">
             <Button variant="outline" onClick={() => handleOpenDialog('/dashboard/registros')}>
               Ver Registro de Visitas
             </Button>
