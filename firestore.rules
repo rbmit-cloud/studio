@@ -1,27 +1,151 @@
+/**
+ * Core Philosophy: This ruleset implements a strict Database-Backed Access Control (DBAC) model.
+ * A user's capabilities are determined by their role, which is established by the existence of a
+ * document in a dedicated role collection (e.g., /roles_admin/{userId}). This provides clear,
+ * centralized, and performant authorization.
+ *
+ * Data Structure: The Firestore structure is intentionally flat, with top-level collections
+ * for 'users', 'visits', and roles ('roles_admin', 'roles_staff'). This design promotes
+ * "Authorization Independence," where the rules for one collection do not depend on reading
+ * data from another, avoiding slow and costly `get()` calls.
+ *
+ * Key Security Decisions:
+ * - Role-Based Access: All access to the primary data collection, `visits`, is governed by
+ *   'admin' or 'staff' roles. Individual document ownership is not used for authorization here.
+ * - Role Secrecy: The lists of admins and staff members are not public. Listing documents
+ *   from role collections is explicitly forbidden to prevent user enumeration.
+ * - Role Management: Only existing admins are permitted to grant or revoke roles for any user,
+ *   including other admins.
+ * - User Privacy: A user's profile document in the `/users` collection is private and can only
+ *   be accessed or modified by the user themselves. Listing users is disabled.
+ * - Default Deny: All paths not explicitly matched are denied access.
+ */
 rules_version = '2';
-
 service cloud.firestore {
   match /databases/{database}/documents {
-    
-    function isUserAuthenticated() {
+
+    // ------------------------------------------------------------------------
+    // Helper Functions
+    // ------------------------------------------------------------------------
+
+    /**
+     * Checks if the user is authenticated.
+     */
+    function isSignedIn() {
       return request.auth != null;
     }
 
-    match /visits/{visitId} {
-      // Anyone can create a visit record (for the public-facing kiosk)
-      allow create: if true;
-      
-      // Only authenticated users (staff/admins) can view, update (e.g., checkout), or delete visit records
-      allow read, update, delete: if isUserAuthenticated();
+    /**
+     * Validates if the requesting user's UID matches the provided userId.
+     * This is the foundation of the user-ownership model.
+     */
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+    
+    /**
+     * Checks if the current user has an 'admin' role by verifying the
+     * existence of their UID in the '/roles_admin' collection.
+     */
+    function isAdmin() {
+      return isSignedIn() && exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid));
     }
 
-    match /hosts/{hostId} {
-      // Anyone can read the list of hosts (to populate dropdowns in visitor forms)
-      allow read: if true;
+    /**
+     * Checks if the current user has a 'staff' role by verifying the
+     * existence of their UID in the '/roles_staff' collection.
+     */
+    function isStaff() {
+      return isSignedIn() && exists(/databases/$(database)/documents/roles_staff/$(request.auth.uid));
+    }
+    
+    /**
+     * Ensures a document exists before an update or delete operation.
+     * This prevents state-changing requests on non-existent data.
+     */
+    function isExistingDoc() {
+      return resource != null;
+    }
 
-      // Only authenticated users can create, update, or delete hosts.
-      // For a higher security application, you should also check for an admin role/claim.
-      allow write: if isUserAuthenticated();
+    /**
+     * On user profile creation, validates that the document's internal 'id'
+     * field matches the user's auth UID, ensuring data integrity.
+     */
+    function isCreatingOwnUserDoc(userId) {
+      return isOwner(userId) && request.resource.data.id == userId;
+    }
+
+    /**
+     * On user profile update, ensures the internal 'id' field is immutable.
+     */
+    function isUpdatingOwnUserDoc() {
+      return request.resource.data.id == resource.data.id;
+    }
+
+    // ------------------------------------------------------------------------
+    // Collection Rules
+    // ------------------------------------------------------------------------
+
+    /**
+     * @description Manages user profile documents. Enforces strict ownership;
+     * only the authenticated user can read or write their own profile data.
+     * @path /users/{userId}
+     * @allow (create) A new user (auth.uid: 'user_abc') creates their own profile at `/users/user_abc`.
+     * @deny (get) A user (auth.uid: 'user_xyz') tries to read the profile at `/users/user_abc`.
+     * @deny (list) Any user tries to list all documents in the `/users` collection.
+     * @principle Restricts access to a user's own data tree and prevents user enumeration.
+     */
+    match /users/{userId} {
+      allow get: if isOwner(userId);
+      allow list: if false;
+      allow create: if isCreatingOwnUserDoc(userId);
+      allow update: if isOwner(userId) && isExistingDoc() && isUpdatingOwnUserDoc();
+      allow delete: if isOwner(userId) && isExistingDoc();
+    }
+
+    /**
+     * @description Stores all visitor log entries. Access is controlled by roles.
+     * Staff and Admins can read, create, update, and delete any visit log.
+     * @path /visits/{visitId}
+     * @allow (create) An authenticated 'staff' user creates a new visit document.
+     * @allow (list) An authenticated 'admin' user lists all visit documents.
+     * @deny (get) An authenticated user without a 'staff' or 'admin' role tries to read a visit.
+     * @principle Implements role-based access control (RBAC) for a shared data collection.
+     */
+    match /visits/{visitId} {
+      allow get, list: if isAdmin() || isStaff();
+      allow create: if isAdmin() || isStaff();
+      allow update, delete: if (isAdmin() || isStaff()) && isExistingDoc();
+    }
+
+    /**
+     * @description Defines which users have 'admin' privileges. The existence of a
+     * document grants the role. Only other admins can manage this list.
+     * @path /roles_admin/{userId}
+     * @allow (create) An existing admin (auth.uid: 'admin_one') creates a doc for 'user_abc' to make them an admin.
+     * @deny (get) Any user, including other admins, tries to directly read a role document.
+     * @deny (list) Any user tries to get a list of all administrators.
+     * @principle Secures role-granting capabilities and prevents enumeration of privileged users.
+     */
+    match /roles_admin/{userId} {
+      allow get, list: if false;
+      allow create: if isAdmin();
+      allow update, delete: if isAdmin() && isExistingDoc();
+    }
+
+    /**
+     * @description Defines which users have 'staff' privileges. The existence of a
+     * document grants the role. Only admins can manage this list.
+     * @path /roles_staff/{userId}
+     * @allow (delete) An existing admin (auth.uid: 'admin_one') deletes the doc for 'user_xyz' to revoke their staff role.
+     * @deny (create) A staff member (auth.uid: 'staff_one') tries to create a doc for 'user_abc' to make them staff.
+     * @deny (list) Any user tries to get a list of all staff members.
+     * @principle Secures role-granting capabilities to a higher privilege level (admin).
+     */
+    match /roles_staff/{userId} {
+      allow get, list: if false;
+      allow create: if isAdmin();
+      allow update, delete: if isAdmin() && isExistingDoc();
     }
   }
 }

@@ -1,121 +1,140 @@
 {
   "entities": {
-    "VehicleDetails": {
-      "title": "Vehicle Details",
-      "description": "Details of a vehicle.",
-      "type": "object",
-      "properties": {
-        "licensePlate": {
-          "type": "string",
-          "description": "Vehicle license plate number."
-        },
-        "trailerLicensePlate": {
-          "type": "string",
-          "description": "Trailer license plate number, if any."
-        }
-      },
-      "required": [
-        "licensePlate"
-      ]
-    },
     "Visit": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "Visit",
-      "description": "A record of a visitor.",
       "type": "object",
+      "description": "Represents a single entry log for any type of visitor (Transportista or Personal) into the company premises.",
       "properties": {
-        "visitorName": {
-          "type": "string"
-        },
-        "companyName": {
+        "id": {
           "type": "string",
-          "description": "The visitor's company (e.g. their employer or transport company)."
+          "description": "Unique identifier for the Visit entity."
         },
-        "clientCompany": {
+        "visitorType": {
           "type": "string",
-          "description": "For transporters, the company they are visiting on behalf of."
+          "description": "The category of the visitor, either 'Transportista' (transporter) or 'Personal' (personal visitor)."
         },
-        "purposeOfVisit": {
-          "type": "string"
-        },
-        "entryType": {
+        "visitorFullName": {
           "type": "string",
-          "enum": [
-            "Transportista",
-            "Personal"
-          ]
+          "description": "The full name of the person visiting."
         },
         "entryDateTime": {
           "type": "string",
+          "description": "The date and time when the visitor entered the premises.",
           "format": "date-time"
         },
         "exitDateTime": {
           "type": "string",
-  
+          "description": "The date and time when the visitor exited the premises. Can be null if the visitor is still inside.",
           "format": "date-time"
         },
-        "vehicleDetails": {
-          "$ref": "#/backend/entities/VehicleDetails"
+        "purposeOfVisit": {
+          "type": "string",
+          "description": "A brief description of the reason for the visit."
         },
-        "hostName": {
-          "type": "string"
+        "companyName": {
+          "type": "string",
+          "description": "The name of the transport company, applicable if visitorType is 'Transportista'."
         },
-        "department": {
-          "type": "string"
+        "vehiclePlateNumber": {
+          "type": "string",
+          "description": "The license plate number of the vehicle, applicable if visitorType is 'Transportista'."
+        },
+        "driverLicenseNumber": {
+          "type": "string",
+          "description": "The driver's license number of the transportista, applicable if visitorType is 'Transportista'."
+        },
+        "hostFullName": {
+          "type": "string",
+          "description": "The full name of the person within the company being visited, applicable if visitorType is 'Personal'."
+        },
+        "notes": {
+          "type": "string",
+          "description": "Any additional notes or remarks about the visit."
         }
       },
       "required": [
-        "visitorName",
-        "companyName",
-        "purposeOfVisit",
-        "entryType",
-        "entryDateTime"
-      ]
-    },
-    "Host": {
-      "title": "Host",
-      "description": "An employee who can be visited.",
-      "type": "object",
-      "properties": {
-        "name": {
-          "type": "string",
-          "description": "Full name of the host."
-        },
-        "department": {
-          "type": "string",
-          "description": "Department the host belongs to."
-        },
-        "email": {
-          "type": "string",
-          "format": "email",
-          "description": "Email address of the host."
-        },
-        "isAdmin": {
-          "type": "boolean",
-          "description": "Whether the host is an administrator."
-        }
-      },
-      "required": [
-        "name"
+        "id",
+        "visitorType",
+        "visitorFullName",
+        "entryDateTime",
+        "purposeOfVisit"
       ]
     }
   },
   "auth": {
     "providers": [
-      "Email"
+      "password",
+      "anonymous"
     ]
   },
   "firestore": {
-    "/visits/{visitId}": {
-      "schema": {
-        "$ref": "#/backend/entities/Visit"
+    "structure": [
+      {
+        "path": "/visits/{visitId}",
+        "definition": {
+          "entityName": "Visit",
+          "schema": {
+            "$ref": "#/backend/entities/Visit"
+          },
+          "description": "Stores all visitor log entries. Access is controlled by user roles (e.g., staff or admin). Each document is independent, not relying on parent documents for authorization. Includes denormalized 'creatorId' and 'createdAt' for audit purposes, but primary authorization is role-based.",
+          "params": [
+            {
+              "name": "visitId",
+              "description": "The unique identifier for a specific visit log entry."
+            }
+          ]
+        }
       },
-      "description": "Collection of all visitor records."
-    },
-    "/hosts/{hostId}": {
-      "schema": {
-        "$ref": "#/backend/entities/Host"
+      {
+        "path": "/users/{userId}",
+        "definition": {
+          "entityName": "User",
+          "schema": {
+            "$ref": "#/backend/entities/User"
+          },
+          "description": "Stores basic user profile information for authenticated Firebase users. While not explicitly defined in the provided 'backend.entities', this path is crucial for user management and linking authentication UIDs to data. Access for profile reading/writing is typically limited to the owning user.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique Firebase Authentication User ID."
+            }
+          ]
+        }
       },
-      "description": "Collection of all hosts that can be visited."
-    }
+      {
+        "path": "/roles_admin/{userId}",
+        "definition": {
+          "entityName": "Role",
+          "schema": {
+            "$ref": "#/backend/entities/Role"
+          },
+          "description": "Grants 'admin' privileges to the user identified by 'userId'. The mere existence of a document at this path signifies an admin role. This design ensures Authorization Independence by not requiring 'get()' calls to parent documents and supports DBAC. This schema reference points to a generic 'Role' entity not explicitly provided but necessary for DBAC.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique Firebase Authentication User ID associated with the admin role."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/roles_staff/{userId}",
+        "definition": {
+          "entityName": "Role",
+          "schema": {
+            "$ref": "#/backend/entities/Role"
+          },
+          "description": "Grants 'staff' privileges to the user identified by 'userId', allowing them to create and view visits. The existence of a document at this path signifies a staff role. This ensures Authorization Independence for role checks and supports DBAC. This schema reference points to a generic 'Role' entity not explicitly provided but necessary for DBAC.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique Firebase Authentication User ID associated with the staff role."
+            }
+          ]
+        }
+      }
+    ],
+    "reasoning": "The provided error 'FirebaseError: Firebase: Error (auth/configuration-not-found).' indicates a client-side Firebase Authentication configuration issue (e.g., missing API key, auth domain, or project ID in your Firebase initialization code). This needs to be resolved in your Next.js application's Firebase setup (`initializeApp`).\n\nRegarding the Firestore structure, the core design prioritizes Authorization Independence and QAPs (Queries as Permissions) while implementing Database-Backed Access Control (DBAC) for roles. The structure defines three main types of collections:\n\n1.  **Visits Collection (`/visits/{visitId}`):** This is the primary collection for storing all visitor log entries. Each document within this collection represents a single 'Visit' entity. To ensure **Authorization Independence**, access to individual visit documents (read, write) is determined solely by the authenticated user's role (e.g., 'admin' or 'staff'), which is validated independently via dedicated role collections. There are no hierarchical dependencies on parent documents for authorization, allowing atomic operations and simplifying security rules. While 'creatorId' and 'createdAt' fields may be included in the 'Visit' document for auditing, they do not dictate read/write permissions.\n    For **QAPs**, security rules for this collection will permit `list` and `get` operations *only if* the `request.auth.uid` corresponds to an authorized role (e.g., a document exists in `/roles_admin/{uid}` or `/roles_staff/{uid}`). This design ensures that unauthorized users cannot even initiate a query for visit data, fulfilling the QAP principle by gating access at the rule level, not relying on client-side filtering.\n\n2.  **Role Collections (`/roles_admin/{userId}`, `/roles_staff/{userId}`):** These collections implement the **DBAC** principle. A user is considered an 'admin' or 'staff' if a document with their `request.auth.uid` as the document ID exists within the respective collection. This approach ensures **Authorization Independence** as checking a user's role is an atomic `exists()` operation on a top-level collection, completely independent of any other document or hierarchical path. This avoids complex `get()` calls in rules. For **QAPs**, these role collections are primarily accessed by the Firebase Security Rules engine via `exists()` checks, not via client-side `list` operations. This inherently secures them, as rules would typically deny `list` access to these collections for general users, only allowing read/write by designated role managers (e.g., other admins).\n\n3.  **Users Collection (`/users/{userId}`):** This standard collection will store basic user profiles, primarily used to link the `request.auth.uid` to specific user data or settings, although its schema is not detailed in the provided entities.\n\nThis structure ensures a secure, scalable, and debuggable system by centralizing role-based access control and making authorization decisions explicit and independent."
   }
 }
