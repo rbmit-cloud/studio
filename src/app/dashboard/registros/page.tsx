@@ -11,6 +11,7 @@ import React, { useEffect, useState, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { type DateRange } from "react-day-picker";
 import { useToast } from '@/hooks/use-toast';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -59,20 +60,17 @@ function VisitorRow({ visitor }: { visitor: Visitor & { id: string } }) {
 
 export default function RegistrosPage() {
   const [visits, setVisits] = useState<(Visitor & { id: string })[]>([]);
-  const [dateFrom, setDateFrom] = useState<Date | undefined>();
-  const [dateTo, setDateTo] = useState<Date | undefined>();
+  const [date, setDate] = useState<DateRange | undefined>();
   const db = useFirestore();
   const { toast } = useToast();
 
   useEffect(() => {
     // Por defecto, mostrar las visitas del día actual al cargar la página en el cliente.
-    const todayStart = new Date();
-    todayStart.setHours(0, 0, 0, 0);
-    setDateFrom(todayStart);
-
-    const todayEnd = new Date();
-    todayEnd.setHours(23, 59, 59, 999);
-    setDateTo(todayEnd);
+    const today = new Date();
+    setDate({
+        from: new Date(new Date().setHours(0, 0, 0, 0)),
+        to: new Date(new Date().setHours(23, 59, 59, 999)),
+    });
   }, []);
 
   useEffect(() => {
@@ -130,13 +128,24 @@ export default function RegistrosPage() {
   }, [visits]);
 
   const filteredVisits = useMemo(() => {
+    if (!date?.from) {
+      return visits;
+    }
     return visits.filter(visit => {
       const visitDate = new Date(visit.entryDateTime);
-      if (dateFrom && visitDate < dateFrom) return false;
-      if (dateTo && visitDate > dateTo) return false;
+      const fromDate = new Date(date.from!);
+      fromDate.setHours(0, 0, 0, 0);
+  
+      if (visitDate < fromDate) return false;
+  
+      const toDate = date.to ? new Date(date.to) : new Date(date.from!);
+      toDate.setHours(23, 59, 59, 999);
+  
+      if (visitDate > toDate) return false;
+  
       return true;
     });
-  }, [visits, dateFrom, dateTo]);
+  }, [visits, date]);
 
   const handleExportCsv = () => {
     if (!filteredVisits || filteredVisits.length === 0) {
@@ -338,63 +347,36 @@ export default function RegistrosPage() {
                   <Popover>
                     <PopoverTrigger asChild>
                       <Button
-                        id="date-from"
+                        id="date"
                         variant={"outline"}
                         className={cn(
-                          "w-[220px] justify-start text-left font-normal h-10",
-                          !dateFrom && "text-muted-foreground"
+                          "w-[300px] justify-start text-left font-normal h-10",
+                          !date && "text-muted-foreground"
                         )}
                       >
                         <CalendarIcon className="mr-2 h-4 w-4" />
-                        {dateFrom ? format(dateFrom, "PPP", { locale: es }) : <span>Desde fecha</span>}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0">
-                      <Calendar
-                        mode="single"
-                        selected={dateFrom}
-                        onSelect={(date) => {
-                          if (date) {
-                            const newDate = new Date(date);
-                            newDate.setHours(0, 0, 0, 0);
-                            setDateFrom(newDate);
-                          } else {
-                            setDateFrom(undefined);
-                          }
-                        }}
-                        initialFocus
-                      />
-                    </PopoverContent>
-                  </Popover>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
-                        id="date-to"
-                        variant={"outline"}
-                        className={cn(
-                          "w-[220px] justify-start text-left font-normal h-10",
-                          !dateTo && "text-muted-foreground"
+                        {date?.from ? (
+                          date.to ? (
+                            <>
+                              {format(date.from, "PPP", { locale: es })} -{" "}
+                              {format(date.to, "PPP", { locale: es })}
+                            </>
+                          ) : (
+                            format(date.from, "PPP", { locale: es })
+                          )
+                        ) : (
+                          <span>Seleccione un rango</span>
                         )}
-                      >
-                        <CalendarIcon className="mr-2 h-4 w-4" />
-                        {dateTo ? format(dateTo, "PPP", { locale: es }) : <span>Hasta fecha</span>}
                       </Button>
                     </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0">
+                    <PopoverContent className="w-auto p-0" align="start">
                       <Calendar
-                        mode="single"
-                        selected={dateTo}
-                        onSelect={(date) => {
-                          if (date) {
-                            const newDate = new Date(date);
-                            newDate.setHours(23, 59, 59, 999);
-                            setDateTo(newDate);
-                          } else {
-                            setDateTo(undefined);
-                          }
-                        }}
-                        disabled={dateFrom ? { before: dateFrom } : undefined}
                         initialFocus
+                        mode="range"
+                        defaultMonth={date?.from}
+                        selected={date}
+                        onSelect={setDate}
+                        numberOfMonths={2}
                       />
                     </PopoverContent>
                   </Popover>
@@ -415,8 +397,8 @@ export default function RegistrosPage() {
                           </DropdownMenuItem>
                       </DropdownMenuContent>
                   </DropdownMenu>
-                  {(dateFrom || dateTo) && (
-                      <Button variant="outline" className="h-10" onClick={() => { setDateFrom(undefined); setDateTo(undefined); }}>
+                  {date && (
+                      <Button variant="outline" className="h-10" onClick={() => { setDate(undefined); }}>
                           <X className="h-4 w-4 mr-2" />
                           Limpiar
                       </Button>
@@ -443,7 +425,7 @@ export default function RegistrosPage() {
               ) : (
                   <TableRow>
                       <TableCell colSpan={5} className="h-24 text-center">
-                          {dateFrom || dateTo ? 'No hay registros que coincidan con su búsqueda.' : 'No hay registros de visitas todavía.'}
+                          {date ? 'No hay registros que coincidan con su búsqueda.' : 'No hay registros de visitas todavía.'}
                       </TableCell>
                   </TableRow>
               )}
