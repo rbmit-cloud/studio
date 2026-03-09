@@ -11,7 +11,9 @@
  *
  * Key Security Decisions:
  * - Role-Based Access: All access to the primary data collection, `visits`, is governed by
- *   'admin' or 'staff' roles. Individual document ownership is not used for authorization here.
+ *   'admin' or 'staff' roles for read/update/delete.
+ * - Anonymous Write for Visits: Any signed-in user (including anonymous users for the public kiosk)
+ *   can create a new visit record. This is a key requirement for the public-facing forms.
  * - Role Secrecy: The lists of admins and staff members are not public. Listing documents
  *   from role collections is explicitly forbidden to prevent user enumeration.
  * - Role Management: Only existing admins are permitted to grant or revoke roles for any user,
@@ -105,17 +107,33 @@ service cloud.firestore {
 
     /**
      * @description Stores all visitor log entries. Access is controlled by roles.
-     * Staff and Admins can read, create, update, and delete any visit log.
+     * Any authenticated user (including anonymous) can create a visit.
+     * Only Staff and Admins can read, update, and delete any visit log.
      * @path /visits/{visitId}
-     * @allow (create) An authenticated 'staff' user creates a new visit document.
+     * @allow (create) An anonymous user from the kiosk creates a new visit document.
      * @allow (list) An authenticated 'admin' user lists all visit documents.
      * @deny (get) An authenticated user without a 'staff' or 'admin' role tries to read a visit.
-     * @principle Implements role-based access control (RBAC) for a shared data collection.
+     * @principle Implements role-based access control (RBAC) for a shared data collection, with open creation for authenticated users.
      */
     match /visits/{visitId} {
       allow get, list: if isAdmin() || isStaff();
-      allow create: if isAdmin() || isStaff();
+      allow create: if isSignedIn();
       allow update, delete: if (isAdmin() || isStaff()) && isExistingDoc();
+    }
+
+    /**
+     * @description Manages the list of hosts (employees) who can be visited.
+     * Any authenticated user can read the list to select a host.
+     * Only admins can create, update, or delete hosts.
+     * @path /hosts/{hostId}
+     * @allow (list) An anonymous user from the kiosk lists all hosts for the dropdown menu.
+     * @deny (create) An anonymous user tries to add a new host.
+     * @allow (update) An admin updates a host's department.
+     * @principle Secures host management to admins while allowing public read for functionality.
+     */
+    match /hosts/{hostId} {
+        allow get, list: if isSignedIn();
+        allow create, update, delete: if isAdmin();
     }
 
     /**
