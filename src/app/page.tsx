@@ -21,7 +21,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth, useFirestore } from '@/firebase';
-import { collection, getDocs, query, where } from 'firebase/firestore';
+import { collection, getDocs, query, where, doc, setDoc, deleteDoc } from 'firebase/firestore';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { FirebaseError } from 'firebase/app';
 
@@ -51,7 +51,7 @@ export default function Home() {
         const userCredential = await signInWithEmailAndPassword(auth, email, password);
         const user = userCredential.user;
 
-        // Step 2: Check if the authenticated user is an admin in Firestore
+        // Step 2: Check if the authenticated user is an admin in the /hosts collection
         const q = query(
             collection(db, "hosts"),
             where("email", "==", user.email),
@@ -59,8 +59,13 @@ export default function Home() {
         );
         const querySnapshot = await getDocs(q);
 
+        const adminRoleDocRef = doc(db, 'roles_admin', user.uid);
+
         if (querySnapshot.empty) {
-            // This case means the user is authenticated but not an admin in our system.
+            // This user is not an admin according to the /hosts collection.
+            // Ensure their role doc is deleted in case they were demoted.
+            await deleteDoc(adminRoleDocRef);
+
             await auth.signOut(); // Sign out the non-admin user
             toast({
                 title: "Acceso denegado",
@@ -68,7 +73,10 @@ export default function Home() {
                 variant: "destructive",
             });
         } else {
-            // User is authenticated and is an admin
+            // User is authenticated and is an admin.
+            // Sync their admin role to /roles_admin for security rules to work.
+            await setDoc(adminRoleDocRef, { grantedAt: new Date().toISOString() });
+            
             toast({
                 title: "Inicio de sesión exitoso",
                 description: "Redirigiendo...",
