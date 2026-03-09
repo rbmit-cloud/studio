@@ -80,7 +80,7 @@ export default function SalidaPage() {
             });
 
             toast({
-                title: "Salida Registrada",
+                title: "Gracias por su visita",
                 description: `Se ha registrado la salida para ${visitToUpdate.data().visitorName}.`,
             });
             form.reset();
