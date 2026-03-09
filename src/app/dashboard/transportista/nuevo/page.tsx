@@ -43,7 +43,7 @@ import {
   } from "@/components/ui/alert-dialog";
 import { useEffect, useState } from "react";
 import { useFirestore } from "@/firebase";
-import { addDoc, collection, onSnapshot, orderBy, query, getDocs, where } from "firebase/firestore";
+import { addDoc, collection, onSnapshot, orderBy, query } from "firebase/firestore";
 import type { Host } from "@/lib/types";
 
 const formSchema = z.object({
@@ -115,20 +115,6 @@ export default function TransportistaFormPage() {
         }
 
         try {
-            const visitsRef = collection(db, "visits");
-            const q = query(visitsRef, where("visitorName", "==", values.visitorName));
-            const querySnapshot = await getDocs(q);
-            const activeVisit = querySnapshot.docs.find(doc => !doc.data().exitDateTime);
-
-            if (activeVisit) {
-                toast({
-                    title: "Visitante ya registrado",
-                    description: "Esta persona ya tiene una entrada registrada y no ha salido.",
-                    variant: "destructive",
-                });
-                return;
-            }
-
             const { privacyPolicy, company, ...rest } = values;
             await addDoc(collection(db, "visits"), {
                 ...rest,
