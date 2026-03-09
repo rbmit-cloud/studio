@@ -3,20 +3,21 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { Truck, User, X, FileDown, ChevronDown, Calendar as CalendarIcon } from 'lucide-react';
+import { Truck, User, X, FileDown, ChevronDown } from 'lucide-react';
 import type { Visitor } from '@/lib/types';
 import { useFirestore } from '@/firebase';
 import { collection, onSnapshot, query, orderBy, updateDoc, type DocumentReference } from 'firebase/firestore';
 import React, { useEffect, useState, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
-import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { type DateRange } from "react-day-picker";
 import { useToast } from '@/hooks/use-toast';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Calendar } from '@/components/ui/calendar';
-import { cn } from '@/lib/utils';
+import { format } from 'date-fns';
+
+type DateRange = {
+  from?: Date;
+  to?: Date;
+}
 
 function VisitorRow({ visitor }: { visitor: Visitor & { id: string } }) {
   const isTransportista = visitor.entryType === 'Transportista';
@@ -277,7 +278,30 @@ export default function RegistrosPage() {
     const body = "Por favor, primero descargue el archivo CSV usando la opción 'Descargar CSV' y luego adjúntelo a este correo.";
     window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
   };
+  
+  const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>, field: 'from' | 'to') => {
+    const { value } = e.target;
+    const newDate = value ? new Date(value + 'T00:00:00') : undefined;
 
+    setDate(currentRange => {
+        const updatedRange = { ...currentRange };
+        if (field === 'from') {
+            updatedRange.from = newDate;
+            if (newDate && updatedRange.to && newDate > updatedRange.to) {
+                updatedRange.to = undefined;
+            }
+        } else {
+            updatedRange.to = newDate;
+        }
+        if(!updatedRange.from && !updatedRange.to) return undefined;
+        return updatedRange;
+    });
+  };
+
+  const formatDateForInput = (date: Date | undefined): string => {
+      if (!date) return '';
+      return format(date, 'yyyy-MM-dd');
+  };
 
   return (
     <div className="flex flex-col gap-6">
@@ -344,42 +368,28 @@ export default function RegistrosPage() {
                   <CardTitle>Registro de Visitas</CardTitle>
               </div>
               <div className="flex flex-wrap items-end gap-2 md:flex-nowrap">
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
-                        id="date"
-                        variant={"outline"}
-                        className={cn(
-                          "w-[300px] justify-start text-left font-normal h-10",
-                          !date && "text-muted-foreground"
-                        )}
-                      >
-                        <CalendarIcon className="mr-2 h-4 w-4" />
-                        {date?.from ? (
-                          date.to ? (
-                            <>
-                              {format(date.from, "PPP", { locale: es })} -{" "}
-                              {format(date.to, "PPP", { locale: es })}
-                            </>
-                          ) : (
-                            format(date.from, "PPP", { locale: es })
-                          )
-                        ) : (
-                          <span>Seleccione un rango</span>
-                        )}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar
-                        initialFocus
-                        mode="range"
-                        defaultMonth={date?.from}
-                        selected={date}
-                        onSelect={setDate}
-                        numberOfMonths={2}
+                  <div className="grid gap-1">
+                      <label htmlFor="date-from" className="text-sm font-medium text-muted-foreground">Desde</label>
+                      <input
+                          id="date-from"
+                          type="date"
+                          value={formatDateForInput(date?.from)}
+                          onChange={(e) => handleDateChange(e, 'from')}
+                          className="h-10 rounded-md border border-input bg-transparent px-3 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                       />
-                    </PopoverContent>
-                  </Popover>
+                  </div>
+                  <div className="grid gap-1">
+                      <label htmlFor="date-to" className="text-sm font-medium text-muted-foreground">Hasta</label>
+                      <input
+                          id="date-to"
+                          type="date"
+                          value={formatDateForInput(date?.to)}
+                          onChange={(e) => handleDateChange(e, 'to')}
+                          min={formatDateForInput(date?.from)}
+                          disabled={!date?.from}
+                          className="h-10 rounded-md border border-input bg-transparent px-3 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                      />
+                  </div>
                   <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                           <Button variant="outline" className='h-10'>
@@ -425,7 +435,7 @@ export default function RegistrosPage() {
               ) : (
                   <TableRow>
                       <TableCell colSpan={5} className="h-24 text-center">
-                          {date ? 'No hay registros que coincidan con su búsqueda.' : 'No hay registros de visitas todavía.'}
+                          {date ? 'No hay registros que coincidan con su búsqueda.' : 'Seleccione un rango de fechas para ver los registros.'}
                       </TableCell>
                   </TableRow>
               )}
