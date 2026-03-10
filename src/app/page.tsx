@@ -20,8 +20,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { useAuth, useFirestore } from '@/firebase';
-import { collection, getDocs, query, where, doc, setDoc, deleteDoc } from 'firebase/firestore';
+import { useAuth } from '@/firebase';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { FirebaseError } from 'firebase/app';
 
@@ -29,7 +28,6 @@ import { FirebaseError } from 'firebase/app';
 export default function Home() {
   const router = useRouter();
   const { toast } = useToast();
-  const db = useFirestore();
   const auth = useAuth();
   const [open, setOpen] = useState(false);
   const [email, setEmail] = useState('');
@@ -37,7 +35,7 @@ export default function Home() {
   const [loginDestination, setLoginDestination] = useState<string>('');
 
   const handleLogin = async () => {
-    if (!auth || !db) {
+    if (!auth) {
         toast({
             title: "Error",
             description: "El servicio de autenticación no está disponible.",
@@ -48,39 +46,13 @@ export default function Home() {
 
     try {
         // Step 1: Authenticate user with Firebase Auth
-        const userCredential = await signInWithEmailAndPassword(auth, email, password);
-        const user = userCredential.user;
+        await signInWithEmailAndPassword(auth, email, password);
 
-        // Step 2: Check if the authenticated user is an admin in the /hosts collection
-        const q = query(
-            collection(db, "hosts"),
-            where("email", "==", user.email),
-            where("isAdmin", "==", true)
-        );
-        const querySnapshot = await getDocs(q);
-
-        if (querySnapshot.empty) {
-            // Not an admin. Ensure their role document is deleted.
-            const roleDocRef = doc(db, "roles_admin", user.uid);
-            await deleteDoc(roleDocRef).catch(() => {}); // Fire-and-forget, okay if it fails
-
-            await auth.signOut(); // Sign out the non-admin user
-            toast({
-                title: "Acceso denegado",
-                description: "No tiene permisos de administrador para acceder a esta sección.",
-                variant: "destructive",
-            });
-        } else {
-            // User is an admin based on /hosts. Sync to /roles_admin.
-            const roleDocRef = doc(db, "roles_admin", user.uid);
-            await setDoc(roleDocRef, { role: "admin", grantedAt: new Date().toISOString() });
-
-            toast({
-                title: "Inicio de sesión exitoso",
-                description: "Redirigiendo...",
-            });
-            router.push(loginDestination);
-        }
+        toast({
+            title: "Inicio de sesión exitoso",
+            description: "Redirigiendo...",
+        });
+        router.push(loginDestination);
 
     } catch (error: any) {
         console.error("Error during login: ", error);

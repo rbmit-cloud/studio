@@ -39,8 +39,6 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
@@ -48,10 +46,6 @@ const formSchema = z.object({
   name: z.string().min(2, "El nombre debe tener al menos 2 caracteres."),
   department: z.string().optional(),
   email: z.string().email("Debe ser un correo electrónico válido.").or(z.literal("")).optional(),
-  isAdmin: z.boolean().default(false),
-}).refine(data => !data.isAdmin || (data.email && data.email.length > 0), {
-  message: "El correo electrónico es obligatorio para los administradores.",
-  path: ["email"],
 });
 
 
@@ -67,7 +61,6 @@ export default function AjustesPage() {
       name: "",
       department: "",
       email: "",
-      isAdmin: false,
     },
   });
 
@@ -99,7 +92,6 @@ export default function AjustesPage() {
         name: "",
         department: "",
         email: "",
-        isAdmin: false,
     });
   };
 
@@ -152,7 +144,6 @@ export default function AjustesPage() {
         name: values.name,
         department: values.department || "",
         email: values.email || "",
-        isAdmin: values.isAdmin,
       };
 
       if (selectedHost) {
@@ -170,14 +161,6 @@ export default function AjustesPage() {
         });
       }
       
-      if(values.isAdmin && values.email) {
-        toast({
-            title: "Gestión de usuarios",
-            description: "Recuerde gestionar las credenciales de los administradores en Firebase Authentication.",
-            duration: 7000,
-        });
-      }
-
       handleCancelEdit();
 
     } catch (error: any) {
@@ -223,13 +206,12 @@ export default function AjustesPage() {
         toast({ title: 'No hay anfitriones para exportar.', variant: 'destructive' });
         return;
     }
-    const headers = ['Nombre', 'Departamento', 'Email', 'Administrador'];
+    const headers = ['Nombre', 'Departamento', 'Email'];
     const csvRows = hosts.map(host => {
         const row = [
             host.name,
             host.department,
             host.email,
-            host.isAdmin ? 'Sí' : 'No'
         ];
         return row.map(value => `"${String(value || '').replace(/"/g, '""')}"`).join(',');
     });
@@ -300,25 +282,6 @@ export default function AjustesPage() {
                   </FormItem>
                 )}
               />
-              <FormField
-                control={form.control}
-                name="isAdmin"
-                render={({ field }) => (
-                  <FormItem className="flex flex-row items-center space-x-3 space-y-0 rounded-md border p-4">
-                    <FormControl>
-                      <Checkbox
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                      />
-                    </FormControl>
-                    <div className="space-y-1 leading-none">
-                        <FormLabel>
-                            Administrador
-                        </FormLabel>
-                    </div>
-                  </FormItem>
-                )}
-              />
             </CardContent>
             <CardFooter className="flex justify-between">
                 <Button type="submit" disabled={form.formState.isSubmitting}>
@@ -382,7 +345,6 @@ export default function AjustesPage() {
                   >
                     <TableCell className="font-medium">
                         {host.name}
-                        {host.isAdmin && <Badge variant="outline" className="ml-2">Admin</Badge>}
                     </TableCell>
                     <TableCell>{host.department}</TableCell>
                     <TableCell className="hidden sm:table-cell">{host.email}</TableCell>
