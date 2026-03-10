@@ -44,7 +44,6 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
-// Remove password from schema and add email requirement for admins
 const formSchema = z.object({
   name: z.string().min(2, "El nombre debe tener al menos 2 caracteres."),
   department: z.string().optional(),
@@ -92,7 +91,7 @@ export default function AjustesPage() {
     });
 
     return () => unsubscribe();
-  }, [db]);
+  }, [db, toast]);
 
   const handleCancelEdit = () => {
     setSelectedHost(null);
@@ -123,7 +122,6 @@ export default function AjustesPage() {
     try {
       const hostsRef = collection(db, "hosts");
       
-      // Check for duplicate name
       const nameQuery = query(hostsRef, where("name", "==", values.name));
       const nameSnapshot = await getDocs(nameQuery);
       const duplicateName = nameSnapshot.docs.find(doc => doc.id !== selectedHost?.id);
@@ -136,7 +134,6 @@ export default function AjustesPage() {
         return;
       }
 
-      // Check for duplicate email if provided
       if (values.email) {
         const emailQuery = query(hostsRef, where("email", "==", values.email));
         const emailSnapshot = await getDocs(emailQuery);
@@ -173,11 +170,13 @@ export default function AjustesPage() {
         });
       }
       
-      toast({
-        title: "Gestión de usuarios",
-        description: "Recuerde gestionar las credenciales de los administradores en Firebase Authentication.",
-        duration: 5000,
-      })
+      if(values.isAdmin && values.email) {
+        toast({
+            title: "Gestión de usuarios",
+            description: "Recuerde gestionar las credenciales de los administradores en Firebase Authentication.",
+            duration: 7000,
+        });
+      }
 
       handleCancelEdit();
 
@@ -293,7 +292,7 @@ export default function AjustesPage() {
                 name="email"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Correo Electrónico (Requerido para administradores)</FormLabel>
+                    <FormLabel>Correo Electrónico</FormLabel>
                     <FormControl>
                       <Input type="email" placeholder="Ej: ana.gomez@empresa.com" {...field} autoComplete="off" />
                     </FormControl>
