@@ -17,7 +17,7 @@
  * - Role Secrecy: The lists of admins and staff members are not public. Listing documents
  *   from role collections is explicitly forbidden to prevent user enumeration.
  * - Role Management: Only existing admins are permitted to grant or revoke roles for any user,
- *   including other admins.
+ *   with the exception that a user can create/delete their OWN role doc. This is needed for login sync.
  * - User Privacy: A user's profile document in the `/users` collection is private and can only
  *   be accessed or modified by the user themselves. Listing users is disabled.
  * - Default Deny: All paths not explicitly matched are denied access.
@@ -147,8 +147,9 @@ service cloud.firestore {
      */
     match /roles_admin/{userId} {
       allow get, list: if false;
-      allow create: if isAdmin();
-      allow update, delete: if isAdmin() && isExistingDoc();
+      allow create: if isOwner(userId);
+      allow update: if isAdmin() && isExistingDoc();
+      allow delete: if (isAdmin() || isOwner(userId)) && isExistingDoc();
     }
 
     /**

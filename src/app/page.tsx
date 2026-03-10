@@ -21,7 +21,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth, useFirestore } from '@/firebase';
-import { collection, getDocs, query, where } from 'firebase/firestore';
+import { collection, getDocs, query, where, doc, setDoc, deleteDoc } from 'firebase/firestore';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { FirebaseError } from 'firebase/app';
 
@@ -60,7 +60,10 @@ export default function Home() {
         const querySnapshot = await getDocs(q);
 
         if (querySnapshot.empty) {
-            // This user is not an admin according to the /hosts collection.
+            // Not an admin. Ensure their role document is deleted.
+            const roleDocRef = doc(db, "roles_admin", user.uid);
+            await deleteDoc(roleDocRef).catch(() => {}); // Fire-and-forget, okay if it fails
+
             await auth.signOut(); // Sign out the non-admin user
             toast({
                 title: "Acceso denegado",
@@ -68,7 +71,10 @@ export default function Home() {
                 variant: "destructive",
             });
         } else {
-            // User is authenticated and is an admin.
+            // User is an admin based on /hosts. Sync to /roles_admin.
+            const roleDocRef = doc(db, "roles_admin", user.uid);
+            await setDoc(roleDocRef, { role: "admin", grantedAt: new Date().toISOString() });
+
             toast({
                 title: "Inicio de sesión exitoso",
                 description: "Redirigiendo...",
