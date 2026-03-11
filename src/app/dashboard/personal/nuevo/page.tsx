@@ -1,3 +1,4 @@
+
 'use client';
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -141,12 +142,12 @@ export default function PersonalFormPage() {
     return (
         <div className="flex justify-center">
             <AlertDialog>
-                <Card className="w-full max-w-2xl">
+                <Card className="w-full max-w-3xl">
                     <Form {...form}>
                         <form onSubmit={form.handleSubmit(onSubmit)}>
                             <CardHeader>
-                                <CardTitle>Registro de Visita Personal</CardTitle>
-                                <CardDescription>Complete los datos para registrar la entrada del visitante.</CardDescription>
+                                <CardTitle className="text-2xl md:text-3xl">Registro de Visita Personal</CardTitle>
+                                <CardDescription className="md:text-base">Complete los datos para registrar la entrada del visitante.</CardDescription>
                             </CardHeader>
                             <CardContent className="grid gap-6">
                                 <div className="grid md:grid-cols-2 gap-4">
@@ -155,7 +156,7 @@ export default function PersonalFormPage() {
                                         name="visitorName"
                                         render={({ field }) => (
                                             <FormItem>
-                                                <FormLabel>Nombre y Apellidos</FormLabel>
+                                                <FormLabel className="md:text-base">Nombre y Apellidos</FormLabel>
                                                 <FormControl>
                                                     <Input placeholder="Ej: Ana Gómez" {...field} autoComplete="off" />
                                                 </FormControl>
@@ -168,7 +169,7 @@ export default function PersonalFormPage() {
                                         name="companyName"
                                         render={({ field }) => (
                                             <FormItem>
-                                                <FormLabel>Empresa</FormLabel>
+                                                <FormLabel className="md:text-base">Empresa</FormLabel>
                                                 <FormControl>
                                                     <Input placeholder="Ej: Soluciones Tech" {...field} autoComplete="off" />
                                                 </FormControl>
@@ -183,7 +184,7 @@ export default function PersonalFormPage() {
                                         name="hostName"
                                         render={({ field }) => (
                                             <FormItem>
-                                                <FormLabel>Persona a visitar</FormLabel>
+                                                <FormLabel className="md:text-base">Persona a visitar</FormLabel>
                                                 <Select onValueChange={(value) => {
                                                     field.onChange(value);
                                                     const selectedHost = hosts.find(h => h.name === value);
@@ -213,7 +214,7 @@ export default function PersonalFormPage() {
                                         name="department"
                                         render={({ field }) => (
                                             <FormItem>
-                                                <FormLabel>Departamento</FormLabel>
+                                                <FormLabel className="md:text-base">Departamento</FormLabel>
                                                 <FormControl>
                                                     <Input placeholder="Departamento" {...field} disabled />
                                                 </FormControl>
@@ -227,7 +228,7 @@ export default function PersonalFormPage() {
                                     name="purposeOfVisit"
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel>Motivo de la visita</FormLabel>
+                                            <FormLabel className="md:text-base">Motivo de la visita</FormLabel>
                                             <FormControl>
                                                 <Input {...field} autoComplete="off" />
                                             </FormControl>
@@ -248,7 +249,7 @@ export default function PersonalFormPage() {
                                         </FormControl>
                                         <div className="space-y-1 leading-none">
                                         <AlertDialogTrigger asChild>
-                                            <FormLabel className="cursor-pointer hover:underline">
+                                            <FormLabel className="cursor-pointer hover:underline md:text-base">
                                                 He leído y acepto la Política de tratamiento de datos.
                                             </FormLabel>
                                         </AlertDialogTrigger>
