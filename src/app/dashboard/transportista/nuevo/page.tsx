@@ -1,3 +1,4 @@
+
 'use client';
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -159,35 +160,33 @@ export default function TransportistaFormPage() {
                                 <CardTitle>Registro de Transportista</CardTitle>
                                 <CardDescription>Complete los datos para registrar la entrada del vehículo y conductor.</CardDescription>
                             </CardHeader>
-                            <CardContent className="grid gap-6">
-                                <div className="grid md:grid-cols-2 gap-4">
-                                    <FormField
-                                        control={form.control}
-                                        name="visitorName"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>Nombre y Apellidos</FormLabel>
-                                                <FormControl>
-                                                    <Input placeholder="Ej: Juan Pérez" {...field} autoComplete="off" />
-                                                </FormControl>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
-                                    <FormField
-                                        control={form.control}
-                                        name="company"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>Empresa (Cliente Final)</FormLabel>
-                                                <FormControl>
-                                                    <Input placeholder="Ej: Cliente final S.A." {...field} autoComplete="off" />
-                                                </FormControl>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
-                                </div>
+                            <CardContent className="grid gap-4">
+                                <FormField
+                                    control={form.control}
+                                    name="visitorName"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Nombre y Apellidos</FormLabel>
+                                            <FormControl>
+                                                <Input placeholder="Ej: Juan Pérez" {...field} autoComplete="off" />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                                <FormField
+                                    control={form.control}
+                                    name="company"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Empresa (Cliente Final)</FormLabel>
+                                            <FormControl>
+                                                <Input placeholder="Ej: Cliente final S.A." {...field} autoComplete="off" />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
                                 <FormField
                                     control={form.control}
                                     name="companyName"
@@ -201,34 +200,32 @@ export default function TransportistaFormPage() {
                                         </FormItem>
                                     )}
                                 />
-                                <div className="grid md:grid-cols-2 gap-4">
-                                    <FormField
-                                        control={form.control}
-                                        name="licensePlate"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>Matrícula</FormLabel>
-                                                <FormControl>
-                                                    <Input placeholder="Ej: AA-123-BB" {...field} autoComplete="off" />
-                                                </FormControl>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
-                                    <FormField
-                                        control={form.control}
-                                        name="trailerLicensePlate"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>Matrícula Remolque (Opcional)</FormLabel>
-                                                <FormControl>
-                                                    <Input placeholder="Ej: R-456-CC" {...field} autoComplete="off" />
-                                                </FormControl>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
-                                </div>
+                                <FormField
+                                    control={form.control}
+                                    name="licensePlate"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Matrícula</FormLabel>
+                                            <FormControl>
+                                                <Input placeholder="Ej: AA-123-BB" {...field} autoComplete="off" />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                                <FormField
+                                    control={form.control}
+                                    name="trailerLicensePlate"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Matrícula Remolque (Opcional)</FormLabel>
+                                            <FormControl>
+                                                <Input placeholder="Ej: R-456-CC" {...field} autoComplete="off" />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
                                 <FormField
                                     control={form.control}
                                     name="purposeOfVisit"
@@ -242,51 +239,49 @@ export default function TransportistaFormPage() {
                                         </FormItem>
                                     )}
                                 />
-                                <div className="grid md:grid-cols-2 gap-4">
-                                    <FormField
-                                        control={form.control}
-                                        name="hostName"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>Persona a visitar</FormLabel>
-                                                <Select onValueChange={(value) => {
-                                                    field.onChange(value);
-                                                    const selectedHost = hosts.find(h => h.name === value);
-                                                    if (selectedHost) {
-                                                        form.setValue('department', selectedHost.department || '', { shouldValidate: true });
-                                                    }
-                                                }} defaultValue={field.value}>
-                                                    <FormControl>
-                                                        <SelectTrigger>
-                                                            <SelectValue placeholder="Seleccione una persona" />
-                                                        </SelectTrigger>
-                                                    </FormControl>
-                                                    <SelectContent>
-                                                        {hosts.map(host => (
-                                                            <SelectItem key={host.name} value={host.name}>
-                                                                {host.name}
-                                                            </SelectItem>
-                                                        ))}
-                                                    </SelectContent>
-                                                </Select>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
-                                    <FormField
-                                        control={form.control}
-                                        name="department"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>Departamento</FormLabel>
+                                <FormField
+                                    control={form.control}
+                                    name="hostName"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Persona a visitar</FormLabel>
+                                            <Select onValueChange={(value) => {
+                                                field.onChange(value);
+                                                const selectedHost = hosts.find(h => h.name === value);
+                                                if (selectedHost) {
+                                                    form.setValue('department', selectedHost.department || '', { shouldValidate: true });
+                                                }
+                                            }} defaultValue={field.value}>
                                                 <FormControl>
-                                                    <Input placeholder="Departamento" {...field} disabled />
+                                                    <SelectTrigger>
+                                                        <SelectValue placeholder="Seleccione una persona" />
+                                                    </SelectTrigger>
                                                 </FormControl>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
-                                </div>
+                                                <SelectContent>
+                                                    {hosts.map(host => (
+                                                        <SelectItem key={host.name} value={host.name}>
+                                                            {host.name}
+                                                        </SelectItem>
+                                                    ))}
+                                                </SelectContent>
+                                            </Select>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                                <FormField
+                                    control={form.control}
+                                    name="department"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Departamento</FormLabel>
+                                            <FormControl>
+                                                <Input placeholder="Departamento" {...field} disabled />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
                                 <FormField
                                     control={form.control}
                                     name="privacyPolicy"

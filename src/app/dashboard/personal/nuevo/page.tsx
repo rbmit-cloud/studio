@@ -142,87 +142,83 @@ export default function PersonalFormPage() {
     return (
         <div className="flex justify-center">
             <AlertDialog>
-                <Card className="w-full max-w-3xl">
+                <Card className="w-full max-w-2xl">
                     <Form {...form}>
                         <form onSubmit={form.handleSubmit(onSubmit)}>
                             <CardHeader>
                                 <CardTitle className="text-2xl md:text-3xl">Registro de Visita Personal</CardTitle>
                                 <CardDescription className="md:text-base">Complete los datos para registrar la entrada del visitante.</CardDescription>
                             </CardHeader>
-                            <CardContent className="grid gap-6">
-                                <div className="grid md:grid-cols-2 gap-4">
-                                    <FormField
-                                        control={form.control}
-                                        name="visitorName"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel className="md:text-base">Nombre y Apellidos</FormLabel>
+                            <CardContent className="grid gap-4">
+                                <FormField
+                                    control={form.control}
+                                    name="visitorName"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel className="md:text-base">Nombre y Apellidos</FormLabel>
+                                            <FormControl>
+                                                <Input placeholder="Ej: Ana Gómez" {...field} autoComplete="off" />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                                <FormField
+                                    control={form.control}
+                                    name="companyName"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel className="md:text-base">Empresa</FormLabel>
+                                            <FormControl>
+                                                <Input placeholder="Ej: Soluciones Tech" {...field} autoComplete="off" />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                                <FormField
+                                    control={form.control}
+                                    name="hostName"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel className="md:text-base">Persona a visitar</FormLabel>
+                                            <Select onValueChange={(value) => {
+                                                field.onChange(value);
+                                                const selectedHost = hosts.find(h => h.name === value);
+                                                if (selectedHost) {
+                                                    form.setValue('department', selectedHost.department || '', { shouldValidate: true });
+                                                }
+                                            }} defaultValue={field.value}>
                                                 <FormControl>
-                                                    <Input placeholder="Ej: Ana Gómez" {...field} autoComplete="off" />
+                                                    <SelectTrigger>
+                                                        <SelectValue placeholder="Seleccione una persona" />
+                                                    </SelectTrigger>
                                                 </FormControl>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
-                                    <FormField
-                                        control={form.control}
-                                        name="companyName"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel className="md:text-base">Empresa</FormLabel>
-                                                <FormControl>
-                                                    <Input placeholder="Ej: Soluciones Tech" {...field} autoComplete="off" />
-                                                </FormControl>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
-                                </div>
-                                <div className="grid md:grid-cols-2 gap-4">
-                                    <FormField
-                                        control={form.control}
-                                        name="hostName"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel className="md:text-base">Persona a visitar</FormLabel>
-                                                <Select onValueChange={(value) => {
-                                                    field.onChange(value);
-                                                    const selectedHost = hosts.find(h => h.name === value);
-                                                    if (selectedHost) {
-                                                        form.setValue('department', selectedHost.department || '', { shouldValidate: true });
-                                                    }
-                                                }} defaultValue={field.value}>
-                                                    <FormControl>
-                                                        <SelectTrigger>
-                                                            <SelectValue placeholder="Seleccione una persona" />
-                                                        </SelectTrigger>
-                                                    </FormControl>
-                                                    <SelectContent>
-                                                        {hosts.map(host => (
-                                                            <SelectItem key={host.name} value={host.name}>
-                                                                {host.name}
-                                                            </SelectItem>
-                                                        ))}
-                                                    </SelectContent>
-                                                </Select>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
-                                    <FormField
-                                        control={form.control}
-                                        name="department"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel className="md:text-base">Departamento</FormLabel>
-                                                <FormControl>
-                                                    <Input placeholder="Departamento" {...field} disabled />
-                                                </FormControl>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
-                                </div>
+                                                <SelectContent>
+                                                    {hosts.map(host => (
+                                                        <SelectItem key={host.name} value={host.name}>
+                                                            {host.name}
+                                                        </SelectItem>
+                                                    ))}
+                                                </SelectContent>
+                                            </Select>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                                <FormField
+                                    control={form.control}
+                                    name="department"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel className="md:text-base">Departamento</FormLabel>
+                                            <FormControl>
+                                                <Input placeholder="Departamento" {...field} disabled />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
                                  <FormField
                                     control={form.control}
                                     name="purposeOfVisit"
