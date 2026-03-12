@@ -183,6 +183,21 @@ export default function PersonalFormPage() {
         }
 
         try {
+            // Check for active visit before registering
+            const activeVisitQuery = query(collection(db, "visits"), where("visitorName", "==", values.visitorName));
+            const activeVisitSnapshot = await getDocs(activeVisitQuery);
+
+            const activeVisits = activeVisitSnapshot.docs.filter(doc => !doc.data().exitDateTime);
+
+            if (activeVisits.length > 0) {
+                toast({
+                    title: "Visita Activa",
+                    description: `Ya existe una entrada activa para ${values.visitorName}. Debe registrar la salida antes de volver a entrar.`,
+                    variant: "destructive",
+                });
+                return;
+            }
+
             const { privacyPolicy, ...dataToSave } = values;
             await addDoc(collection(db, "visits"), {
                 ...dataToSave,
@@ -215,7 +230,7 @@ export default function PersonalFormPage() {
     return (
         <div className="flex justify-center">
             <AlertDialog>
-                <Card className="w-full max-w-lg">
+                <Card className="w-full max-w-2xl">
                     <Form {...form}>
                         <form onSubmit={form.handleSubmit(onSubmit)}>
                             <CardHeader>

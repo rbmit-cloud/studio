@@ -44,7 +44,7 @@ import {
   } from "@/components/ui/alert-dialog";
 import { useEffect, useState } from "react";
 import { useFirestore } from "@/firebase";
-import { addDoc, collection, onSnapshot, orderBy, query } from "firebase/firestore";
+import { addDoc, collection, getDocs, onSnapshot, orderBy, query, where } from "firebase/firestore";
 import type { Host } from "@/lib/types";
 
 const formSchema = z.object({
@@ -116,6 +116,21 @@ export default function TransportistaFormPage() {
         }
 
         try {
+             // Check for active visit before registering
+             const activeVisitQuery = query(collection(db, "visits"), where("visitorName", "==", values.visitorName));
+             const activeVisitSnapshot = await getDocs(activeVisitQuery);
+ 
+             const activeVisits = activeVisitSnapshot.docs.filter(doc => !doc.data().exitDateTime);
+ 
+             if (activeVisits.length > 0) {
+                 toast({
+                     title: "Visita Activa",
+                     description: `Ya existe una entrada activa para ${values.visitorName}. Debe registrar la salida antes de volver a entrar.`,
+                     variant: "destructive",
+                 });
+                 return;
+             }
+
             const { privacyPolicy, company, ...rest } = values;
             await addDoc(collection(db, "visits"), {
                 ...rest,
