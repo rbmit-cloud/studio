@@ -1,4 +1,3 @@
-
 'use client';
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -49,7 +48,6 @@ import type { Host } from "@/lib/types";
 
 const formSchema = z.object({
   visitorName: z.string().min(2, "El nombre y apellidos deben tener al menos 2 caracteres."),
-  company: z.string().min(2, "La empresa debe tener al menos 2 caracteres."),
   companyName: z.string().min(2, "La empresa de transportes debe tener al menos 2 caracteres."),
   licensePlate: z.string().min(5, "La matrícula debe tener al menos 5 caracteres.").regex(/^[A-Z0-9-]{5,10}$/, 'Formato de matrícula inválido.'),
   trailerLicensePlate: z.string().optional(),
@@ -93,7 +91,6 @@ export default function TransportistaFormPage() {
         resolver: zodResolver(formSchema),
         defaultValues: {
             visitorName: "",
-            company: "",
             companyName: "",
             licensePlate: "",
             trailerLicensePlate: "",
@@ -131,10 +128,9 @@ export default function TransportistaFormPage() {
                  return;
              }
 
-            const { privacyPolicy, company, ...rest } = values;
+            const { privacyPolicy, ...rest } = values;
             await addDoc(collection(db, "visits"), {
                 ...rest,
-                clientCompany: company,
                 entryType: 'Transportista',
                 entryDateTime: new Date().toISOString(),
                 vehicleDetails: {
@@ -184,19 +180,6 @@ export default function TransportistaFormPage() {
                                             <FormLabel>Nombre y Apellidos</FormLabel>
                                             <FormControl>
                                                 <Input placeholder="Ej: Juan Pérez" {...field} autoComplete="off" />
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-                                <FormField
-                                    control={form.control}
-                                    name="company"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Empresa (Cliente Final)</FormLabel>
-                                            <FormControl>
-                                                <Input placeholder="Ej: Cliente final S.A." {...field} autoComplete="off" />
                                             </FormControl>
                                             <FormMessage />
                                         </FormItem>

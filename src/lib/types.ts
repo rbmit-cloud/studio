@@ -8,7 +8,6 @@ export type Visitor = {
   id: string;
   visitorName: string;
   companyName: string;
-  clientCompany?: string;
   purposeOfVisit: string;
   entryType: 'Transportista' | 'Personal';
   entryDateTime: string;
