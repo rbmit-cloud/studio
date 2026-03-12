@@ -1,4 +1,3 @@
-
 'use client';
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -44,7 +43,7 @@ import {
   } from "@/components/ui/alert-dialog";
 import { useEffect, useState } from "react";
 import { useFirestore } from "@/firebase";
-import { addDoc, collection, onSnapshot, orderBy, query } from "firebase/firestore";
+import { addDoc, collection, getDocs, limit, onSnapshot, orderBy, query, where } from "firebase/firestore";
 import type { Host } from "@/lib/types";
 
 const formSchema = z.object({
@@ -99,6 +98,44 @@ export default function PersonalFormPage() {
 
     const privacyPolicyAccepted = form.watch('privacyPolicy');
 
+    const findPreviousVisit = async (visitorName: string) => {
+        if (!db || visitorName.length < 2) return;
+    
+        try {
+            const q = query(
+                collection(db, "visits"),
+                where("visitorName", "==", visitorName),
+                where("entryType", "==", "Personal"),
+                orderBy("entryDateTime", "desc"),
+                limit(1)
+            );
+    
+            const querySnapshot = await getDocs(q);
+    
+            if (!querySnapshot.empty) {
+                const lastVisit = querySnapshot.docs[0].data();
+                
+                if (lastVisit.companyName) {
+                    form.setValue("companyName", lastVisit.companyName, { shouldValidate: true });
+                }
+                if (lastVisit.hostName) {
+                    form.setValue("hostName", lastVisit.hostName, { shouldValidate: true });
+                    
+                    const selectedHost = hosts.find(h => h.name === lastVisit.hostName);
+                    if (selectedHost) {
+                        form.setValue('department', selectedHost.department || '', { shouldValidate: true });
+                    }
+                }
+                 toast({
+                    title: "Visitante Encontrado",
+                    description: "Se han autocompletado los datos de la última visita.",
+                });
+            }
+        } catch (error) {
+            console.error("Error searching for previous visit:", error);
+        }
+    };
+
     async function onSubmit(values: z.infer<typeof formSchema>) {
         if (!db) {
             toast({
@@ -142,7 +179,7 @@ export default function PersonalFormPage() {
     return (
         <div className="flex justify-center">
             <AlertDialog>
-                <Card className="w-full max-w-2xl">
+                <Card className="w-full max-w-lg">
                     <Form {...form}>
                         <form onSubmit={form.handleSubmit(onSubmit)}>
                             <CardHeader>
@@ -157,7 +194,15 @@ export default function PersonalFormPage() {
                                         <FormItem>
                                             <FormLabel className="md:text-base">Nombre y Apellidos</FormLabel>
                                             <FormControl>
-                                                <Input placeholder="Ej: Ana Gómez" {...field} autoComplete="off" />
+                                                <Input 
+                                                    placeholder="Ej: Ana Gómez" 
+                                                    {...field}
+                                                    onBlur={(e) => {
+                                                        field.onBlur(e);
+                                                        findPreviousVisit(e.target.value);
+                                                    }}
+                                                    autoComplete="off" 
+                                                />
                                             </FormControl>
                                             <FormMessage />
                                         </FormItem>
@@ -188,7 +233,7 @@ export default function PersonalFormPage() {
                                                 if (selectedHost) {
                                                     form.setValue('department', selectedHost.department || '', { shouldValidate: true });
                                                 }
-                                            }} defaultValue={field.value}>
+                                            }} value={field.value}>
                                                 <FormControl>
                                                     <SelectTrigger>
                                                         <SelectValue placeholder="Seleccione una persona" />
