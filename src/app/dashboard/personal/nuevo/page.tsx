@@ -70,6 +70,42 @@ export default function PersonalFormPage() {
     }, []);
 
     useEffect(() => {
+        if (!isClient) return;
+
+        let inactivityTimer: NodeJS.Timeout;
+
+        const resetInactivityTimer = () => {
+            clearTimeout(inactivityTimer);
+            inactivityTimer = setTimeout(() => {
+                toast({
+                    title: "Sesión inactiva",
+                    description: "Regresando a la pantalla principal.",
+                });
+                router.push('/');
+            }, 5 * 60 * 1000); // 5 minutes
+        };
+
+        const activityEvents = ['mousemove', 'mousedown', 'keydown', 'touchstart', 'scroll'];
+        
+        const handleActivity = () => {
+            resetInactivityTimer();
+        };
+
+        activityEvents.forEach(event => {
+            window.addEventListener(event, handleActivity);
+        });
+
+        resetInactivityTimer(); // Start the timer on mount
+
+        return () => {
+            clearTimeout(inactivityTimer);
+            activityEvents.forEach(event => {
+                window.removeEventListener(event, handleActivity);
+            });
+        };
+    }, [isClient, router]);
+
+    useEffect(() => {
         if (!db) return;
     
         const q = query(collection(db, 'hosts'), orderBy('name', 'asc'));
