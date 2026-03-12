@@ -43,7 +43,7 @@ import {
   } from "@/components/ui/alert-dialog";
 import { useEffect, useState } from "react";
 import { useFirestore } from "@/firebase";
-import { addDoc, collection, getDocs, onSnapshot, orderBy, query, where } from "firebase/firestore";
+import { addDoc, collection, getDocs, limit, onSnapshot, orderBy, query, where } from "firebase/firestore";
 import type { Host } from "@/lib/types";
 
 const formSchema = z.object({
@@ -101,6 +101,35 @@ export default function TransportistaFormPage() {
     });
 
     const privacyPolicyAccepted = form.watch('privacyPolicy');
+
+    const findPreviousVisit = async (visitorName: string) => {
+        if (!db || visitorName.length < 2) return;
+    
+        try {
+            const q = query(
+                collection(db, "visits"),
+                where("visitorName", "==", visitorName),
+                where("entryType", "==", "Transportista"),
+                orderBy("entryDateTime", "desc"),
+                limit(1)
+            );
+    
+            const querySnapshot = await getDocs(q);
+    
+            if (!querySnapshot.empty) {
+                const lastVisit = querySnapshot.docs[0].data();
+                
+                if (lastVisit.companyName) {
+                    form.setValue("companyName", lastVisit.companyName, { shouldValidate: true });
+                }
+                if (lastVisit.vehicleDetails?.licensePlate) {
+                    form.setValue("licensePlate", lastVisit.vehicleDetails.licensePlate, { shouldValidate: true });
+                }
+            }
+        } catch (error) {
+            console.error("Error searching for previous visit:", error);
+        }
+    };
 
     async function onSubmit(values: z.infer<typeof formSchema>) {
         if (!db) {
@@ -164,12 +193,12 @@ export default function TransportistaFormPage() {
     return (
         <div className="flex justify-center">
             <AlertDialog>
-                <Card className="w-full max-w-2xl">
+                <Card className="w-full max-w-lg">
                     <Form {...form}>
                         <form onSubmit={form.handleSubmit(onSubmit)}>
                             <CardHeader>
-                                <CardTitle>Registro de Transportista</CardTitle>
-                                <CardDescription>Complete los datos para registrar la entrada del vehículo y conductor.</CardDescription>
+                                <CardTitle className="text-2xl md:text-3xl">Registro de Transportista</CardTitle>
+                                <CardDescription className="md:text-base">Complete los datos para registrar la entrada del vehículo y conductor.</CardDescription>
                             </CardHeader>
                             <CardContent className="grid gap-4">
                                 <FormField
@@ -177,9 +206,17 @@ export default function TransportistaFormPage() {
                                     name="visitorName"
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel>Nombre y Apellidos</FormLabel>
+                                            <FormLabel className="md:text-base">Nombre y Apellidos</FormLabel>
                                             <FormControl>
-                                                <Input placeholder="Ej: Juan Pérez" {...field} autoComplete="off" />
+                                                <Input 
+                                                    placeholder="Ej: Juan Pérez" 
+                                                    {...field}
+                                                    onBlur={(e) => {
+                                                        field.onBlur(e);
+                                                        findPreviousVisit(e.target.value);
+                                                    }}
+                                                    autoComplete="off" 
+                                                />
                                             </FormControl>
                                             <FormMessage />
                                         </FormItem>
@@ -190,7 +227,7 @@ export default function TransportistaFormPage() {
                                     name="companyName"
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel>Empresa de Transportes</FormLabel>
+                                            <FormLabel className="md:text-base">Empresa de Transportes</FormLabel>
                                             <FormControl>
                                                 <Input placeholder="Ej: Transportes Rápidos S.A." {...field} autoComplete="off" />
                                             </FormControl>
@@ -203,7 +240,7 @@ export default function TransportistaFormPage() {
                                     name="licensePlate"
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel>Matrícula</FormLabel>
+                                            <FormLabel className="md:text-base">Matrícula</FormLabel>
                                             <FormControl>
                                                 <Input placeholder="Ej: AA-123-BB" {...field} autoComplete="off" />
                                             </FormControl>
@@ -216,7 +253,7 @@ export default function TransportistaFormPage() {
                                     name="trailerLicensePlate"
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel>Matrícula Remolque (Opcional)</FormLabel>
+                                            <FormLabel className="md:text-base">Matrícula Remolque (Opcional)</FormLabel>
                                             <FormControl>
                                                 <Input placeholder="Ej: R-456-CC" {...field} autoComplete="off" />
                                             </FormControl>
@@ -229,7 +266,7 @@ export default function TransportistaFormPage() {
                                     name="purposeOfVisit"
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel>Motivo de la visita</FormLabel>
+                                            <FormLabel className="md:text-base">Motivo de la visita</FormLabel>
                                             <FormControl>
                                                 <Input placeholder="Ej: Entrega de mercancía" {...field} autoComplete="off" />
                                             </FormControl>
@@ -242,7 +279,7 @@ export default function TransportistaFormPage() {
                                     name="hostName"
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel>Persona a visitar</FormLabel>
+                                            <FormLabel className="md:text-base">Persona a visitar</FormLabel>
                                             <Select onValueChange={(value) => {
                                                 field.onChange(value);
                                                 const selectedHost = hosts.find(h => h.name === value);
@@ -272,7 +309,7 @@ export default function TransportistaFormPage() {
                                     name="department"
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel>Departamento</FormLabel>
+                                            <FormLabel className="md:text-base">Departamento</FormLabel>
                                             <FormControl>
                                                 <Input placeholder="Departamento" {...field} disabled />
                                             </FormControl>
@@ -293,7 +330,7 @@ export default function TransportistaFormPage() {
                                         </FormControl>
                                         <div className="space-y-1 leading-none">
                                         <AlertDialogTrigger asChild>
-                                            <FormLabel className="cursor-pointer hover:underline">
+                                            <FormLabel className="cursor-pointer hover:underline md:text-base">
                                                 He leído y acepto la Política de tratamiento de datos.
                                             </FormLabel>
                                         </AlertDialogTrigger>
