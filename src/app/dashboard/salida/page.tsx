@@ -26,7 +26,7 @@ import { useRouter } from "next/navigation";
 import { useFirestore } from "@/firebase";
 import { collection, getDocs, query, where, updateDoc, doc } from "firebase/firestore";
 import { useLanguage, getZodSchema } from "@/context/language-context";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 
 export default function SalidaPage() {
     const { t } = useLanguage();
@@ -41,9 +41,15 @@ export default function SalidaPage() {
         },
     });
 
+    const isInitialRender = useRef(true);
+    // Re-validate on language change, but skip the first render.
     useEffect(() => {
+        if (isInitialRender.current) {
+            isInitialRender.current = false;
+            return;
+        }
         form.trigger();
-    }, [t, form]);
+    }, [t]);
 
     async function onSubmit(values: z.infer<typeof formSchema>) {
         if (!db) {

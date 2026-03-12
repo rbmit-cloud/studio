@@ -41,7 +41,7 @@ import {
     AlertDialogTitle,
     AlertDialogTrigger,
   } from "@/components/ui/alert-dialog";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useFirestore } from "@/firebase";
 import { addDoc, collection, getDocs, limit, onSnapshot, orderBy, query, where } from "firebase/firestore";
 import type { Host } from "@/lib/types";
@@ -123,10 +123,15 @@ export default function PersonalFormPage() {
         },
     });
 
-    // Re-validate on language change
+    const isInitialRender = useRef(true);
+    // Re-validate on language change, but skip the first render.
     useEffect(() => {
+        if (isInitialRender.current) {
+            isInitialRender.current = false;
+            return;
+        }
         form.trigger();
-    }, [t, form]);
+    }, [t]);
 
     const privacyPolicyAccepted = form.watch('privacyPolicy');
 
