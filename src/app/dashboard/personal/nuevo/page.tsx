@@ -162,10 +162,6 @@ export default function PersonalFormPage() {
                         form.setValue('department', selectedHost.department || '', { shouldValidate: true });
                     }
                 }
-                 toast({
-                    title: "Visitante Encontrado",
-                    description: "Se han autocompletado los datos de la última visita.",
-                });
             }
         } catch (error) {
             console.error("Error searching for previous visit:", error);
@@ -230,7 +226,7 @@ export default function PersonalFormPage() {
     return (
         <div className="flex justify-center">
             <AlertDialog>
-                <Card className="w-full max-w-2xl">
+                <Card className="w-full max-w-lg">
                     <Form {...form}>
                         <form onSubmit={form.handleSubmit(onSubmit)}>
                             <CardHeader>
