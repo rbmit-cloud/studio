@@ -3,6 +3,7 @@ import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
 import { cn } from '@/lib/utils';
 import { FirebaseClientProvider } from '@/firebase/client-provider';
+import { LanguageProvider } from '@/context/language-context';
 
 export const metadata: Metadata = {
   title: 'ROBAMA',
@@ -23,7 +24,9 @@ export default function RootLayout({
       </head>
       <body className={cn("min-h-screen bg-background font-sans antialiased", "font-body")}>
         <FirebaseClientProvider>
-          {children}
+          <LanguageProvider>
+            {children}
+          </LanguageProvider>
         </FirebaseClientProvider>
         <Toaster />
       </body>

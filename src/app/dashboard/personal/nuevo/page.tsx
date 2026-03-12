@@ -45,21 +45,12 @@ import { useEffect, useState } from "react";
 import { useFirestore } from "@/firebase";
 import { addDoc, collection, getDocs, limit, onSnapshot, orderBy, query, where } from "firebase/firestore";
 import type { Host } from "@/lib/types";
-
-const formSchema = z.object({
-  visitorName: z.string().min(2, "El nombre y apellidos deben tener al menos 2 caracteres."),
-  companyName: z.string().min(2, "La empresa debe tener al menos 2 caracteres."),
-  purposeOfVisit: z.string(),
-  hostName: z.string({
-    required_error: "Debe seleccionar una persona a visitar.",
-  }),
-  department: z.string().optional(),
-  privacyPolicy: z.boolean().refine(val => val === true, {
-    message: "Debe aceptar la política de tratamiento de datos.",
-  }),
-});
+import { useLanguage, getZodSchema } from "@/context/language-context";
 
 export default function PersonalFormPage() {
+    const { t } = useLanguage();
+    const formSchema = getZodSchema(t).personal;
+
     const [isClient, setIsClient] = useState(false);
     const db = useFirestore();
     const router = useRouter();
@@ -78,8 +69,8 @@ export default function PersonalFormPage() {
             clearTimeout(inactivityTimer);
             inactivityTimer = setTimeout(() => {
                 toast({
-                    title: "Sesión inactiva",
-                    description: "Regresando a la pantalla principal.",
+                    title: t('sessionInactive'),
+                    description: t('redirectingToMain'),
                 });
                 router.push('/');
             }, 5 * 60 * 1000); // 5 minutes
@@ -103,7 +94,7 @@ export default function PersonalFormPage() {
                 window.removeEventListener(event, handleActivity);
             });
         };
-    }, [isClient, router]);
+    }, [isClient, router, t]);
 
     useEffect(() => {
         if (!db) return;
@@ -131,6 +122,11 @@ export default function PersonalFormPage() {
             privacyPolicy: false,
         },
     });
+
+    // Re-validate on language change
+    useEffect(() => {
+        form.trigger();
+    }, [t, form]);
 
     const privacyPolicyAccepted = form.watch('privacyPolicy');
 
@@ -171,8 +167,8 @@ export default function PersonalFormPage() {
     async function onSubmit(values: z.infer<typeof formSchema>) {
         if (!db) {
             toast({
-                title: "Error",
-                description: "La base de datos no está disponible.",
+                title: t('dbError'),
+                description: t('dbUnavailable'),
                 variant: "destructive"
             });
             return;
@@ -187,8 +183,8 @@ export default function PersonalFormPage() {
 
             if (activeVisits.length > 0) {
                 toast({
-                    title: "Visita Activa",
-                    description: `Ya existe una entrada activa para ${values.visitorName}. Debe registrar la salida antes de volver a entrar.`,
+                    title: t('activeVisitTitle'),
+                    description: t('activeVisitError', { visitorName: values.visitorName }),
                     variant: "destructive",
                 });
                 return;
@@ -202,8 +198,8 @@ export default function PersonalFormPage() {
             });
 
             toast({
-                title: "Bienvenido/a a Robama",
-                description: `El registro de ${values.visitorName} se ha completado.`,
+                title: t('welcomeMessage'),
+                description: t('registrationComplete', { visitorName: values.visitorName }),
             });
             form.reset();
             setTimeout(() => {
@@ -212,8 +208,8 @@ export default function PersonalFormPage() {
         } catch (error) {
             console.error("Error adding document: ", error);
             toast({
-                title: "Error al registrar",
-                description: "Ocurrió un error al guardar la visita. Por favor, inténtelo de nuevo.",
+                title: t('registrationError'),
+                description: t('registrationErrorDescription'),
                 variant: "destructive"
             });
         }
@@ -224,14 +220,14 @@ export default function PersonalFormPage() {
     }
 
     return (
-        <div className="flex justify-center">
+        <div className="flex justify-center w-full">
             <AlertDialog>
-                <Card className="w-full max-w-lg">
+                <Card className="w-full max-w-2xl">
                     <Form {...form}>
                         <form onSubmit={form.handleSubmit(onSubmit)}>
                             <CardHeader>
-                                <CardTitle className="text-2xl md:text-3xl">Registro de Visita Personal</CardTitle>
-                                <CardDescription className="md:text-base">Complete los datos para registrar la entrada del visitante.</CardDescription>
+                                <CardTitle className="text-2xl md:text-3xl">{t('personalVisitRegistration')}</CardTitle>
+                                <CardDescription className="md:text-base">{t('personalVisitDescription')}</CardDescription>
                             </CardHeader>
                             <CardContent className="grid gap-4">
                                 <FormField
@@ -239,10 +235,10 @@ export default function PersonalFormPage() {
                                     name="visitorName"
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel className="md:text-base">Nombre y Apellidos</FormLabel>
+                                            <FormLabel className="md:text-base">{t('fullName')}</FormLabel>
                                             <FormControl>
                                                 <Input 
-                                                    placeholder="Ej: Ana Gómez" 
+                                                    placeholder={t('fullNamePlaceholder')} 
                                                     {...field}
                                                     onBlur={(e) => {
                                                         field.onBlur(e);
@@ -260,9 +256,9 @@ export default function PersonalFormPage() {
                                     name="companyName"
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel className="md:text-base">Empresa</FormLabel>
+                                            <FormLabel className="md:text-base">{t('company')}</FormLabel>
                                             <FormControl>
-                                                <Input placeholder="Ej: Soluciones Tech" {...field} autoComplete="off" />
+                                                <Input placeholder={t('companyPlaceholder')} {...field} autoComplete="off" />
                                             </FormControl>
                                             <FormMessage />
                                         </FormItem>
@@ -273,7 +269,7 @@ export default function PersonalFormPage() {
                                     name="hostName"
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel className="md:text-base">Persona a visitar</FormLabel>
+                                            <FormLabel className="md:text-base">{t('personToVisit')}</FormLabel>
                                             <Select onValueChange={(value) => {
                                                 field.onChange(value);
                                                 const selectedHost = hosts.find(h => h.name === value);
@@ -283,7 +279,7 @@ export default function PersonalFormPage() {
                                             }} value={field.value}>
                                                 <FormControl>
                                                     <SelectTrigger>
-                                                        <SelectValue placeholder="Seleccione una persona" />
+                                                        <SelectValue placeholder={t('selectPerson')} />
                                                     </SelectTrigger>
                                                 </FormControl>
                                                 <SelectContent>
@@ -303,9 +299,9 @@ export default function PersonalFormPage() {
                                     name="department"
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel className="md:text-base">Departamento</FormLabel>
+                                            <FormLabel className="md:text-base">{t('department')}</FormLabel>
                                             <FormControl>
-                                                <Input placeholder="Departamento" {...field} disabled />
+                                                <Input placeholder={t('departmentPlaceholder')} {...field} disabled />
                                             </FormControl>
                                             <FormMessage />
                                         </FormItem>
@@ -316,7 +312,7 @@ export default function PersonalFormPage() {
                                     name="purposeOfVisit"
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel className="md:text-base">Motivo de la visita</FormLabel>
+                                            <FormLabel className="md:text-base">{t('purposeOfVisit')}</FormLabel>
                                             <FormControl>
                                                 <Input {...field} autoComplete="off" />
                                             </FormControl>
@@ -338,7 +334,7 @@ export default function PersonalFormPage() {
                                         <div className="space-y-1 leading-none">
                                         <AlertDialogTrigger asChild>
                                             <FormLabel className="cursor-pointer hover:underline md:text-base">
-                                                He leído y acepto la Política de tratamiento de datos.
+                                                {t('privacyPolicy')}
                                             </FormLabel>
                                         </AlertDialogTrigger>
                                         <FormMessage />
@@ -348,9 +344,9 @@ export default function PersonalFormPage() {
                                 />
                             </CardContent>
                             <CardFooter className="flex justify-end gap-2">
-                                <Button type="button" variant="outline" onClick={() => router.back()}>Cancelar</Button>
+                                <Button type="button" variant="outline" onClick={() => router.back()}>{t('cancel')}</Button>
                                 <Button type="submit" disabled={form.formState.isSubmitting || !privacyPolicyAccepted}>
-                                    {form.formState.isSubmitting ? 'Registrando...' : 'Registrar Entrada'}
+                                    {form.formState.isSubmitting ? t('registering') : t('registerEntry')}
                                 </Button>
                             </CardFooter>
                         </form>
@@ -358,13 +354,13 @@ export default function PersonalFormPage() {
                 </Card>
                 <AlertDialogContent>
                     <AlertDialogHeader>
-                        <AlertDialogTitle>Política de Tratamiento de Datos</AlertDialogTitle>
+                        <AlertDialogTitle>{t('privacyPolicyTitle')}</AlertDialogTitle>
                         <AlertDialogDescription className="text-foreground max-h-[60vh] overflow-y-auto">
-                        En cumplimiento del artículo 13 del Reglamento General de Protección de Datos (Reglamento UE 2016/679), y del artículo 11 de la Ley Orgánica de Protección de Datos Personales y garantía de los Derechos digitales (LO 3/2018), S.A. ROBAMA, le informa que sus datos serán tratados para el registro y control de las visitas que accedan a las instalaciones. La base jurídica del tratamiento es el interés legítimo. Los datos se conservarán durante el tiempo necesario para cumplir con la finalidad anteriormente descrita. Los datos no serán cedidos a terceros salvo existencia de obligación legal. Podrá ejercitar sus derechos de acceso, rectificación, supresión, limitación del tratamiento, oposición, oposición a decisiones individuales automatizadas, incluida la elaboración de perfiles o la portabilidad de sus datos dirigiéndose a info@robama.com. En todo caso, puede recabar la tutela de las autoridades de protección de datos.
+                        {t('privacyPolicyContent')}
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
-                        <AlertDialogAction>Cerrar</AlertDialogAction>
+                        <AlertDialogAction>{t('close')}</AlertDialogAction>
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>

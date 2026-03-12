@@ -25,12 +25,12 @@ import {
 import { useRouter } from "next/navigation";
 import { useFirestore } from "@/firebase";
 import { collection, getDocs, query, where, updateDoc, doc } from "firebase/firestore";
-
-const formSchema = z.object({
-  visitorName: z.string().min(2, "El nombre y apellidos deben tener al menos 2 caracteres."),
-});
+import { useLanguage, getZodSchema } from "@/context/language-context";
+import { useEffect } from "react";
 
 export default function SalidaPage() {
+    const { t } = useLanguage();
+    const formSchema = getZodSchema(t).salida;
     const db = useFirestore();
     const router = useRouter();
     
@@ -41,11 +41,15 @@ export default function SalidaPage() {
         },
     });
 
+    useEffect(() => {
+        form.trigger();
+    }, [t, form]);
+
     async function onSubmit(values: z.infer<typeof formSchema>) {
         if (!db) {
             toast({
-                title: "Error",
-                description: "La base de datos no está disponible.",
+                title: t('dbError'),
+                description: t('dbUnavailable'),
                 variant: "destructive"
             });
             return;
@@ -63,8 +67,8 @@ export default function SalidaPage() {
 
             if (activeVisits.length === 0) {
                 toast({
-                    title: "Entrada no registrada",
-                    description: "No se encontró una entrada activa para este visitante.",
+                    title: t('exitRegistrationErrorTitle'),
+                    description: t('exitRegistrationErrorDescription'),
                     variant: "destructive",
                 });
                 return;
@@ -80,8 +84,8 @@ export default function SalidaPage() {
             });
 
             toast({
-                title: "Gracias por su visita",
-                description: `Se ha registrado la salida para ${visitToUpdate.data().visitorName}.`,
+                title: t('exitSuccessTitle'),
+                description: t('exitSuccessDescription', { visitorName: visitToUpdate.data().visitorName }),
             });
             form.reset();
             setTimeout(() => {
@@ -91,8 +95,8 @@ export default function SalidaPage() {
         } catch (error) {
             console.error("Error updating document: ", error);
             toast({
-                title: "Error al registrar salida",
-                description: "Ocurrió un error al guardar la salida. Por favor, inténtelo de nuevo.",
+                title: t('registrationError'),
+                description: t('registrationErrorDescription'),
                 variant: "destructive"
             });
         }
@@ -104,9 +108,9 @@ export default function SalidaPage() {
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)}>
                         <CardHeader>
-                            <CardTitle>Registrar Salida</CardTitle>
+                            <CardTitle>{t('registerExitTitle')}</CardTitle>
                             <CardDescription>
-                                Ingrese el nombre y apellidos del visitante para registrar su salida.
+                                {t('registerExitDescription')}
                             </CardDescription>
                         </CardHeader>
                         <CardContent>
@@ -115,9 +119,9 @@ export default function SalidaPage() {
                                 name="visitorName"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>Nombre y Apellidos</FormLabel>
+                                        <FormLabel>{t('fullName')}</FormLabel>
                                         <FormControl>
-                                            <Input placeholder="Ej: Juan Pérez" {...field} autoComplete="off" />
+                                            <Input placeholder={t('exitFullNamePlaceholder')} {...field} autoComplete="off" />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
@@ -125,9 +129,9 @@ export default function SalidaPage() {
                             />
                         </CardContent>
                         <CardFooter className="flex justify-end gap-2">
-                            <Button type="button" variant="outline" onClick={() => router.back()}>Cancelar</Button>
+                            <Button type="button" variant="outline" onClick={() => router.back()}>{t('cancel')}</Button>
                             <Button type="submit" disabled={form.formState.isSubmitting}>
-                                {form.formState.isSubmitting ? 'Registrando...' : 'Registrar Salida'}
+                                {form.formState.isSubmitting ? t('registering') : t('registerExitButton')}
                             </Button>
                         </CardFooter>
                     </form>

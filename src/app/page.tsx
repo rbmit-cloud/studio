@@ -29,6 +29,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useLanguage } from '@/context/language-context';
 
 
 export default function Home() {
@@ -39,6 +40,7 @@ export default function Home() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loginDestination, setLoginDestination] = useState<string>('');
+  const { setLanguage, t } = useLanguage();
 
   const handleLogin = async () => {
     if (!auth) {
@@ -117,8 +119,8 @@ export default function Home() {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuItem>EN</DropdownMenuItem>
-            <DropdownMenuItem>ES</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setLanguage('en')}>EN</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setLanguage('es')}>ES</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
@@ -129,16 +131,16 @@ export default function Home() {
         <Dialog open={open} onOpenChange={handleCloseDialog}>
             <DialogContent className="sm:max-w-[425px]">
                 <DialogHeader>
-                    <DialogTitle>Acceso Restringido</DialogTitle>
+                    <DialogTitle>{t('restrictedAccess')}</DialogTitle>
                     <DialogDescription>
-                    Ingrese sus credenciales para acceder a esta sección.
+                    {t('enterCredentials')}
                     </DialogDescription>
                 </DialogHeader>
                 <form onSubmit={(e) => { e.preventDefault(); handleLogin(); }}>
                     <div className="grid gap-4 py-4">
                         <div className="grid grid-cols-4 items-center gap-4">
                         <Label htmlFor="email" className="text-right">
-                            Correo Electrónico
+                            {t('email')}
                         </Label>
                         <Input
                             id="email"
@@ -151,7 +153,7 @@ export default function Home() {
                         </div>
                         <div className="grid grid-cols-4 items-center gap-4">
                         <Label htmlFor="password"className="text-right">
-                            Contraseña
+                            {t('password')}
                         </Label>
                         <Input
                             id="password"
@@ -164,7 +166,7 @@ export default function Home() {
                         </div>
                     </div>
                     <DialogFooter>
-                        <Button type="submit">Iniciar Sesión</Button>
+                        <Button type="submit">{t('login')}</Button>
                     </DialogFooter>
                 </form>
             </DialogContent>
@@ -177,7 +179,7 @@ export default function Home() {
             <CardContent className="p-0">
               <Link href="/dashboard/personal/nuevo" className="flex flex-col items-center justify-center h-64 p-6 text-center rounded-lg active:bg-destructive active:text-destructive-foreground">
                 <User className="w-20 h-20 mb-4" />
-                <h2 className="text-2xl font-semibold">Entrada Personal</h2>
+                <h2 className="text-2xl font-semibold">{t('personalEntry')}</h2>
               </Link>
             </CardContent>
           </Card>
@@ -185,7 +187,7 @@ export default function Home() {
             <CardContent className="p-0">
               <Link href="/dashboard/transportista/nuevo" className="flex flex-col items-center justify-center h-64 p-6 text-center rounded-lg active:bg-info active:text-info-foreground">
                 <Truck className="w-20 h-20 mb-4 text-primary" />
-                <h2 className="text-2xl font-semibold text-card-foreground">Entrada Transportista</h2>
+                <h2 className="text-2xl font-semibold text-card-foreground">{t('transporterEntry')}</h2>
               </Link>
             </CardContent>
           </Card>
@@ -193,7 +195,7 @@ export default function Home() {
             <CardContent className="p-0">
               <Link href="/dashboard/salida" className="flex flex-col items-center justify-center h-64 p-6 text-center rounded-lg active:bg-warning active:text-warning-foreground">
                 <LogOut className="w-20 h-20 mb-4 text-primary" />
-                <h2 className="text-2xl font-semibold text-card-foreground">Registrar Salida</h2>
+                <h2 className="text-2xl font-semibold text-card-foreground">{t('registerExit')}</h2>
               </Link>
             </CardContent>
           </Card>
@@ -201,10 +203,10 @@ export default function Home() {
         
         <div className="flex items-center justify-center gap-4 mt-6">
             <Button variant="outline" onClick={() => handleOpenDialog('/dashboard/registros')}>
-              Ver Registro de Visitas
+              {t('viewVisitLog')}
             </Button>
             <Button variant="outline" onClick={() => handleOpenDialog('/admin')}>
-                Administración
+                {t('administration')}
             </Button>
         </div>
       </div>
