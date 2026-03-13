@@ -58,10 +58,13 @@ export async function sendEmailReport(visits: (Visitor & { id: string })[], repo
         
         // 1. Get hosts who want to receive reports
         const hostsRef = collection(db, "hosts");
-        const q = query(hostsRef, where("sendRecords", "==", true), where("email", "!=", ""));
+        const q = query(hostsRef, where("sendRecords", "==", true));
         const querySnapshot = await getDocs(q);
 
-        const hostsToSend = querySnapshot.docs.map(doc => doc.data() as Host);
+        const hostsToSend = querySnapshot.docs
+            .map(doc => doc.data() as Host)
+            .filter(host => host.email && host.email.trim() !== '');
+
 
         if (hostsToSend.length === 0) {
             return { success: true, message: 'No hay anfitriones configurados para recibir correos.' };
@@ -125,6 +128,10 @@ export async function sendEmailReport(visits: (Visitor & { id: string })[], repo
         return { success: true, message: `Informe enviado a ${hostsToSend.length} anfitriones.` };
     } catch (error: any) {
         console.error('Error sending email report:', error);
+
+        if (error.code === 'firestore/failed-precondition') {
+            return { success: false, message: 'La consulta requiere un índice de Firestore. Por favor, revise los registros para crear el índice necesario.' };
+        }
         
         if (error instanceof FirebaseError && 
             (error.code === 'auth/invalid-credential' || error.code === 'auth/wrong-password' || error.code === 'auth/user-not-found' || error.code === 'auth/invalid-email')) {
