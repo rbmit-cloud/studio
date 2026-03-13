@@ -220,8 +220,8 @@ export default function AjustesPage() {
         'Nombre': host.name,
         'Departamento': host.department,
         'Email': host.email,
-        'Recibir Registros': host.sendRecords ? 'Sí' : 'No',
         'Recibir Notif. Entrada': host.sendEntryNotification ? 'Sí' : 'No',
+        'Recibir Registros': host.sendRecords ? 'Sí' : 'No',
     }));
     
     const worksheet = XLSX.utils.json_to_sheet(dataToExport);
@@ -281,28 +281,6 @@ export default function AjustesPage() {
               />
               <FormField
                 control={form.control}
-                name="sendRecords"
-                render={({ field }) => (
-                  <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4 shadow-sm">
-                    <FormControl>
-                      <Checkbox
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                      />
-                    </FormControl>
-                    <div className="space-y-1 leading-none">
-                      <FormLabel>
-                        Recibir Registros
-                      </FormLabel>
-                      <FormDescription>
-                        Si está marcado, se recibirán informes de visitas por correo electrónico
-                      </FormDescription>
-                    </div>
-                  </FormItem>
-                )}
-              />
-               <FormField
-                control={form.control}
                 name="sendEntryNotification"
                 render={({ field }) => (
                   <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4 shadow-sm">
@@ -318,6 +296,28 @@ export default function AjustesPage() {
                       </FormLabel>
                       <FormDescription>
                         Si está marcado, se recibirá un email cuando un visitante se registre para verle.
+                      </FormDescription>
+                    </div>
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="sendRecords"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4 shadow-sm">
+                    <FormControl>
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                    <div className="space-y-1 leading-none">
+                      <FormLabel>
+                        Recibir Registros
+                      </FormLabel>
+                      <FormDescription>
+                        Si está marcado, se recibirán informes de visitas por correo electrónico
                       </FormDescription>
                     </div>
                   </FormItem>
@@ -357,8 +357,8 @@ export default function AjustesPage() {
                 <TableHead>Nombre</TableHead>
                 <TableHead>Departamento</TableHead>
                 <TableHead className="hidden sm:table-cell">Email</TableHead>
-                <TableHead>Recibir Registros</TableHead>
                 <TableHead>Notif. Entrada</TableHead>
+                <TableHead>Recibir Registros</TableHead>
                 <TableHead className="text-right">Acción</TableHead>
               </TableRow>
             </TableHeader>
@@ -378,8 +378,8 @@ export default function AjustesPage() {
                     </TableCell>
                     <TableCell>{host.department}</TableCell>
                     <TableCell className="hidden sm:table-cell">{host.email}</TableCell>
-                    <TableCell>{host.sendRecords ? 'Sí' : 'No'}</TableCell>
                     <TableCell>{host.sendEntryNotification ? 'Sí' : 'No'}</TableCell>
+                    <TableCell>{host.sendRecords ? 'Sí' : 'No'}</TableCell>
                     <TableCell className="text-right">
                         <AlertDialog>
                             <AlertDialogTrigger asChild>
