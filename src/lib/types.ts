@@ -22,4 +22,5 @@ export type Host = {
   name: string;
   department?: string;
   email?: string;
+  sendRecords?: boolean;
 };

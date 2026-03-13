@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -41,11 +42,13 @@ import {
 } from "@/components/ui/alert-dialog";
 import { cn } from "@/lib/utils";
 import * as XLSX from 'xlsx';
+import { Checkbox } from "@/components/ui/checkbox";
 
 const formSchema = z.object({
   name: z.string().min(2, "El nombre debe tener al menos 2 caracteres."),
   department: z.string().optional(),
   email: z.string().email("Debe ser un correo electrónico válido.").or(z.literal("")).optional(),
+  sendRecords: z.boolean().default(false).optional(),
 });
 
 
@@ -61,6 +64,7 @@ export default function AjustesPage() {
       name: "",
       department: "",
       email: "",
+      sendRecords: false,
     },
   });
 
@@ -92,12 +96,13 @@ export default function AjustesPage() {
         name: "",
         department: "",
         email: "",
+        sendRecords: false,
     });
   };
 
   const handleSelectHost = (host: Host) => {
     setSelectedHost(host);
-    form.reset({ ...host, email: host.email || '' });
+    form.reset({ ...host, email: host.email || '', sendRecords: host.sendRecords || false });
   };
 
 
@@ -144,6 +149,7 @@ export default function AjustesPage() {
         name: values.name,
         department: values.department || "",
         email: values.email || "",
+        sendRecords: values.sendRecords || false,
       };
 
       if (selectedHost) {
@@ -210,6 +216,7 @@ export default function AjustesPage() {
         'Nombre': host.name,
         'Departamento': host.department,
         'Email': host.email,
+        'Enviar Registros': host.sendRecords ? 'Sí' : 'No',
     }));
     
     const worksheet = XLSX.utils.json_to_sheet(dataToExport);
@@ -267,6 +274,28 @@ export default function AjustesPage() {
                   </FormItem>
                 )}
               />
+              <FormField
+                control={form.control}
+                name="sendRecords"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4 shadow-sm">
+                    <FormControl>
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                    <div className="space-y-1 leading-none">
+                      <FormLabel>
+                        Enviar Registros
+                      </FormLabel>
+                      <FormDescription>
+                        Si está marcado, se enviarán informes de visitas por correo electrónico a este anfitrión.
+                      </FormDescription>
+                    </div>
+                  </FormItem>
+                )}
+              />
             </CardContent>
             <CardFooter className="flex justify-between">
                 <Button type="submit" disabled={form.formState.isSubmitting}>
@@ -301,6 +330,7 @@ export default function AjustesPage() {
                 <TableHead>Nombre</TableHead>
                 <TableHead>Departamento</TableHead>
                 <TableHead className="hidden sm:table-cell">Email</TableHead>
+                <TableHead>Enviar Registros</TableHead>
                 <TableHead className="text-right">Acción</TableHead>
               </TableRow>
             </TableHeader>
@@ -320,6 +350,7 @@ export default function AjustesPage() {
                     </TableCell>
                     <TableCell>{host.department}</TableCell>
                     <TableCell className="hidden sm:table-cell">{host.email}</TableCell>
+                    <TableCell>{host.sendRecords ? 'Sí' : 'No'}</TableCell>
                     <TableCell className="text-right">
                         <AlertDialog>
                             <AlertDialogTrigger asChild>
@@ -347,7 +378,7 @@ export default function AjustesPage() {
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={4} className="h-24 text-center">
+                  <TableCell colSpan={5} className="h-24 text-center">
                     No hay anfitriones registrados.
                   </TableCell>
                 </TableRow>
