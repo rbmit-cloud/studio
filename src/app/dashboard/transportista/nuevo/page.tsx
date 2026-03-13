@@ -235,7 +235,7 @@ export default function TransportistaFormPage() {
                                                     placeholder={t('transporterFullNamePlaceholder')} 
                                                     {...field}
                                                     onBlur={(e) => {
-                                                        field.onBlur(e);
+                                                        field.onBlur();
                                                         findPreviousVisit(e.target.value);
                                                     }}
                                                     autoComplete="off" 
