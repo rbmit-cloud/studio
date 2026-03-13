@@ -14,8 +14,6 @@ const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-const resend = new Resend(process.env.RESEND_API_KEY);
-
 async function ensureAuthenticated() {
     // Check if we're already signed in as the service user
     if (auth.currentUser?.email === process.env.FIREBASE_SERVICE_EMAIL) {
@@ -40,6 +38,8 @@ export async function sendEmailReport(visits: (Visitor & { id: string })[], repo
      if (!process.env.RESEND_FROM_EMAIL) {
         return { success: false, message: 'Resend "from" email is not configured.' };
     }
+
+    const resend = new Resend(process.env.RESEND_API_KEY);
 
     try {
         await ensureAuthenticated();
