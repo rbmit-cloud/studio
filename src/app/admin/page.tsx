@@ -220,7 +220,7 @@ export default function AjustesPage() {
         'Nombre': host.name,
         'Departamento': host.department,
         'Email': host.email,
-        'Enviar Registros': host.sendRecords ? 'Sí' : 'No',
+        'Recibir Registros': host.sendRecords ? 'Sí' : 'No',
         'Recibir Notif. Entrada': host.sendEntryNotification ? 'Sí' : 'No',
     }));
     
@@ -292,7 +292,7 @@ export default function AjustesPage() {
                     </FormControl>
                     <div className="space-y-1 leading-none">
                       <FormLabel>
-                        Enviar Registros
+                        Recibir Registros
                       </FormLabel>
                       <FormDescription>
                         Si está marcado, se enviarán informes de visitas por correo electrónico a este anfitrión.
@@ -357,7 +357,7 @@ export default function AjustesPage() {
                 <TableHead>Nombre</TableHead>
                 <TableHead>Departamento</TableHead>
                 <TableHead className="hidden sm:table-cell">Email</TableHead>
-                <TableHead>Enviar Registros</TableHead>
+                <TableHead>Recibir Registros</TableHead>
                 <TableHead>Notif. Entrada</TableHead>
                 <TableHead className="text-right">Acción</TableHead>
               </TableRow>
