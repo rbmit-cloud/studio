@@ -70,6 +70,15 @@ export default function AjustesPage() {
     },
   });
 
+  const emailValue = form.watch('email');
+
+  useEffect(() => {
+    if (!emailValue) {
+        form.setValue('sendEntryNotification', false);
+        form.setValue('sendRecords', false);
+    }
+  }, [emailValue, form]);
+
   useEffect(() => {
     if (!db) return;
 
@@ -288,6 +297,7 @@ export default function AjustesPage() {
                       <Checkbox
                         checked={field.value}
                         onCheckedChange={field.onChange}
+                        disabled={!emailValue}
                       />
                     </FormControl>
                     <div className="space-y-1 leading-none">
@@ -310,6 +320,7 @@ export default function AjustesPage() {
                       <Checkbox
                         checked={field.value}
                         onCheckedChange={field.onChange}
+                        disabled={!emailValue}
                       />
                     </FormControl>
                     <div className="space-y-1 leading-none">
