@@ -61,6 +61,42 @@ export default function TransportistaFormPage() {
     }, []);
 
     useEffect(() => {
+        if (!isClient) return;
+
+        let inactivityTimer: NodeJS.Timeout;
+
+        const resetInactivityTimer = () => {
+            clearTimeout(inactivityTimer);
+            inactivityTimer = setTimeout(() => {
+                toast({
+                    title: t('sessionInactive'),
+                    description: t('redirectingToMain'),
+                });
+                router.push('/');
+            }, 1 * 60 * 1000); // 1 minute
+        };
+
+        const activityEvents = ['mousemove', 'mousedown', 'keydown', 'touchstart', 'scroll'];
+        
+        const handleActivity = () => {
+            resetInactivityTimer();
+        };
+
+        activityEvents.forEach(event => {
+            window.addEventListener(event, handleActivity);
+        });
+
+        resetInactivityTimer(); // Start the timer on mount
+
+        return () => {
+            clearTimeout(inactivityTimer);
+            activityEvents.forEach(event => {
+                window.removeEventListener(event, handleActivity);
+            });
+        };
+    }, [isClient, router, t]);
+
+    useEffect(() => {
         if (!db) return;
     
         const q = query(collection(db, 'hosts'), orderBy('name', 'asc'));
@@ -148,14 +184,14 @@ export default function TransportistaFormPage() {
                  return;
              }
 
-            const { privacyPolicy, ...rest } = values;
+            const { privacyPolicy, licensePlate, trailerLicensePlate, ...rest } = values;
             await addDoc(collection(db, "visits"), {
                 ...rest,
                 entryType: 'Transportista',
                 entryDateTime: new Date().toISOString(),
                 vehicleDetails: {
-                    licensePlate: values.licensePlate,
-                    trailerLicensePlate: values.trailerLicensePlate
+                    licensePlate: licensePlate,
+                    trailerLicensePlate: trailerLicensePlate
                 }
             });
 

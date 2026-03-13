@@ -26,13 +26,54 @@ import { useRouter } from "next/navigation";
 import { useFirestore } from "@/firebase";
 import { collection, getDocs, query, where, updateDoc, doc } from "firebase/firestore";
 import { useLanguage, getZodSchema } from "@/context/language-context";
-import { useMemo } from "react";
+import { useMemo, useEffect, useState } from "react";
 
 export default function SalidaPage() {
     const { t } = useLanguage();
     const formSchema = useMemo(() => getZodSchema(t).salida, [t]);
     const db = useFirestore();
     const router = useRouter();
+    const [isClient, setIsClient] = useState(false);
+
+    useEffect(() => {
+        setIsClient(true);
+    }, []);
+
+    useEffect(() => {
+        if (!isClient) return;
+
+        let inactivityTimer: NodeJS.Timeout;
+
+        const resetInactivityTimer = () => {
+            clearTimeout(inactivityTimer);
+            inactivityTimer = setTimeout(() => {
+                toast({
+                    title: t('sessionInactive'),
+                    description: t('redirectingToMain'),
+                });
+                router.push('/');
+            }, 1 * 60 * 1000); // 1 minute
+        };
+
+        const activityEvents = ['mousemove', 'mousedown', 'keydown', 'touchstart', 'scroll'];
+        
+        const handleActivity = () => {
+            resetInactivityTimer();
+        };
+
+        activityEvents.forEach(event => {
+            window.addEventListener(event, handleActivity);
+        });
+
+        resetInactivityTimer(); // Start the timer on mount
+
+        return () => {
+            clearTimeout(inactivityTimer);
+            activityEvents.forEach(event => {
+                window.removeEventListener(event, handleActivity);
+            });
+        };
+    }, [isClient, router, t]);
     
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -97,6 +138,10 @@ export default function SalidaPage() {
                 variant: "destructive"
             });
         }
+    }
+
+    if (!isClient) {
+        return null;
     }
 
     return (
