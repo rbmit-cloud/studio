@@ -36,7 +36,7 @@ export default function SalidaPage() {
     
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
-        mode: "onTouched",
+        mode: "onSubmit",
         defaultValues: {
             visitorName: "",
         },

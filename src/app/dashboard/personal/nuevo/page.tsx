@@ -114,11 +114,12 @@ export default function PersonalFormPage() {
     
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
-        mode: "onTouched",
+        mode: "onSubmit",
         defaultValues: {
             visitorName: "",
             companyName: "",
             purposeOfVisit: "",
+            hostName: undefined,
             department: "",
             privacyPolicy: false,
         },
@@ -144,14 +145,14 @@ export default function PersonalFormPage() {
                 const lastVisit = querySnapshot.docs[0].data();
                 
                 if (lastVisit.companyName) {
-                    form.setValue("companyName", lastVisit.companyName, { shouldValidate: true });
+                    form.setValue("companyName", lastVisit.companyName);
                 }
                 if (lastVisit.hostName) {
-                    form.setValue("hostName", lastVisit.hostName, { shouldValidate: true });
+                    form.setValue("hostName", lastVisit.hostName);
                     
                     const selectedHost = hosts.find(h => h.name === lastVisit.hostName);
                     if (selectedHost) {
-                        form.setValue('department', selectedHost.department || '', { shouldValidate: true });
+                        form.setValue('department', selectedHost.department || '');
                     }
                 }
             }
@@ -270,7 +271,7 @@ export default function PersonalFormPage() {
                                                 field.onChange(value);
                                                 const selectedHost = hosts.find(h => h.name === value);
                                                 if (selectedHost) {
-                                                    form.setValue('department', selectedHost.department || '', { shouldValidate: true });
+                                                    form.setValue('department', selectedHost.department || '');
                                                 }
                                             }} value={field.value}>
                                                 <FormControl>

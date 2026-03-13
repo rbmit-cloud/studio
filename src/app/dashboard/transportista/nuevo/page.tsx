@@ -78,13 +78,14 @@ export default function TransportistaFormPage() {
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
-        mode: "onTouched",
+        mode: "onSubmit",
         defaultValues: {
             visitorName: "",
             companyName: "",
             licensePlate: "",
             trailerLicensePlate: "",
             purposeOfVisit: "",
+            hostName: undefined,
             department: "",
             privacyPolicy: false,
         },
@@ -110,10 +111,10 @@ export default function TransportistaFormPage() {
                 const lastVisit = querySnapshot.docs[0].data();
                 
                 if (lastVisit.companyName) {
-                    form.setValue("companyName", lastVisit.companyName, { shouldValidate: true });
+                    form.setValue("companyName", lastVisit.companyName);
                 }
                 if (lastVisit.vehicleDetails?.licensePlate) {
-                    form.setValue("licensePlate", lastVisit.vehicleDetails.licensePlate, { shouldValidate: true });
+                    form.setValue("licensePlate", lastVisit.vehicleDetails.licensePlate);
                 }
             }
         } catch (error) {
@@ -274,7 +275,7 @@ export default function TransportistaFormPage() {
                                                 field.onChange(value);
                                                 const selectedHost = hosts.find(h => h.name === value);
                                                 if (selectedHost) {
-                                                    form.setValue('department', selectedHost.department || '', { shouldValidate: true });
+                                                    form.setValue('department', selectedHost.department || '');
                                                 }
                                             }} defaultValue={field.value}>
                                                 <FormControl>
