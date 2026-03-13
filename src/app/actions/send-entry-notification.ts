@@ -82,7 +82,7 @@ export async function sendEntryNotificationEmail(visitor: VisitorNotificationPay
           <div>
             <h1>Nueva Visita Registrada</h1>
             <p>Hola ${host.name},</p>
-            <p>Se ha registrado una nueva visita para ti. El visitante se encuentra en recepción.</p>
+            <p>Se ha registrado una nueva visita para ti.</p>
             <br/>
             <p><strong>Detalles de la visita:</strong></p>
             <ul>
