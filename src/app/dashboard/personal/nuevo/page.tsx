@@ -68,10 +68,6 @@ export default function PersonalFormPage() {
         const resetInactivityTimer = () => {
             clearTimeout(inactivityTimer);
             inactivityTimer = setTimeout(() => {
-                toast({
-                    title: t('sessionInactive'),
-                    description: t('redirectingToMain'),
-                });
                 router.push('/');
             }, 1 * 60 * 1000); // 1 minute
         };
@@ -94,7 +90,7 @@ export default function PersonalFormPage() {
                 window.removeEventListener(event, handleActivity);
             });
         };
-    }, [isClient, router, t]);
+    }, [isClient, router]);
 
     useEffect(() => {
         if (!db) return;

@@ -47,10 +47,6 @@ export default function SalidaPage() {
         const resetInactivityTimer = () => {
             clearTimeout(inactivityTimer);
             inactivityTimer = setTimeout(() => {
-                toast({
-                    title: t('sessionInactive'),
-                    description: t('redirectingToMain'),
-                });
                 router.push('/');
             }, 1 * 60 * 1000); // 1 minute
         };
@@ -73,7 +69,7 @@ export default function SalidaPage() {
                 window.removeEventListener(event, handleActivity);
             });
         };
-    }, [isClient, router, t]);
+    }, [isClient, router]);
     
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
