@@ -18,6 +18,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { sendEmailReport } from '@/app/actions/send-email';
 
 type DateRange = {
   from?: Date;
@@ -67,6 +68,7 @@ function VisitorRow({ visitor }: { visitor: Visitor & { id: string } }) {
 export default function RegistrosPage() {
   const [visits, setVisits] = useState<(Visitor & { id: string })[]>([]);
   const [date, setDate] = useState<DateRange | undefined>();
+  const [isSending, setIsSending] = useState(false);
   const db = useFirestore();
   const { toast } = useToast();
 
@@ -248,11 +250,41 @@ export default function RegistrosPage() {
       return format(date, 'yyyy-MM-dd');
   };
 
-  const handleSendEmail = () => {
+  const handleSendEmail = async (reportType: 'active' | 'filtered') => {
+    setIsSending(true);
     toast({
-        title: "Función no implementada",
-        description: "El envío de informes por correo electrónico se implementará pronto.",
+        title: "Enviando informe...",
+        description: "Esto puede tardar unos segundos.",
     });
+
+    const visitsToEmail = reportType === 'active' ? activeVisits : filteredVisits;
+    const reportTitle = `Reporte de Visitas ${reportType === 'active' ? 'Activas' : 'del Periodo'}`;
+
+    if (visitsToEmail.length === 0) {
+        toast({
+            variant: "destructive",
+            title: "No hay datos para enviar",
+            description: "No hay visitas en la selección actual para generar un informe.",
+        });
+        setIsSending(false);
+        return;
+    }
+
+    const result = await sendEmailReport(visitsToEmail, reportTitle);
+
+    if (result.success) {
+        toast({
+            title: "Informe enviado",
+            description: result.message,
+        });
+    } else {
+        toast({
+            variant: "destructive",
+            title: "Error al enviar",
+            description: result.message,
+        });
+    }
+    setIsSending(false);
   };
 
   return (
@@ -278,7 +310,7 @@ export default function RegistrosPage() {
                         <FileDown className="mr-2 h-4 w-4" />
                         <span>Descargar XLSX</span>
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={handleSendEmail}>
+                    <DropdownMenuItem onClick={() => handleSendEmail('active')} disabled={isSending}>
                         <Mail className="mr-2 h-4 w-4" />
                         <span>Enviar por mail</span>
                     </DropdownMenuItem>
@@ -355,7 +387,7 @@ export default function RegistrosPage() {
                             <FileDown className="mr-2 h-4 w-4" />
                             <span>Descargar XLSX</span>
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={handleSendEmail}>
+                        <DropdownMenuItem onClick={() => handleSendEmail('filtered')} disabled={isSending}>
                             <Mail className="mr-2 h-4 w-4" />
                             <span>Enviar por mail</span>
                         </DropdownMenuItem>
