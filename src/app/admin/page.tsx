@@ -48,8 +48,8 @@ const formSchema = z.object({
   name: z.string().min(2, "El nombre debe tener al menos 2 caracteres."),
   department: z.string().optional(),
   email: z.string().email("Debe ser un correo electrónico válido.").or(z.literal("")).optional(),
-  sendRecords: z.boolean().default(false).optional(),
   sendEntryNotification: z.boolean().default(false).optional(),
+  sendRecords: z.boolean().default(false).optional(),
 });
 
 
@@ -65,8 +65,8 @@ export default function AjustesPage() {
       name: "",
       department: "",
       email: "",
-      sendRecords: false,
       sendEntryNotification: false,
+      sendRecords: false,
     },
   });
 
@@ -98,14 +98,14 @@ export default function AjustesPage() {
         name: "",
         department: "",
         email: "",
-        sendRecords: false,
         sendEntryNotification: false,
+        sendRecords: false,
     });
   };
 
   const handleSelectHost = (host: Host) => {
     setSelectedHost(host);
-    form.reset({ ...host, email: host.email || '', sendRecords: host.sendRecords || false, sendEntryNotification: host.sendEntryNotification || false });
+    form.reset({ ...host, email: host.email || '', sendEntryNotification: host.sendEntryNotification || false, sendRecords: host.sendRecords || false });
   };
 
 
@@ -152,8 +152,8 @@ export default function AjustesPage() {
         name: values.name,
         department: values.department || "",
         email: values.email || "",
-        sendRecords: values.sendRecords || false,
         sendEntryNotification: values.sendEntryNotification || false,
+        sendRecords: values.sendRecords || false,
       };
 
       if (selectedHost) {
@@ -221,7 +221,7 @@ export default function AjustesPage() {
         'Departamento': host.department,
         'Email': host.email,
         'Recibir Notif. Entrada': host.sendEntryNotification ? 'Sí' : 'No',
-        'Recibir Registros': host.sendRecords ? 'Sí' : 'No',
+        'Recibir informes': host.sendRecords ? 'Sí' : 'No',
     }));
     
     const worksheet = XLSX.utils.json_to_sheet(dataToExport);
@@ -314,7 +314,7 @@ export default function AjustesPage() {
                     </FormControl>
                     <div className="space-y-1 leading-none">
                       <FormLabel>
-                        Recibir Registros
+                        Recibir informes
                       </FormLabel>
                       <FormDescription>
                         Si está marcado, se recibirán informes de visitas por correo electrónico
@@ -358,7 +358,7 @@ export default function AjustesPage() {
                 <TableHead>Departamento</TableHead>
                 <TableHead className="hidden sm:table-cell">Email</TableHead>
                 <TableHead>Notif. Entrada</TableHead>
-                <TableHead>Recibir Registros</TableHead>
+                <TableHead>Recibir informes</TableHead>
                 <TableHead className="text-right">Acción</TableHead>
               </TableRow>
             </TableHeader>
