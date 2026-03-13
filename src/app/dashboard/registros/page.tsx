@@ -9,10 +9,10 @@ import { useFirestore } from '@/firebase';
 import { collection, onSnapshot, query, orderBy, updateDoc, type DocumentReference } from 'firebase/firestore';
 import React, { useEffect, useState, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
-import { es } from 'date-fns/locale';
 import { useToast } from '@/hooks/use-toast';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { format } from 'date-fns';
+import * as XLSX from 'xlsx';
 
 type DateRange = {
   from?: Date;
@@ -148,7 +148,7 @@ export default function RegistrosPage() {
     });
   }, [visits, date]);
 
-  const handleExportCsv = () => {
+  const handleExportXlsx = () => {
     if (!filteredVisits || filteredVisits.length === 0) {
         toast({
             title: 'No hay datos para exportar',
@@ -158,61 +158,39 @@ export default function RegistrosPage() {
         return;
     }
 
-    const headers = [
-        "Tipo Entrada",
-        "Nombre Visitante",
-        "Empresa",
-        "Motivo Visita",
-        "Anfitrión",
-        "Departamento Anfitrión",
-        "Matrícula Camión",
-        "Matrícula Remolque",
-        "Fecha Entrada",
-        "Hora Entrada",
-        "Fecha Salida",
-        "Hora Salida"
-    ];
-
-    const csvRows = filteredVisits.map(visit => {
-        const entryDateTime = new Date(visit.entryDateTime);
-        const exitDateTime = visit.exitDateTime ? new Date(visit.exitDateTime) : null;
-        
-        const row = [
-            visit.entryType,
-            visit.visitorName,
-            visit.companyName,
-            visit.purposeOfVisit,
-            visit.hostName || '',
-            visit.department || '',
-            visit.entryType === 'Transportista' ? visit.vehicleDetails?.licensePlate || '' : '',
-            visit.entryType === 'Transportista' ? visit.vehicleDetails?.trailerLicensePlate || '' : '',
-            entryDateTime.toLocaleDateString('es-ES'),
-            entryDateTime.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }),
-            exitDateTime ? exitDateTime.toLocaleDateString('es-ES') : 'Dentro',
-            exitDateTime ? exitDateTime.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }) : ''
-        ];
-        
-        return row.map(value => `"${String(value || '').replace(/"/g, '""')}"`).join(',');
+    const dataToExport = filteredVisits.map(visit => {
+      const entryDateTime = new Date(visit.entryDateTime);
+      const exitDateTime = visit.exitDateTime ? new Date(visit.exitDateTime) : null;
+      
+      return {
+          "Tipo Entrada": visit.entryType,
+          "Nombre Visitante": visit.visitorName,
+          "Empresa": visit.companyName,
+          "Motivo Visita": visit.purposeOfVisit,
+          "Anfitrión": visit.hostName || '',
+          "Departamento Anfitrión": visit.department || '',
+          "Matrícula Camión": visit.entryType === 'Transportista' ? visit.vehicleDetails?.licensePlate || '' : '',
+          "Matrícula Remolque": visit.entryType === 'Transportista' ? visit.vehicleDetails?.trailerLicensePlate || '' : '',
+          "Fecha Entrada": entryDateTime.toLocaleDateString('es-ES'),
+          "Hora Entrada": entryDateTime.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }),
+          "Fecha Salida": exitDateTime ? exitDateTime.toLocaleDateString('es-ES') : 'Dentro',
+          "Hora Salida": exitDateTime ? exitDateTime.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }) : ''
+      };
     });
 
-    const csvContent = [headers.join(','), ...csvRows].join('\n');
-    const blob = new Blob([`\uFEFF${csvContent}`], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.setAttribute('download', 'registro_visitas.csv');
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    const worksheet = XLSX.utils.json_to_sheet(dataToExport);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Registros");
+    XLSX.writeFile(workbook, "registro_visitas.xlsx");
   };
 
   const handleSendEmail = () => {
     const subject = "Exportación de Registros de Visitas";
-    const body = "Por favor, primero descargue el archivo CSV usando la opción 'Descargar CSV' y luego adjúntelo a este correo.";
+    const body = "Por favor, primero descargue el archivo XLSX usando la opción 'Descargar XLSX' y luego adjúntelo a este correo.";
     window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
   };
   
-  const handleExportActiveVisitsCsv = () => {
+  const handleExportActiveVisitsXlsx = () => {
     if (!activeVisits || activeVisits.length === 0) {
         toast({
             title: 'No hay visitas activas para exportar',
@@ -221,57 +199,35 @@ export default function RegistrosPage() {
         return;
     }
 
-    const headers = [
-        "Tipo Entrada",
-        "Nombre Visitante",
-        "Empresa",
-        "Motivo Visita",
-        "Anfitrión",
-        "Departamento Anfitrión",
-        "Matrícula Camión",
-        "Matrícula Remolque",
-        "Fecha Entrada",
-        "Hora Entrada",
-        "Fecha Salida",
-        "Hora Salida"
-    ];
-
-    const csvRows = activeVisits.map(visit => {
+    const dataToExport = activeVisits.map(visit => {
         const entryDateTime = new Date(visit.entryDateTime);
         const exitDateTime = visit.exitDateTime ? new Date(visit.exitDateTime) : null;
         
-        const row = [
-            visit.entryType,
-            visit.visitorName,
-            visit.companyName,
-            visit.purposeOfVisit,
-            visit.hostName || '',
-            visit.department || '',
-            visit.entryType === 'Transportista' ? visit.vehicleDetails?.licensePlate || '' : '',
-            visit.entryType === 'Transportista' ? visit.vehicleDetails?.trailerLicensePlate || '' : '',
-            entryDateTime.toLocaleDateString('es-ES'),
-            entryDateTime.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }),
-            exitDateTime ? exitDateTime.toLocaleDateString('es-ES') : 'Dentro',
-            exitDateTime ? exitDateTime.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }) : ''
-        ];
-        
-        return row.map(value => `"${String(value || '').replace(/"/g, '""')}"`).join(',');
+        return {
+            "Tipo Entrada": visit.entryType,
+            "Nombre Visitante": visit.visitorName,
+            "Empresa": visit.companyName,
+            "Motivo Visita": visit.purposeOfVisit,
+            "Anfitrión": visit.hostName || '',
+            "Departamento Anfitrión": visit.department || '',
+            "Matrícula Camión": visit.entryType === 'Transportista' ? visit.vehicleDetails?.licensePlate || '' : '',
+            "Matrícula Remolque": visit.entryType === 'Transportista' ? visit.vehicleDetails?.trailerLicensePlate || '' : '',
+            "Fecha Entrada": entryDateTime.toLocaleDateString('es-ES'),
+            "Hora Entrada": entryDateTime.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }),
+            "Fecha Salida": exitDateTime ? exitDateTime.toLocaleDateString('es-ES') : 'Dentro',
+            "Hora Salida": exitDateTime ? exitDateTime.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }) : ''
+        };
     });
-
-    const csvContent = [headers.join(','), ...csvRows].join('\n');
-    const blob = new Blob([`\uFEFF${csvContent}`], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.setAttribute('download', 'visitas_activas.csv');
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    
+    const worksheet = XLSX.utils.json_to_sheet(dataToExport);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Visitas Activas");
+    XLSX.writeFile(workbook, "visitas_activas.xlsx");
   };
 
   const handleSendActiveVisitsEmail = () => {
     const subject = "Exportación de Visitas Activas";
-    const body = "Por favor, primero descargue el archivo CSV usando la opción 'Descargar CSV' y luego adjúntelo a este correo.";
+    const body = "Por favor, primero descargue el archivo XLSX usando la opción 'Descargar XLSX' y luego adjúntelo a este correo.";
     window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
   };
   
@@ -319,8 +275,8 @@ export default function RegistrosPage() {
                       </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent>
-                      <DropdownMenuItem onClick={handleExportActiveVisitsCsv}>
-                          Descargar CSV
+                      <DropdownMenuItem onClick={handleExportActiveVisitsXlsx}>
+                          Descargar XLSX
                       </DropdownMenuItem>
                       <DropdownMenuItem onClick={handleSendActiveVisitsEmail}>
                           Enviar por Email
@@ -395,8 +351,8 @@ export default function RegistrosPage() {
                           </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent>
-                          <DropdownMenuItem onClick={handleExportCsv}>
-                              Descargar CSV
+                          <DropdownMenuItem onClick={handleExportXlsx}>
+                              Descargar XLSX
                           </DropdownMenuItem>
                           <DropdownMenuItem onClick={handleSendEmail}>
                               Enviar por Email

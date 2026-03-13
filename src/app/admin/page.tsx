@@ -41,6 +41,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { cn } from "@/lib/utils";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import * as XLSX from 'xlsx';
 
 const formSchema = z.object({
   name: z.string().min(2, "El nombre debe tener al menos 2 caracteres."),
@@ -201,35 +202,26 @@ export default function AjustesPage() {
     }
   }
 
-  const handleExportHostsCsv = () => {
+  const handleExportHostsXlsx = () => {
     if (!hosts || hosts.length === 0) {
         toast({ title: 'No hay anfitriones para exportar.', variant: 'destructive' });
         return;
     }
-    const headers = ['Nombre', 'Departamento', 'Email'];
-    const csvRows = hosts.map(host => {
-        const row = [
-            host.name,
-            host.department,
-            host.email,
-        ];
-        return row.map(value => `"${String(value || '').replace(/"/g, '""')}"`).join(',');
-    });
+    const dataToExport = hosts.map(host => ({
+        'Nombre': host.name,
+        'Departamento': host.department,
+        'Email': host.email,
+    }));
     
-    const csvContent = [headers.join(','), ...csvRows].join('\n');
-    const blob = new Blob([`\uFEFF${csvContent}`], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.setAttribute('download', 'anfitriones.csv');
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    const worksheet = XLSX.utils.json_to_sheet(dataToExport);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Anfitriones");
+    XLSX.writeFile(workbook, "anfitriones.xlsx");
 };
 
   const handleSendHostsEmail = () => {
       const subject = "Exportación de Lista de Anfitriones";
-      const body = "Por favor, primero descargue el archivo CSV usando la opción 'Descargar CSV' y luego adjúntelo a este correo.";
+      const body = "Por favor, primero descargue el archivo XLSX usando la opción 'Descargar XLSX' y luego adjúntelo a este correo.";
       window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
   };
 
@@ -312,8 +304,8 @@ export default function AjustesPage() {
                     </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent>
-                    <DropdownMenuItem onClick={handleExportHostsCsv}>
-                        Descargar CSV
+                    <DropdownMenuItem onClick={handleExportHostsXlsx}>
+                        Descargar XLSX
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={handleSendHostsEmail}>
                         Enviar por Email
