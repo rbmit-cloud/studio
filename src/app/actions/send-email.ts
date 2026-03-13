@@ -1,12 +1,13 @@
 'use server';
 
 import { getApp, getApps, initializeApp } from 'firebase/app';
-import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
+import { getAuth, signInWithEmailAndPassword, signOut } from 'firebase/auth';
 import { getFirestore, collection, getDocs, query, where } from 'firebase/firestore';
 import * as nodemailer from 'nodemailer';
 import * as XLSX from 'xlsx';
 import { firebaseConfig } from '@/firebase/config';
 import type { Host, Visitor } from '@/lib/types';
+import { FirebaseError } from 'firebase/app';
 
 // Ensure Firebase is initialized
 const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
@@ -14,26 +15,29 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 
 async function ensureAuthenticated() {
+    // This function assumes the environment variables have already been checked by the caller.
     // Check if we're already signed in as the service user
     if (auth.currentUser?.email === process.env.FIREBASE_SERVICE_EMAIL) {
         return;
     }
     // Sign out any other user (like anonymous)
     if (auth.currentUser) {
-        await auth.signOut();
+        await signOut(auth);
     }
-    // Sign in with service account credentials from environment variables
-    if (process.env.FIREBASE_SERVICE_EMAIL && process.env.FIREBASE_SERVICE_PASSWORD) {
-        await signInWithEmailAndPassword(auth, process.env.FIREBASE_SERVICE_EMAIL, process.env.FIREBASE_SERVICE_PASSWORD);
-    } else {
-        throw new Error('Firebase service account credentials are not configured in environment variables.');
-    }
+    // Sign in with service account credentials from environment variables.
+    // Non-null assertions are safe here because the calling function checks for their existence.
+    await signInWithEmailAndPassword(auth, process.env.FIREBASE_SERVICE_EMAIL!, process.env.FIREBASE_SERVICE_PASSWORD!);
 }
 
 export async function sendEmailReport(visits: (Visitor & { id: string })[], reportTitle: string): Promise<{ success: boolean; message: string }> {
+    // --- Start: Environment Variable Validation ---
     if (!process.env.GMAIL_EMAIL || !process.env.GMAIL_APP_PASSWORD) {
         return { success: false, message: 'Las credenciales de Gmail no están configuradas en las variables de entorno. Por favor, añada GMAIL_EMAIL y GMAIL_APP_PASSWORD.' };
     }
+    if (!process.env.FIREBASE_SERVICE_EMAIL || !process.env.FIREBASE_SERVICE_PASSWORD) {
+        return { success: false, message: 'Las credenciales de la cuenta de servicio de Firebase no están configuradas. Por favor, añada FIREBASE_SERVICE_EMAIL y FIREBASE_SERVICE_PASSWORD a sus variables de entorno.' };
+    }
+    // --- End: Environment Variable Validation ---
 
     // Nodemailer transporter setup
     const transporter = nodemailer.createTransport({
@@ -116,6 +120,12 @@ export async function sendEmailReport(visits: (Visitor & { id: string })[], repo
         return { success: true, message: `Informe enviado a ${hostsToSend.length} anfitriones.` };
     } catch (error: any) {
         console.error('Error sending email report:', error);
+        
+        if (error instanceof FirebaseError && 
+            (error.code === 'auth/invalid-credential' || error.code === 'auth/wrong-password' || error.code === 'auth/user-not-found')) {
+            return { success: false, message: 'Error de autenticación con la cuenta de servicio de Firebase. Verifique que FIREBASE_SERVICE_EMAIL y FIREBASE_SERVICE_PASSWORD son correctos.' };
+        }
+        
         return { success: false, message: error.message || 'No se pudo enviar el informe por correo.' };
     }
 }
