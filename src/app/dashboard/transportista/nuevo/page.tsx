@@ -41,7 +41,7 @@ import {
     AlertDialogTitle,
     AlertDialogTrigger,
   } from "@/components/ui/alert-dialog";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useMemo } from "react";
 import { useFirestore } from "@/firebase";
 import { addDoc, collection, getDocs, limit, onSnapshot, orderBy, query, where } from "firebase/firestore";
 import type { Host } from "@/lib/types";
@@ -49,7 +49,7 @@ import { useLanguage, getZodSchema } from "@/context/language-context";
 
 export default function TransportistaFormPage() {
     const { t } = useLanguage();
-    const formSchema = getZodSchema(t).transportista;
+    const formSchema = useMemo(() => getZodSchema(t).transportista, [t]);
 
     const [isClient, setIsClient] = useState(false);
     const db = useFirestore();
