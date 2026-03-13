@@ -43,10 +43,11 @@ import {
   } from "@/components/ui/alert-dialog";
 import { useEffect, useState, useMemo } from "react";
 import { useFirestore } from "@/firebase";
-import { addDoc, collection, getDocs, limit, onSnapshot, orderBy, query, where } from "firebase/firestore";
+import { addDoc, collection, getDocs, onSnapshot, orderBy, query, where } from "firebase/firestore";
 import type { Host } from "@/lib/types";
 import { useLanguage, getZodSchema } from "@/context/language-context";
 import { sendEntryNotificationEmail } from "@/app/actions/send-entry-notification";
+import { findPreviousVisitAction } from "@/app/actions/find-previous-visit";
 
 export default function PersonalFormPage() {
     const { t } = useLanguage();
@@ -125,22 +126,16 @@ export default function PersonalFormPage() {
     const privacyPolicyAccepted = form.watch('privacyPolicy');
 
     const findPreviousVisit = async (visitorName: string) => {
-        if (!db || visitorName.length < 2) return;
+        if (visitorName.length < 2) return;
     
         try {
-            const q = query(
-                collection(db, "visits"),
-                where("visitorName", "==", visitorName),
-                where("entryType", "==", "Personal"),
-                orderBy("entryDateTime", "desc"),
-                limit(1)
-            );
+            const result = await findPreviousVisitAction({
+                visitorName: visitorName,
+                entryType: "Personal"
+            });
     
-            const querySnapshot = await getDocs(q);
-    
-            if (!querySnapshot.empty) {
-                const lastVisit = querySnapshot.docs[0].data();
-                
+            if (result.success && result.data) {
+                const lastVisit = result.data;
                 if (lastVisit.companyName) {
                     form.setValue("companyName", lastVisit.companyName);
                 }
@@ -152,9 +147,12 @@ export default function PersonalFormPage() {
                         form.setValue('department', selectedHost.department || '');
                     }
                 }
+            } else if (!result.success) {
+                // Optionally show a toast, but for now just log it to avoid bothering the user
+                console.error("Error searching for previous visit:", result.message);
             }
         } catch (error) {
-            console.error("Error searching for previous visit:", error);
+            console.error("Error calling findPreviousVisitAction:", error);
         }
     };
 

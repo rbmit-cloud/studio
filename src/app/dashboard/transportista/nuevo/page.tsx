@@ -43,10 +43,11 @@ import {
   } from "@/components/ui/alert-dialog";
 import { useEffect, useState, useMemo } from "react";
 import { useFirestore } from "@/firebase";
-import { addDoc, collection, getDocs, limit, onSnapshot, orderBy, query, where } from "firebase/firestore";
+import { addDoc, collection, getDocs, onSnapshot, orderBy, query, where } from "firebase/firestore";
 import type { Host } from "@/lib/types";
 import { useLanguage, getZodSchema } from "@/context/language-context";
 import { sendEntryNotificationEmail } from "@/app/actions/send-entry-notification";
+import { findPreviousVisitAction } from "@/app/actions/find-previous-visit";
 
 export default function TransportistaFormPage() {
     const { t } = useLanguage();
@@ -127,31 +128,28 @@ export default function TransportistaFormPage() {
     const privacyPolicyAccepted = form.watch('privacyPolicy');
 
     const findPreviousVisit = async (visitorName: string) => {
-        if (!db || visitorName.length < 2) return;
+        if (visitorName.length < 2) return;
     
         try {
-            const q = query(
-                collection(db, "visits"),
-                where("visitorName", "==", visitorName),
-                where("entryType", "==", "Transportista"),
-                orderBy("entryDateTime", "desc"),
-                limit(1)
-            );
-    
-            const querySnapshot = await getDocs(q);
-    
-            if (!querySnapshot.empty) {
-                const lastVisit = querySnapshot.docs[0].data();
+            const result = await findPreviousVisitAction({
+                visitorName: visitorName,
+                entryType: "Transportista"
+            });
+
+            if (result.success && result.data) {
+                const lastVisit = result.data;
                 
                 if (lastVisit.companyName) {
                     form.setValue("companyName", lastVisit.companyName);
                 }
-                if (lastVisit.vehicleDetails?.licensePlate) {
-                    form.setValue("licensePlate", lastVisit.vehicleDetails.licensePlate);
+                if (lastVisit.licensePlate) {
+                    form.setValue("licensePlate", lastVisit.licensePlate);
                 }
+            } else if (!result.success) {
+                 console.error("Error searching for previous visit:", result.message);
             }
         } catch (error) {
-            console.error("Error searching for previous visit:", error);
+            console.error("Error calling findPreviousVisitAction:", error);
         }
     };
 
