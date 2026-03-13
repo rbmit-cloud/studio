@@ -131,6 +131,7 @@ PLAN DE EMERGENCIA
     'companyMinChars': 'La empresa debe tener al menos 2 caracteres.',
     'hostRequired': 'Debe seleccionar una persona a visitar.',
     'privacyPolicyRequired': 'Debe aceptar la política de tratamiento de datos.',
+    'purposeRequired': 'El motivo de la visita es obligatorio.',
     'licensePlateMinChars': 'La matrícula debe tener al menos 5 caracteres.',
     'invalidLicensePlate': 'Formato de matrícula inválido.',
     'registrationError': 'Error en el registro',
@@ -257,6 +258,7 @@ EMERGENCY PLAN
     'companyMinChars': 'Company name must be at least 2 characters.',
     'hostRequired': 'You must select a person to visit.',
     'privacyPolicyRequired': 'You must accept the data processing policy.',
+    'purposeRequired': 'The purpose of visit is required.',
     'licensePlateMinChars': 'License plate must be at least 5 characters.',
     'invalidLicensePlate': 'Invalid license plate format.',
     'registrationError': 'Registration Error',
@@ -309,7 +311,7 @@ export const getZodSchema = (t: (key: string, replacements?: {[key: string]: str
     personal: z.object({
         visitorName: z.string().min(2, t('nameMinChars')),
         companyName: z.string().min(2, t('companyMinChars')),
-        purposeOfVisit: z.string(),
+        purposeOfVisit: z.string().min(1, t('purposeRequired')),
         hostName: z.string({
           required_error: t('hostRequired'),
         }),
@@ -323,7 +325,7 @@ export const getZodSchema = (t: (key: string, replacements?: {[key: string]: str
         companyName: z.string().min(2, t('companyMinChars')),
         licensePlate: z.string().min(5, t('licensePlateMinChars')).regex(/^[A-Z0-9-]{5,10}$/, t('invalidLicensePlate')),
         trailerLicensePlate: z.string().optional(),
-        purposeOfVisit: z.string(),
+        purposeOfVisit: z.string().min(1, t('purposeRequired')),
         hostName: z.string({
           required_error: t('hostRequired'),
         }),
