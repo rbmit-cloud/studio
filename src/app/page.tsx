@@ -1,6 +1,5 @@
 'use client';
 
-import Link from 'next/link';
 import Image from 'next/image';
 import { Truck, User, LogOut, Globe } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -17,6 +16,15 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
@@ -42,6 +50,9 @@ export default function Home() {
   const [loginDestination, setLoginDestination] = useState<string>('');
   const { setLanguage, t } = useLanguage();
 
+  const [isSafetyModalOpen, setIsSafetyModalOpen] = useState(false);
+  const [entryDestination, setEntryDestination] = useState<string>('');
+
   const handleLogin = async () => {
     if (!auth) {
         toast({
@@ -53,7 +64,6 @@ export default function Home() {
     }
 
     try {
-        // Step 1: Authenticate user with Firebase Auth
         await signInWithEmailAndPassword(auth, email, password);
 
         toast({
@@ -85,7 +95,6 @@ export default function Home() {
             variant: "destructive",
         });
     } finally {
-        // Clear fields and close dialog regardless of outcome
         setEmail('');
         setPassword('');
         setOpen(false); 
@@ -107,6 +116,10 @@ export default function Home() {
     setOpen(isOpen);
   }
 
+  const handleEntryClick = (destination: string) => {
+    setEntryDestination(destination);
+    setIsSafetyModalOpen(true);
+  };
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-8 bg-background relative">
@@ -172,31 +185,49 @@ export default function Home() {
             </DialogContent>
         </Dialog>
 
+        <AlertDialog open={isSafetyModalOpen} onOpenChange={setIsSafetyModalOpen}>
+            <AlertDialogContent className="max-w-3xl">
+                <AlertDialogHeader>
+                    <AlertDialogTitle>{t('safetyRegulationsTitle')}</AlertDialogTitle>
+                </AlertDialogHeader>
+                <div className="text-sm text-foreground max-h-[70vh] overflow-y-auto pr-4 text-left whitespace-pre-line">
+                    {t('safetyRegulationsContent')}
+                </div>
+                <AlertDialogFooter>
+                    <AlertDialogCancel>{t('cancel')}</AlertDialogCancel>
+                    <AlertDialogAction onClick={() => router.push(entryDestination)}>
+                        {t('accept')}
+                    </AlertDialogAction>
+                </AlertDialogFooter>
+            </AlertDialogContent>
+        </AlertDialog>
+
+
         <DateTime />
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-y-4 md:gap-8 w-full max-w-6xl mt-6">
-          <Card className="transform transition-transform duration-300 hover:scale-105 hover:shadow-red-2xl">
+          <Card className="transform transition-transform duration-300 hover:scale-105 hover:shadow-red-2xl cursor-pointer" onClick={() => handleEntryClick('/dashboard/personal/nuevo')}>
             <CardContent className="p-0">
-              <Link href="/dashboard/personal/nuevo" className="flex flex-col items-center justify-center h-64 p-6 text-center rounded-lg active:bg-destructive active:text-destructive-foreground">
+              <div className="flex flex-col items-center justify-center h-64 p-6 text-center rounded-lg active:bg-destructive active:text-destructive-foreground">
                 <User className="w-20 h-20 mb-4" />
                 <h2 className="text-2xl font-semibold">{t('personalEntry')}</h2>
-              </Link>
+              </div>
             </CardContent>
           </Card>
-          <Card className="transform transition-transform duration-300 hover:scale-105 hover:shadow-cyan-2xl">
+          <Card className="transform transition-transform duration-300 hover:scale-105 hover:shadow-cyan-2xl cursor-pointer" onClick={() => handleEntryClick('/dashboard/transportista/nuevo')}>
             <CardContent className="p-0">
-              <Link href="/dashboard/transportista/nuevo" className="flex flex-col items-center justify-center h-64 p-6 text-center rounded-lg active:bg-info active:text-info-foreground">
+              <div className="flex flex-col items-center justify-center h-64 p-6 text-center rounded-lg active:bg-info active:text-info-foreground">
                 <Truck className="w-20 h-20 mb-4 text-primary" />
                 <h2 className="text-2xl font-semibold text-card-foreground">{t('transporterEntry')}</h2>
-              </Link>
+              </div>
             </CardContent>
           </Card>
-          <Card className="transform transition-transform duration-300 hover:scale-105 hover:shadow-yellow-2xl">
+          <Card className="transform transition-transform duration-300 hover:scale-105 hover:shadow-yellow-2xl cursor-pointer" onClick={() => router.push('/dashboard/salida')}>
             <CardContent className="p-0">
-              <Link href="/dashboard/salida" className="flex flex-col items-center justify-center h-64 p-6 text-center rounded-lg active:bg-warning active:text-warning-foreground">
+              <div className="flex flex-col items-center justify-center h-64 p-6 text-center rounded-lg active:bg-warning active:text-warning-foreground">
                 <LogOut className="w-20 h-20 mb-4 text-primary" />
                 <h2 className="text-2xl font-semibold text-card-foreground">{t('registerExit')}</h2>
-              </Link>
+              </div>
             </CardContent>
           </Card>
         </div>
