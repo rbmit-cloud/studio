@@ -41,7 +41,7 @@ import {
     AlertDialogTitle,
     AlertDialogTrigger,
   } from "@/components/ui/alert-dialog";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useFirestore } from "@/firebase";
 import { addDoc, collection, getDocs, limit, onSnapshot, orderBy, query, where } from "firebase/firestore";
 import type { Host } from "@/lib/types";
@@ -49,7 +49,7 @@ import { useLanguage, getZodSchema } from "@/context/language-context";
 
 export default function PersonalFormPage() {
     const { t } = useLanguage();
-    const formSchema = getZodSchema(t).personal;
+    const formSchema = useMemo(() => getZodSchema(t).personal, [t]);
 
     const [isClient, setIsClient] = useState(false);
     const db = useFirestore();
@@ -114,6 +114,7 @@ export default function PersonalFormPage() {
     
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
+        mode: "onTouched",
         defaultValues: {
             visitorName: "",
             companyName: "",
@@ -122,16 +123,6 @@ export default function PersonalFormPage() {
             privacyPolicy: false,
         },
     });
-
-    const isInitialRender = useRef(true);
-    // Re-validate on language change, but skip the first render.
-    useEffect(() => {
-        if (isInitialRender.current) {
-            isInitialRender.current = false;
-            return;
-        }
-        form.trigger();
-    }, [t]);
 
     const privacyPolicyAccepted = form.watch('privacyPolicy');
 
@@ -227,7 +218,7 @@ export default function PersonalFormPage() {
     return (
         <div className="flex justify-center w-full">
             <AlertDialog>
-                <Card className="w-full max-w-2xl">
+                <Card className="w-full max-w-lg">
                     <Form {...form}>
                         <form onSubmit={form.handleSubmit(onSubmit)}>
                             <CardHeader>

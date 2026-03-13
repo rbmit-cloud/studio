@@ -26,30 +26,21 @@ import { useRouter } from "next/navigation";
 import { useFirestore } from "@/firebase";
 import { collection, getDocs, query, where, updateDoc, doc } from "firebase/firestore";
 import { useLanguage, getZodSchema } from "@/context/language-context";
-import { useEffect, useRef } from "react";
+import { useMemo } from "react";
 
 export default function SalidaPage() {
     const { t } = useLanguage();
-    const formSchema = getZodSchema(t).salida;
+    const formSchema = useMemo(() => getZodSchema(t).salida, [t]);
     const db = useFirestore();
     const router = useRouter();
     
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
+        mode: "onTouched",
         defaultValues: {
             visitorName: "",
         },
     });
-
-    const isInitialRender = useRef(true);
-    // Re-validate on language change, but skip the first render.
-    useEffect(() => {
-        if (isInitialRender.current) {
-            isInitialRender.current = false;
-            return;
-        }
-        form.trigger();
-    }, [t]);
 
     async function onSubmit(values: z.infer<typeof formSchema>) {
         if (!db) {
