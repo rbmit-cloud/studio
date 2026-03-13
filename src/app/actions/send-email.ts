@@ -3,11 +3,10 @@
 import { getApp, getApps, initializeApp } from 'firebase/app';
 import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
 import { getFirestore, collection, getDocs, query, where } from 'firebase/firestore';
-import { Resend } from 'resend';
+import * as nodemailer from 'nodemailer';
 import * as XLSX from 'xlsx';
 import { firebaseConfig } from '@/firebase/config';
 import type { Host, Visitor } from '@/lib/types';
-import EmailTemplate from '@/components/email-template';
 
 // Ensure Firebase is initialized
 const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
@@ -32,14 +31,18 @@ async function ensureAuthenticated() {
 }
 
 export async function sendEmailReport(visits: (Visitor & { id: string })[], reportTitle: string): Promise<{ success: boolean; message: string }> {
-    if (!process.env.RESEND_API_KEY) {
-        return { success: false, message: 'Resend API key is not configured.' };
-    }
-     if (!process.env.RESEND_FROM_EMAIL) {
-        return { success: false, message: 'Resend "from" email is not configured.' };
+    if (!process.env.GMAIL_EMAIL || !process.env.GMAIL_APP_PASSWORD) {
+        return { success: false, message: 'Las credenciales de Gmail no están configuradas en las variables de entorno. Por favor, añada GMAIL_EMAIL y GMAIL_APP_PASSWORD.' };
     }
 
-    const resend = new Resend(process.env.RESEND_API_KEY);
+    // Nodemailer transporter setup
+    const transporter = nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
+            user: process.env.GMAIL_EMAIL,
+            pass: process.env.GMAIL_APP_PASSWORD,
+        },
+    });
 
     try {
         await ensureAuthenticated();
@@ -82,15 +85,27 @@ export async function sendEmailReport(visits: (Visitor & { id: string })[], repo
         // 3. Send email to each host
         const emailsToSend = hostsToSend.map(host => {
             if (!host.email) return null;
-            return resend.emails.send({
-                from: process.env.RESEND_FROM_EMAIL!,
+
+            const emailHtml = `
+              <div>
+                <h1>${reportTitle}</h1>
+                <p>Hola ${host.name},</p>
+                <p>Adjunto encontrarás el informe de visitas solicitado.</p>
+                <p>Saludos cordiales,</p>
+                <p>Sistema de Registro de Visitas</p>
+              </div>
+            `;
+
+            return transporter.sendMail({
+                from: `"Sistema de Registros" <${process.env.GMAIL_EMAIL}>`,
                 to: host.email,
                 subject: reportTitle,
-                react: EmailTemplate({ hostName: host.name, reportTitle }),
+                html: emailHtml,
                 attachments: [
                     {
                         filename: 'reporte_visitas.xlsx',
                         content: xlsxBuffer,
+                        contentType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
                     },
                 ],
             });
