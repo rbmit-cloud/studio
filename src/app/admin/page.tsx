@@ -317,7 +317,7 @@ export default function AjustesPage() {
                         Recibir notificación de entrada
                       </FormLabel>
                       <FormDescription>
-                        Si está marcado, se enviará un email cuando un visitante se registre para verle.
+                        Si está marcado, se recibirá un email cuando un visitante se registre para verle.
                       </FormDescription>
                     </div>
                   </FormItem>
