@@ -46,6 +46,7 @@ import { useFirestore } from "@/firebase";
 import { addDoc, collection, getDocs, limit, onSnapshot, orderBy, query, where } from "firebase/firestore";
 import type { Host } from "@/lib/types";
 import { useLanguage, getZodSchema } from "@/context/language-context";
+import { sendEntryNotificationEmail } from "@/app/actions/send-entry-notification";
 
 export default function TransportistaFormPage() {
     const { t } = useLanguage();
@@ -188,6 +189,22 @@ export default function TransportistaFormPage() {
                 vehicleDetails: {
                     licensePlate: licensePlate,
                     trailerLicensePlate: trailerLicensePlate
+                }
+            });
+
+            // Send notification email without blocking UI
+            sendEntryNotificationEmail({
+                ...rest,
+                entryType: 'Transportista',
+                vehicleDetails: {
+                    licensePlate,
+                    trailerLicensePlate
+                }
+            }).then(result => {
+                if (!result.success) {
+                    console.error("Failed to send visit notification:", result.message);
+                } else {
+                    console.log("Visit notification email result:", result.message);
                 }
             });
 

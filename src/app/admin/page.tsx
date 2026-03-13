@@ -49,6 +49,7 @@ const formSchema = z.object({
   department: z.string().optional(),
   email: z.string().email("Debe ser un correo electrónico válido.").or(z.literal("")).optional(),
   sendRecords: z.boolean().default(false).optional(),
+  sendEntryNotification: z.boolean().default(false).optional(),
 });
 
 
@@ -65,6 +66,7 @@ export default function AjustesPage() {
       department: "",
       email: "",
       sendRecords: false,
+      sendEntryNotification: false,
     },
   });
 
@@ -97,12 +99,13 @@ export default function AjustesPage() {
         department: "",
         email: "",
         sendRecords: false,
+        sendEntryNotification: false,
     });
   };
 
   const handleSelectHost = (host: Host) => {
     setSelectedHost(host);
-    form.reset({ ...host, email: host.email || '', sendRecords: host.sendRecords || false });
+    form.reset({ ...host, email: host.email || '', sendRecords: host.sendRecords || false, sendEntryNotification: host.sendEntryNotification || false });
   };
 
 
@@ -150,11 +153,12 @@ export default function AjustesPage() {
         department: values.department || "",
         email: values.email || "",
         sendRecords: values.sendRecords || false,
+        sendEntryNotification: values.sendEntryNotification || false,
       };
 
       if (selectedHost) {
         const hostDocRef = doc(db, "hosts", selectedHost.id);
-        await updateDoc(hostDocRef, dataToSave);
+        await updateDoc(hostDocRef, dataToSave as any); // Use 'as any' to bypass strict type checking for update
         toast({
             title: "Anfitrión Actualizado",
             description: `Se ha actualizado a ${values.name}.`,
@@ -217,6 +221,7 @@ export default function AjustesPage() {
         'Departamento': host.department,
         'Email': host.email,
         'Enviar Registros': host.sendRecords ? 'Sí' : 'No',
+        'Recibir Notif. Entrada': host.sendEntryNotification ? 'Sí' : 'No',
     }));
     
     const worksheet = XLSX.utils.json_to_sheet(dataToExport);
@@ -296,6 +301,28 @@ export default function AjustesPage() {
                   </FormItem>
                 )}
               />
+               <FormField
+                control={form.control}
+                name="sendEntryNotification"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4 shadow-sm">
+                    <FormControl>
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                    <div className="space-y-1 leading-none">
+                      <FormLabel>
+                        Recibir notificación de entrada
+                      </FormLabel>
+                      <FormDescription>
+                        Si está marcado, se enviará un email cuando un visitante se registre para verle.
+                      </FormDescription>
+                    </div>
+                  </FormItem>
+                )}
+              />
             </CardContent>
             <CardFooter className="flex justify-between">
                 <Button type="submit" disabled={form.formState.isSubmitting}>
@@ -331,6 +358,7 @@ export default function AjustesPage() {
                 <TableHead>Departamento</TableHead>
                 <TableHead className="hidden sm:table-cell">Email</TableHead>
                 <TableHead>Enviar Registros</TableHead>
+                <TableHead>Notif. Entrada</TableHead>
                 <TableHead className="text-right">Acción</TableHead>
               </TableRow>
             </TableHeader>
@@ -351,6 +379,7 @@ export default function AjustesPage() {
                     <TableCell>{host.department}</TableCell>
                     <TableCell className="hidden sm:table-cell">{host.email}</TableCell>
                     <TableCell>{host.sendRecords ? 'Sí' : 'No'}</TableCell>
+                    <TableCell>{host.sendEntryNotification ? 'Sí' : 'No'}</TableCell>
                     <TableCell className="text-right">
                         <AlertDialog>
                             <AlertDialogTrigger asChild>
@@ -378,7 +407,7 @@ export default function AjustesPage() {
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={5} className="h-24 text-center">
+                  <TableCell colSpan={6} className="h-24 text-center">
                     No hay anfitriones registrados.
                   </TableCell>
                 </TableRow>

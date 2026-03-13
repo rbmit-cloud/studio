@@ -23,4 +23,5 @@ export type Host = {
   department?: string;
   email?: string;
   sendRecords?: boolean;
+  sendEntryNotification?: boolean;
 };
