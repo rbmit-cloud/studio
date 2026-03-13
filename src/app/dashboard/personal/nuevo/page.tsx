@@ -73,7 +73,7 @@ export default function PersonalFormPage() {
                     description: t('redirectingToMain'),
                 });
                 router.push('/');
-            }, 5 * 60 * 1000); // 5 minutes
+            }, 1 * 60 * 1000); // 1 minute
         };
 
         const activityEvents = ['mousemove', 'mousedown', 'keydown', 'touchstart', 'scroll'];
