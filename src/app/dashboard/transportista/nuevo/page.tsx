@@ -187,6 +187,7 @@ export default function TransportistaFormPage() {
                 entryType: 'Transportista',
                 entryDateTime: new Date().toISOString(),
                 vehicleDetails: {
+                    type: 'Camión',
                     licensePlate: licensePlate,
                     trailerLicensePlate: trailerLicensePlate
                 }
@@ -197,6 +198,7 @@ export default function TransportistaFormPage() {
                 ...rest,
                 entryType: 'Transportista',
                 vehicleDetails: {
+                    type: 'Camión',
                     licensePlate,
                     trailerLicensePlate
                 }
