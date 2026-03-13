@@ -1,32 +1,37 @@
 'use server';
 
 import { getApp, getApps, initializeApp } from 'firebase/app';
-import { getAuth, signInWithEmailAndPassword, signOut } from 'firebase/auth';
-import { getFirestore, collection, getDocs, query, where } from 'firebase/firestore';
+import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
+import { getFirestore, collection, getDocs, query, where, type Firestore } from 'firebase/firestore';
 import * as nodemailer from 'nodemailer';
 import * as XLSX from 'xlsx';
 import { firebaseConfig } from '@/firebase/config';
 import type { Host, Visitor } from '@/lib/types';
 import { FirebaseError } from 'firebase/app';
 
-// Ensure Firebase is initialized
-const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
+// Define a constant for our service app's name
+const SERVICE_APP_NAME = 'firebase-service-account-app';
 
-async function ensureAuthenticated() {
-    // This function assumes the environment variables have already been checked by the caller.
-    // Check if we're already signed in as the service user
-    if (auth.currentUser?.email === process.env.FIREBASE_SERVICE_EMAIL) {
-        return;
+/**
+ * Initializes a dedicated Firebase app for the service account,
+ * signs it in, and returns an authenticated Firestore instance.
+ * This function is idempotent, meaning it won't create multiple app instances.
+ */
+async function getAuthenticatedFirestore(): Promise<Firestore> {
+    // Check if the service app is already initialized
+    const serviceApp = getApps().find(app => app.name === SERVICE_APP_NAME) 
+                     || initializeApp(firebaseConfig, SERVICE_APP_NAME);
+
+    const auth = getAuth(serviceApp);
+
+    // Sign in only if we aren't already signed in as the service user
+    if (auth.currentUser?.email !== process.env.FIREBASE_SERVICE_EMAIL) {
+        // Non-null assertions are safe here because the calling function checks for their existence.
+        await signInWithEmailAndPassword(auth, process.env.FIREBASE_SERVICE_EMAIL!, process.env.FIREBASE_SERVICE_PASSWORD!);
     }
-    // Sign out any other user (like anonymous)
-    if (auth.currentUser) {
-        await signOut(auth);
-    }
-    // Sign in with service account credentials from environment variables.
-    // Non-null assertions are safe here because the calling function checks for their existence.
-    await signInWithEmailAndPassword(auth, process.env.FIREBASE_SERVICE_EMAIL!, process.env.FIREBASE_SERVICE_PASSWORD!);
+    
+    // Return the Firestore instance associated with our authenticated service app
+    return getFirestore(serviceApp);
 }
 
 export async function sendEmailReport(visits: (Visitor & { id: string })[], reportTitle: string): Promise<{ success: boolean; message: string }> {
@@ -39,7 +44,6 @@ export async function sendEmailReport(visits: (Visitor & { id: string })[], repo
     }
     // --- End: Environment Variable Validation ---
 
-    // Nodemailer transporter setup
     const transporter = nodemailer.createTransport({
         service: 'gmail',
         auth: {
@@ -49,7 +53,8 @@ export async function sendEmailReport(visits: (Visitor & { id: string })[], repo
     });
 
     try {
-        await ensureAuthenticated();
+        // Get an authenticated Firestore instance
+        const db = await getAuthenticatedFirestore();
         
         // 1. Get hosts who want to receive reports
         const hostsRef = collection(db, "hosts");
@@ -122,7 +127,7 @@ export async function sendEmailReport(visits: (Visitor & { id: string })[], repo
         console.error('Error sending email report:', error);
         
         if (error instanceof FirebaseError && 
-            (error.code === 'auth/invalid-credential' || error.code === 'auth/wrong-password' || error.code === 'auth/user-not-found')) {
+            (error.code === 'auth/invalid-credential' || error.code === 'auth/wrong-password' || error.code === 'auth/user-not-found' || error.code === 'auth/invalid-email')) {
             return { success: false, message: 'Error de autenticación con la cuenta de servicio de Firebase. Verifique que FIREBASE_SERVICE_EMAIL y FIREBASE_SERVICE_PASSWORD son correctos.' };
         }
         
