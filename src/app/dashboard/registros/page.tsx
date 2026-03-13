@@ -5,7 +5,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import { Truck, User, X, FileDown, ChevronDown, Mail } from 'lucide-react';
 import type { Visitor } from '@/lib/types';
-import { useFirestore } from '@/firebase';
+import { useFirestore, useUser } from '@/firebase';
 import { collection, onSnapshot, query, orderBy, updateDoc, type DocumentReference } from 'firebase/firestore';
 import React, { useEffect, useState, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
@@ -71,6 +71,7 @@ export default function RegistrosPage() {
   const [isSending, setIsSending] = useState(false);
   const db = useFirestore();
   const { toast } = useToast();
+  const { user, isUserLoading } = useUser();
 
   useEffect(() => {
     // Por defecto, mostrar las visitas del día actual al cargar la página en el cliente.
@@ -82,7 +83,12 @@ export default function RegistrosPage() {
   }, []);
 
   useEffect(() => {
-    if (!db) return;
+    if (isUserLoading || !db) return; // Wait for user and db to be ready
+
+    if (!user || user.isAnonymous) {
+      setVisits([]); // Clear data if user is not a logged-in admin
+      return;
+    }
 
     const q = query(collection(db, 'visits'), orderBy('entryDateTime', 'desc'));
     
@@ -126,10 +132,17 @@ export default function RegistrosPage() {
       }
 
       setVisits(visitsData);
+    }, (error) => {
+      console.error("Error fetching visits:", error);
+      toast({
+        title: "Error de permisos",
+        description: "No tiene permisos para ver los registros. Por favor, inicie sesión con una cuenta de administrador.",
+        variant: "destructive"
+      });
     });
 
     return () => unsubscribe();
-  }, [db]);
+  }, [db, user, isUserLoading, toast]);
 
   const activeVisits = useMemo(() => {
     return visits.filter(visit => !visit.exitDateTime);
@@ -421,7 +434,7 @@ export default function RegistrosPage() {
               ) : (
                   <TableRow>
                       <TableCell colSpan={5} className="h-24 text-center">
-                          {date ? 'No hay registros que coincidan con su búsqueda.' : 'Seleccione un rango de fechas para ver los registros.'}
+                          {isUserLoading ? "Cargando..." : (user?.isAnonymous ? "Acceso denegado. Inicie sesión como administrador." : (date ? 'No hay registros que coincidan con su búsqueda.' : 'Seleccione un rango de fechas para ver los registros.'))}
                       </TableCell>
                   </TableRow>
               )}
