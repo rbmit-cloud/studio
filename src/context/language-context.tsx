@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useState, useContext, ReactNode, useEffect } from 'react';
+import React, { createContext, useState, useContext, ReactNode, useEffect, useCallback } from 'react';
 import { z } from 'zod';
 
 type Language = 'en' | 'es';
@@ -163,13 +163,13 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
     document.documentElement.lang = language;
   }, [language]);
 
-  const t = (key: string, replacements: {[key: string]: string} = {}): string => {
+  const t = useCallback((key: string, replacements: {[key: string]: string} = {}): string => {
     let translation = translations[language][key] || key;
     Object.keys(replacements).forEach(rKey => {
         translation = translation.replace(`{${rKey}}`, replacements[rKey]);
     });
     return translation;
-  };
+  }, [language]);
   
   const value = {
     language,
