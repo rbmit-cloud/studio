@@ -295,7 +295,7 @@ export default function AjustesPage() {
                         Recibir Registros
                       </FormLabel>
                       <FormDescription>
-                        Si está marcado, se enviarán informes de visitas por correo electrónico a este anfitrión.
+                        Si está marcado, se recibirán informes de visitas por correo electrónico
                       </FormDescription>
                     </div>
                   </FormItem>
