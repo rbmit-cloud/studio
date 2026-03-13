@@ -135,7 +135,7 @@ export async function sendEmailReport(visits: (Visitor & { id: string })[], repo
         
         if (error instanceof FirebaseError && 
             (error.code === 'auth/invalid-credential' || error.code === 'auth/wrong-password' || error.code === 'auth/user-not-found' || error.code === 'auth/invalid-email')) {
-            return { success: false, message: 'Error de autenticación con la cuenta de servicio de Firebase. Verifique que FIREBASE_SERVICE_EMAIL y FIREBASE_SERVICE_PASSWORD son correctos.' };
+            return { success: false, message: 'Error de autenticación con la cuenta de servicio de Firebase. Verifique las variables de entorno FIREBASE_SERVICE_EMAIL y FIREBASE_SERVICE_PASSWORD. Si cambió la contraseña de este usuario recientemente, debe actualizarla aquí también.' };
         }
         
         return { success: false, message: error.message || 'No se pudo enviar el informe por correo.' };
