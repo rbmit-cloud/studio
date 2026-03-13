@@ -27,7 +27,7 @@ import { addDoc, collection, onSnapshot, query, orderBy, doc, deleteDoc, where, 
 import { useEffect, useState } from "react";
 import type { Host } from "@/lib/types";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { ChevronDown, FileDown, Trash2 } from "lucide-react";
+import { FileDown, Trash2 } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -40,7 +40,6 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { cn } from "@/lib/utils";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import * as XLSX from 'xlsx';
 
 const formSchema = z.object({
@@ -219,12 +218,6 @@ export default function AjustesPage() {
     XLSX.writeFile(workbook, "anfitriones.xlsx");
 };
 
-  const handleSendHostsEmail = () => {
-      const subject = "Exportación de Lista de Anfitriones";
-      const body = "Por favor, primero descargue el archivo XLSX usando la opción 'Descargar XLSX' y luego adjúntelo a este correo.";
-      window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-  };
-
   return (
     <div className="grid gap-6 md:grid-cols-2">
       <Card>
@@ -295,23 +288,10 @@ export default function AjustesPage() {
               <CardTitle>Lista de Anfitriones</CardTitle>
               <CardDescription>Personas actualmente disponibles para visitas. Haga clic en una fila para editar.</CardDescription>
             </div>
-            <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                    <Button variant="outline">
-                        <FileDown className="mr-2 h-4 w-4" />
-                        Exportar
-                        <ChevronDown className="ml-2 h-4 w-4" />
-                    </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent>
-                    <DropdownMenuItem onClick={handleExportHostsXlsx}>
-                        Descargar XLSX
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={handleSendHostsEmail}>
-                        Enviar por Email
-                    </DropdownMenuItem>
-                </DropdownMenuContent>
-            </DropdownMenu>
+            <Button variant="outline" onClick={handleExportHostsXlsx}>
+                <FileDown className="mr-2 h-4 w-4" />
+                Descargar XLSX
+            </Button>
           </div>
         </CardHeader>
         <CardContent>

@@ -3,14 +3,13 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { Truck, User, X, FileDown, ChevronDown } from 'lucide-react';
+import { Truck, User, X, FileDown } from 'lucide-react';
 import type { Visitor } from '@/lib/types';
 import { useFirestore } from '@/firebase';
 import { collection, onSnapshot, query, orderBy, updateDoc, type DocumentReference } from 'firebase/firestore';
 import React, { useEffect, useState, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { format } from 'date-fns';
 import * as XLSX from 'xlsx';
 
@@ -183,12 +182,6 @@ export default function RegistrosPage() {
     XLSX.utils.book_append_sheet(workbook, worksheet, "Registros");
     XLSX.writeFile(workbook, "registro_visitas.xlsx");
   };
-
-  const handleSendEmail = () => {
-    const subject = "Exportación de Registros de Visitas";
-    const body = "Por favor, primero descargue el archivo XLSX usando la opción 'Descargar XLSX' y luego adjúntelo a este correo.";
-    window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-  };
   
   const handleExportActiveVisitsXlsx = () => {
     if (!activeVisits || activeVisits.length === 0) {
@@ -225,12 +218,6 @@ export default function RegistrosPage() {
     XLSX.writeFile(workbook, "visitas_activas.xlsx");
   };
 
-  const handleSendActiveVisitsEmail = () => {
-    const subject = "Exportación de Visitas Activas";
-    const body = "Por favor, primero descargue el archivo XLSX usando la opción 'Descargar XLSX' y luego adjúntelo a este correo.";
-    window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-  };
-  
   const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>, field: 'from' | 'to') => {
     const { value } = e.target;
     const newDate = value ? new Date(value + 'T00:00:00') : undefined;
@@ -266,23 +253,10 @@ export default function RegistrosPage() {
                   Visitantes que se encuentran actualmente en las instalaciones.
                   </CardDescription>
               </div>
-              <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                      <Button variant="outline">
-                          <FileDown className="mr-2 h-4 w-4" />
-                          Exportar
-                          <ChevronDown className="ml-2 h-4 w-4" />
-                      </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent>
-                      <DropdownMenuItem onClick={handleExportActiveVisitsXlsx}>
-                          Descargar XLSX
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={handleSendActiveVisitsEmail}>
-                          Enviar por Email
-                      </DropdownMenuItem>
-                  </DropdownMenuContent>
-              </DropdownMenu>
+              <Button variant="outline" onClick={handleExportActiveVisitsXlsx}>
+                  <FileDown className="mr-2 h-4 w-4" />
+                  Descargar XLSX
+              </Button>
           </div>
         </CardHeader>
         <CardContent>
@@ -342,23 +316,10 @@ export default function RegistrosPage() {
                           className="h-10 rounded-md border border-input bg-transparent px-3 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
                       />
                   </div>
-                  <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                          <Button variant="outline" className='h-10'>
-                              <FileDown className="mr-2 h-4 w-4" />
-                              Exportar
-                              <ChevronDown className="ml-2 h-4 w-4" />
-                          </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent>
-                          <DropdownMenuItem onClick={handleExportXlsx}>
-                              Descargar XLSX
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={handleSendEmail}>
-                              Enviar por Email
-                          </DropdownMenuItem>
-                      </DropdownMenuContent>
-                  </DropdownMenu>
+                  <Button variant="outline" className='h-10' onClick={handleExportXlsx}>
+                      <FileDown className="mr-2 h-4 w-4" />
+                      Descargar XLSX
+                  </Button>
                   {date && (
                       <Button variant="outline" className="h-10" onClick={() => { setDate(undefined); }}>
                           <X className="h-4 w-4 mr-2" />
