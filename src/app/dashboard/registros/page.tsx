@@ -3,7 +3,7 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { Truck, User, X, FileDown } from 'lucide-react';
+import { Truck, User, X, FileDown, ChevronDown, Mail } from 'lucide-react';
 import type { Visitor } from '@/lib/types';
 import { useFirestore } from '@/firebase';
 import { collection, onSnapshot, query, orderBy, updateDoc, type DocumentReference } from 'firebase/firestore';
@@ -12,6 +12,12 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import * as XLSX from 'xlsx';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 type DateRange = {
   from?: Date;
@@ -242,6 +248,13 @@ export default function RegistrosPage() {
       return format(date, 'yyyy-MM-dd');
   };
 
+  const handleSendEmail = () => {
+    toast({
+        title: "Función no implementada",
+        description: "El envío de informes por correo electrónico se implementará pronto.",
+    });
+  };
+
   return (
     <div className="flex flex-col gap-6">
       <Card>
@@ -253,10 +266,24 @@ export default function RegistrosPage() {
                   Visitantes que se encuentran actualmente en las instalaciones.
                   </CardDescription>
               </div>
-              <Button variant="outline" onClick={handleExportActiveVisitsXlsx}>
-                  <FileDown className="mr-2 h-4 w-4" />
-                  Descargar XLSX
-              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                    <Button variant="outline">
+                        Exportar
+                        <ChevronDown className="ml-2 h-4 w-4" />
+                    </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                    <DropdownMenuItem onClick={handleExportActiveVisitsXlsx}>
+                        <FileDown className="mr-2 h-4 w-4" />
+                        <span>Descargar XLSX</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={handleSendEmail}>
+                        <Mail className="mr-2 h-4 w-4" />
+                        <span>Enviar por mail</span>
+                    </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
           </div>
         </CardHeader>
         <CardContent>
@@ -316,10 +343,24 @@ export default function RegistrosPage() {
                           className="h-10 rounded-md border border-input bg-transparent px-3 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
                       />
                   </div>
-                  <Button variant="outline" className='h-10' onClick={handleExportXlsx}>
-                      <FileDown className="mr-2 h-4 w-4" />
-                      Descargar XLSX
-                  </Button>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <Button variant="outline" className="h-10">
+                            Exportar
+                            <ChevronDown className="ml-2 h-4 w-4" />
+                        </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent>
+                        <DropdownMenuItem onClick={handleExportXlsx}>
+                            <FileDown className="mr-2 h-4 w-4" />
+                            <span>Descargar XLSX</span>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={handleSendEmail}>
+                            <Mail className="mr-2 h-4 w-4" />
+                            <span>Enviar por mail</span>
+                        </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                   {date && (
                       <Button variant="outline" className="h-10" onClick={() => { setDate(undefined); }}>
                           <X className="h-4 w-4 mr-2" />
