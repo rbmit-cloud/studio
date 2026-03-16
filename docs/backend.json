@@ -51,6 +51,14 @@
         "notes": {
           "type": "string",
           "description": "Any additional notes or remarks about the visit."
+        },
+        "acceptedPrivacyPolicy": {
+          "type": "boolean",
+          "description": "Indicates whether the visitor accepted the data processing policy."
+        },
+        "acceptedSafetyRegulations": {
+          "type": "boolean",
+          "description": "Indicates whether the visitor accepted the safety regulations."
         }
       },
       "required": [

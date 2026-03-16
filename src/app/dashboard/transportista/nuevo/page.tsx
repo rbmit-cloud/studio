@@ -196,7 +196,9 @@ export default function TransportistaFormPage() {
                     type: 'Camión',
                     licensePlate: licensePlate,
                     trailerLicensePlate: trailerLicensePlate
-                }
+                },
+                acceptedPrivacyPolicy: privacyPolicy,
+                acceptedSafetyRegulations: true,
             });
 
             // Send notification email without blocking UI

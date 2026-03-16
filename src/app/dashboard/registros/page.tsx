@@ -196,7 +196,9 @@ export default function RegistrosPage() {
           "Fecha Entrada": entryDateTime.toLocaleDateString('es-ES'),
           "Hora Entrada": entryDateTime.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }),
           "Fecha Salida": exitDateTime ? exitDateTime.toLocaleDateString('es-ES') : 'Dentro',
-          "Hora Salida": exitDateTime ? exitDateTime.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }) : ''
+          "Hora Salida": exitDateTime ? exitDateTime.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }) : '',
+          "Aceptó Política Privacidad": visit.acceptedPrivacyPolicy ? 'Sí' : 'No',
+          "Aceptó Normas Seguridad": visit.acceptedSafetyRegulations ? 'Sí' : 'No'
       };
     });
 
@@ -231,7 +233,9 @@ export default function RegistrosPage() {
             "Fecha Entrada": entryDateTime.toLocaleDateString('es-ES'),
             "Hora Entrada": entryDateTime.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }),
             "Fecha Salida": exitDateTime ? exitDateTime.toLocaleDateString('es-ES') : 'Dentro',
-            "Hora Salida": exitDateTime ? exitDateTime.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }) : ''
+            "Hora Salida": exitDateTime ? exitDateTime.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }) : '',
+            "Aceptó Política Privacidad": visit.acceptedPrivacyPolicy ? 'Sí' : 'No',
+            "Aceptó Normas Seguridad": visit.acceptedSafetyRegulations ? 'Sí' : 'No'
         };
     });
     

@@ -195,6 +195,8 @@ export default function PersonalFormPage() {
                 ...dataToSave,
                 entryType: 'Personal',
                 entryDateTime: new Date().toISOString(),
+                acceptedPrivacyPolicy: privacyPolicy,
+                acceptedSafetyRegulations: true,
             });
 
             // Send notification email without blocking UI

@@ -15,6 +15,8 @@ export type Visitor = {
   vehicleDetails?: VehicleDetails;
   hostName?: string;
   department?: string;
+  acceptedPrivacyPolicy?: boolean;
+  acceptedSafetyRegulations?: boolean;
 };
 
 export type Host = {
