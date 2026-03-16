@@ -27,6 +27,7 @@ import { useFirestore } from "@/firebase";
 import { collection, getDocs, query, where, updateDoc, doc } from "firebase/firestore";
 import { useLanguage, getZodSchema } from "@/context/language-context";
 import { useMemo, useEffect, useState } from "react";
+import { useEnvironment } from "@/context/environment-context";
 
 export default function SalidaPage() {
     const { t } = useLanguage();
@@ -34,6 +35,7 @@ export default function SalidaPage() {
     const db = useFirestore();
     const router = useRouter();
     const [isClient, setIsClient] = useState(false);
+    const { visitsCollection } = useEnvironment();
 
     useEffect(() => {
         setIsClient(true);
@@ -92,7 +94,7 @@ export default function SalidaPage() {
         const { visitorName } = values;
 
         try {
-            const q = query(collection(db, "visits"), where("visitorName", "==", visitorName));
+            const q = query(collection(db, visitsCollection), where("visitorName", "==", visitorName));
             
             const querySnapshot = await getDocs(q);
             
@@ -113,7 +115,7 @@ export default function SalidaPage() {
             
             const visitToUpdate = activeVisits[0];
 
-            await updateDoc(doc(db, "visits", visitToUpdate.id), {
+            await updateDoc(doc(db, visitsCollection, visitToUpdate.id), {
                 exitDateTime: new Date().toISOString(),
             });
 

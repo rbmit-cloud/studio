@@ -43,6 +43,7 @@ import {
 import { cn } from "@/lib/utils";
 import * as XLSX from 'xlsx';
 import { Checkbox } from "@/components/ui/checkbox";
+import { useEnvironment } from "@/context/environment-context";
 
 const formSchema = z.object({
   name: z.string().min(2, "El nombre debe tener al menos 2 caracteres."),
@@ -54,6 +55,7 @@ const formSchema = z.object({
 
 
 export default function AjustesPage() {
+  const { environment, toggleEnvironment, hostsCollection } = useEnvironment();
   const db = useFirestore();
   const [hosts, setHosts] = useState<Host[]>([]);
   const [selectedHost, setSelectedHost] = useState<Host | null>(null);
@@ -82,7 +84,7 @@ export default function AjustesPage() {
   useEffect(() => {
     if (!db) return;
 
-    const q = query(collection(db, "hosts"), orderBy("name", "asc"));
+    const q = query(collection(db, hostsCollection), orderBy("name", "asc"));
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const hostsData: Host[] = [];
       snapshot.forEach((doc) => {
@@ -99,7 +101,7 @@ export default function AjustesPage() {
     });
 
     return () => unsubscribe();
-  }, [db, toast]);
+  }, [db, toast, hostsCollection]);
 
   const handleCancelEdit = () => {
     setSelectedHost(null);
@@ -129,7 +131,7 @@ export default function AjustesPage() {
     }
   
     try {
-      const hostsRef = collection(db, "hosts");
+      const hostsRef = collection(db, hostsCollection);
       
       const nameQuery = query(hostsRef, where("name", "==", values.name));
       const nameSnapshot = await getDocs(nameQuery);
@@ -166,7 +168,7 @@ export default function AjustesPage() {
       };
 
       if (selectedHost) {
-        const hostDocRef = doc(db, "hosts", selectedHost.id);
+        const hostDocRef = doc(db, hostsCollection, selectedHost.id);
         await updateDoc(hostDocRef, dataToSave as any); // Use 'as any' to bypass strict type checking for update
         toast({
             title: "Anfitrión Actualizado",
@@ -202,7 +204,7 @@ export default function AjustesPage() {
         return;
     }
     try {
-        await deleteDoc(doc(db, "hosts", hostId));
+        await deleteDoc(doc(db, hostsCollection, hostId));
         toast({
             title: "Anfitrión Eliminado",
             description: "El anfitrión ha sido eliminado correctamente.",
@@ -336,9 +338,14 @@ export default function AjustesPage() {
               />
             </CardContent>
             <CardFooter className="flex justify-between">
-                <Button type="submit" disabled={form.formState.isSubmitting}>
-                  {form.formState.isSubmitting ? 'Guardando...' : (selectedHost ? 'Actualizar Anfitrión' : 'Añadir Anfitrión')}
-                </Button>
+                <div className="flex gap-2">
+                    <Button type="submit" disabled={form.formState.isSubmitting}>
+                    {form.formState.isSubmitting ? 'Guardando...' : (selectedHost ? 'Actualizar Anfitrión' : 'Añadir Anfitrión')}
+                    </Button>
+                    <Button type="button" variant={environment === 'test' ? 'destructive' : 'secondary'} onClick={toggleEnvironment}>
+                        {environment === 'test' ? 'Desactivar Entorno Test' : 'Activar Entorno Test'}
+                    </Button>
+                </div>
               {selectedHost && (
                 <Button type="button" variant="outline" onClick={handleCancelEdit}>
                     Cancelar Edición

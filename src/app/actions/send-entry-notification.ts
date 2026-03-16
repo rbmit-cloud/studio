@@ -41,6 +41,7 @@ type VisitorNotificationPayload = {
     hostName: string;
     department?: string;
     vehicleDetails?: VehicleDetails;
+    environment: 'prod' | 'test';
 };
 
 export async function sendEntryNotificationEmail(visitor: VisitorNotificationPayload): Promise<{ success: boolean; message: string }> {
@@ -54,8 +55,9 @@ export async function sendEntryNotificationEmail(visitor: VisitorNotificationPay
 
     try {
         const db = await getAuthenticatedFirestore();
+        const hostsCollectionName = visitor.environment === 'test' ? 'test_hosts' : 'hosts';
         
-        const hostsRef = collection(db, "hosts");
+        const hostsRef = collection(db, hostsCollectionName);
         const q = query(hostsRef, where("name", "==", visitor.hostName));
         const querySnapshot = await getDocs(q);
 

@@ -29,6 +29,7 @@ async function getAuthenticatedFirestore(): Promise<Firestore> {
 type PreviousVisitPayload = {
     visitorName: string;
     entryType: 'Personal' | 'Transportista';
+    environment: 'prod' | 'test';
 };
 
 // Define a return type that is serializable for the client
@@ -47,9 +48,10 @@ export async function findPreviousVisitAction(payload: PreviousVisitPayload): Pr
 
     try {
         const db = await getAuthenticatedFirestore();
+        const visitsCollectionName = payload.environment === 'test' ? 'test_visits' : 'visits';
 
         const q = query(
-            collection(db, "visits"),
+            collection(db, visitsCollectionName),
             where("visitorName", "==", payload.visitorName),
             where("entryType", "==", payload.entryType),
             orderBy("entryDateTime", "desc"),
@@ -78,7 +80,7 @@ export async function findPreviousVisitAction(payload: PreviousVisitPayload): Pr
         
         if (error instanceof FirebaseError) {
              if (error.code === 'auth/invalid-credential' || error.code === 'auth/wrong-password' || error.code === 'auth/user-not-found' || error.code === 'auth/invalid-email') {
-                return { success: false, data: null, message: 'Error de autenticación con la cuenta de servicio de Firebase. Verifique las variables de entorno FIREBASE_SERVICE_EMAIL y FIREBASE_SERVICE_PASSWORD.' };
+                return { success: false, data: null, message: 'Error de autenticación con la cuenta de servicio de Firebase. Verifique las variables de entorno FIREBASE_SERVICE_EMAIL y FIREBASE_SERVICE_PASSWORD. Si cambió la contraseña de este usuario recientemente, debe actualizarla aquí también.' };
              }
              if (error.code === 'firestore/failed-precondition') {
                 return { success: false, data: null, message: 'La consulta requiere un índice de Firestore. Por favor, revise los registros para crear el índice necesario.' };

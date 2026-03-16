@@ -19,6 +19,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { sendEmailReport } from '@/app/actions/send-email';
+import { useEnvironment } from '@/context/environment-context';
 
 type DateRange = {
   from?: Date;
@@ -72,6 +73,7 @@ export default function RegistrosPage() {
   const db = useFirestore();
   const { toast } = useToast();
   const { user, isUserLoading } = useUser();
+  const { visitsCollection, hostsCollection } = useEnvironment();
 
   useEffect(() => {
     // Por defecto, mostrar las visitas del día actual al cargar la página en el cliente.
@@ -90,7 +92,7 @@ export default function RegistrosPage() {
       return;
     }
 
-    const q = query(collection(db, 'visits'), orderBy('entryDateTime', 'desc'));
+    const q = query(collection(db, visitsCollection), orderBy('entryDateTime', 'desc'));
     
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
       const visitsData: (Visitor & { id: string })[] = [];
@@ -142,7 +144,7 @@ export default function RegistrosPage() {
     });
 
     return () => unsubscribe();
-  }, [db, user, isUserLoading, toast]);
+  }, [db, user, isUserLoading, toast, visitsCollection]);
 
   const activeVisits = useMemo(() => {
     return visits.filter(visit => !visit.exitDateTime);
@@ -283,7 +285,7 @@ export default function RegistrosPage() {
         return;
     }
 
-    const result = await sendEmailReport(visitsToEmail, reportTitle);
+    const result = await sendEmailReport(visitsToEmail, reportTitle, hostsCollection);
 
     if (result.success) {
         toast({

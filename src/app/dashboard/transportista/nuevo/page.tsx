@@ -48,10 +48,12 @@ import type { Host } from "@/lib/types";
 import { useLanguage, getZodSchema } from "@/context/language-context";
 import { sendEntryNotificationEmail } from "@/app/actions/send-entry-notification";
 import { findPreviousVisitAction } from "@/app/actions/find-previous-visit";
+import { useEnvironment } from "@/context/environment-context";
 
 export default function TransportistaFormPage() {
     const { t } = useLanguage();
     const formSchema = useMemo(() => getZodSchema(t).transportista, [t]);
+    const { environment, visitsCollection, hostsCollection } = useEnvironment();
 
     const [isClient, setIsClient] = useState(false);
     const db = useFirestore();
@@ -97,7 +99,7 @@ export default function TransportistaFormPage() {
     useEffect(() => {
         if (!db) return;
     
-        const q = query(collection(db, 'hosts'), orderBy('name', 'asc'));
+        const q = query(collection(db, hostsCollection), orderBy('name', 'asc'));
         const unsubscribe = onSnapshot(q, (snapshot) => {
             const hostsData: Omit<Host, 'id' | 'email'>[] = [];
             snapshot.forEach((doc) => {
@@ -108,7 +110,7 @@ export default function TransportistaFormPage() {
         });
     
         return () => unsubscribe();
-    }, [db]);
+    }, [db, hostsCollection]);
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -133,7 +135,8 @@ export default function TransportistaFormPage() {
         try {
             const result = await findPreviousVisitAction({
                 visitorName: visitorName,
-                entryType: "Transportista"
+                entryType: "Transportista",
+                environment: environment,
             });
 
             if (result.success && result.data) {
@@ -165,7 +168,7 @@ export default function TransportistaFormPage() {
 
         try {
              // Check for active visit before registering
-             const activeVisitQuery = query(collection(db, "visits"), where("visitorName", "==", values.visitorName));
+             const activeVisitQuery = query(collection(db, visitsCollection), where("visitorName", "==", values.visitorName));
              const activeVisitSnapshot = await getDocs(activeVisitQuery);
  
              const activeVisits = activeVisitSnapshot.docs.filter(doc => !doc.data().exitDateTime);
@@ -180,7 +183,7 @@ export default function TransportistaFormPage() {
              }
 
             const { privacyPolicy, licensePlate, trailerLicensePlate, ...rest } = values;
-            await addDoc(collection(db, "visits"), {
+            await addDoc(collection(db, visitsCollection), {
                 ...rest,
                 entryType: 'Transportista',
                 entryDateTime: new Date().toISOString(),
@@ -199,7 +202,8 @@ export default function TransportistaFormPage() {
                     type: 'Camión',
                     licensePlate,
                     trailerLicensePlate
-                }
+                },
+                environment: environment,
             }).then(result => {
                 if (!result.success) {
                     console.error("Failed to send visit notification:", result.message);

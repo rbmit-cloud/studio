@@ -34,7 +34,7 @@ async function getAuthenticatedFirestore(): Promise<Firestore> {
     return getFirestore(serviceApp);
 }
 
-export async function sendEmailReport(visits: (Visitor & { id: string })[], reportTitle: string): Promise<{ success: boolean; message: string }> {
+export async function sendEmailReport(visits: (Visitor & { id: string })[], reportTitle: string, hostsCollectionName: 'hosts' | 'test_hosts'): Promise<{ success: boolean; message: string }> {
     // --- Start: Environment Variable Validation ---
     if (!process.env.GMAIL_EMAIL || !process.env.GMAIL_APP_PASSWORD) {
         return { success: false, message: 'Las credenciales de Gmail no están configuradas en las variables de entorno. Por favor, añada GMAIL_EMAIL y GMAIL_APP_PASSWORD.' };
@@ -57,7 +57,7 @@ export async function sendEmailReport(visits: (Visitor & { id: string })[], repo
         const db = await getAuthenticatedFirestore();
         
         // 1. Get hosts who want to receive reports
-        const hostsRef = collection(db, "hosts");
+        const hostsRef = collection(db, hostsCollectionName);
         const q = query(hostsRef, where("sendRecords", "==", true));
         const querySnapshot = await getDocs(q);
 
