@@ -73,7 +73,7 @@ export default function RegistrosPage() {
   const db = useFirestore();
   const { toast } = useToast();
   const { user, isUserLoading } = useUser();
-  const { visitsCollection, hostsCollection } = useEnvironment();
+  const { visitsCollection, hostsCollection, environment } = useEnvironment();
 
   useEffect(() => {
     // Por defecto, mostrar las visitas del día actual al cargar la página en el cliente.
@@ -203,6 +203,16 @@ export default function RegistrosPage() {
     });
 
     const worksheet = XLSX.utils.json_to_sheet(dataToExport);
+
+    if (environment === 'test') {
+        XLSX.utils.sheet_add_aoa(worksheet, [['***ENTORNO TEST***']], { origin: -1 });
+        const numCols = Object.keys(dataToExport[0] || {}).length;
+        if (numCols > 0) {
+            if (!worksheet['!merges']) worksheet['!merges'] = [];
+            worksheet['!merges'].push({ s: { r: 0, c: 0 }, e: { r: 0, c: numCols - 1 } });
+        }
+    }
+
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Registros");
     XLSX.writeFile(workbook, "registro_visitas.xlsx");
@@ -240,6 +250,16 @@ export default function RegistrosPage() {
     });
     
     const worksheet = XLSX.utils.json_to_sheet(dataToExport);
+    
+    if (environment === 'test') {
+        XLSX.utils.sheet_add_aoa(worksheet, [['***ENTORNO TEST***']], { origin: -1 });
+        const numCols = Object.keys(dataToExport[0] || {}).length;
+        if (numCols > 0) {
+            if (!worksheet['!merges']) worksheet['!merges'] = [];
+            worksheet['!merges'].push({ s: { r: 0, c: 0 }, e: { r: 0, c: numCols - 1 } });
+        }
+    }
+
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Visitas Activas");
     XLSX.writeFile(workbook, "visitas_activas.xlsx");

@@ -52,6 +52,8 @@ export async function sendEmailReport(visits: (Visitor & { id: string })[], repo
         },
     });
 
+    const environment = hostsCollectionName === 'test_hosts' ? 'test' : 'prod';
+
     try {
         // Get an authenticated Firestore instance
         const db = await getAuthenticatedFirestore();
@@ -92,6 +94,16 @@ export async function sendEmailReport(visits: (Visitor & { id: string })[], repo
           };
         });
         const worksheet = XLSX.utils.json_to_sheet(dataToExport);
+
+        if (environment === 'test') {
+            XLSX.utils.sheet_add_aoa(worksheet, [['***ENTORNO TEST***']], { origin: -1 });
+            const numCols = Object.keys(dataToExport[0] || {}).length;
+            if (numCols > 0) {
+                if (!worksheet['!merges']) worksheet['!merges'] = [];
+                worksheet['!merges'].push({ s: { r: 0, c: 0 }, e: { r: 0, c: numCols - 1 } });
+            }
+        }
+
         const workbook = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(workbook, worksheet, "Registros");
         const xlsxBuffer = XLSX.write(workbook, { type: 'buffer', bookType: 'xlsx' });
