@@ -5,6 +5,7 @@ import { cn } from '@/lib/utils';
 import { FirebaseClientProvider } from '@/firebase/client-provider';
 import { LanguageProvider } from '@/context/language-context';
 import { EnvironmentProvider } from '@/context/environment-context';
+import { EnvironmentBanner } from '@/components/ui/environment-banner';
 
 export const metadata: Metadata = {
   title: 'ROBAMA',
@@ -27,6 +28,7 @@ export default function RootLayout({
         <FirebaseClientProvider>
           <LanguageProvider>
             <EnvironmentProvider>
+              <EnvironmentBanner />
               {children}
             </EnvironmentProvider>
           </LanguageProvider>
