@@ -21,8 +21,8 @@ export default function AdminLayout({
         </div>
         <h1 className="flex-1 text-center text-xl font-semibold">Mantenimiento de Anfitriones</h1>
         <div className="flex items-center gap-2">
-            <Button type="button" variant={environment === 'test' ? 'destructive' : 'secondary'} onClick={toggleEnvironment} size="sm">
-                {environment === 'test' ? 'Desactivar Entorno Test' : 'Activar Entorno Test'}
+            <Button type="button" variant={environment === 'test' ? 'destructive' : 'default'} onClick={toggleEnvironment} size="sm">
+                {environment === 'test' ? 'DESACTIVAR ENTORNO TEST' : 'ACTIVAR ENTORNO TEST'}
             </Button>
             <Button asChild variant="outline" size="sm">
               <Link href="/">
