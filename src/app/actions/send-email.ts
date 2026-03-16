@@ -80,15 +80,15 @@ export async function sendEmailReport(visits: (Visitor & { id: string })[], repo
               "Empresa": visit.companyName,
               "Motivo Visita": visit.purposeOfVisit,
               "Anfitrión": visit.hostName || '',
-              "Departamento Anfitrión": visit.department || '',
+              "Departamento": visit.department || '',
               "Matrícula Camión": visit.entryType === 'Transportista' ? visit.vehicleDetails?.licensePlate || '' : '',
               "Matrícula Remolque": visit.entryType === 'Transportista' ? visit.vehicleDetails?.trailerLicensePlate || '' : '',
               "Fecha Entrada": entryDateTime.toLocaleDateString('es-ES'),
               "Hora Entrada": entryDateTime.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }),
               "Fecha Salida": exitDateTime ? exitDateTime.toLocaleDateString('es-ES') : 'Dentro',
               "Hora Salida": exitDateTime ? exitDateTime.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }) : '',
-              "Aceptó Política Privacidad": visit.acceptedPrivacyPolicy ? 'Sí' : 'No',
-              "Aceptó Normas Seguridad": visit.acceptedSafetyRegulations ? 'Sí' : 'No'
+              "Aceptó y Entendió Política Privacidad": visit.acceptedPrivacyPolicy ? 'Sí' : 'No',
+              "Aceptó y Entendió Normas Seguridad": visit.acceptedSafetyRegulations ? 'Sí' : 'No'
           };
         });
         const worksheet = XLSX.utils.json_to_sheet(dataToExport);
