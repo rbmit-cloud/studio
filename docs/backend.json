@@ -60,6 +60,42 @@
         "entryDateTime",
         "purposeOfVisit"
       ]
+    },
+    "Host": {
+      "title": "Host",
+      "description": "Represents an employee who can be visited.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Host entity."
+        },
+        "name": {
+          "type": "string",
+          "description": "The full name of the host."
+        },
+        "department": {
+          "type": "string",
+          "description": "The department the host belongs to."
+        },
+        "email": {
+          "type": "string",
+          "format": "email",
+          "description": "The email address of the host."
+        },
+        "sendRecords": {
+          "type": "boolean",
+          "description": "Whether the host should receive visit reports by email."
+        },
+        "sendEntryNotification": {
+          "type": "boolean",
+          "description": "Whether the host should receive an email notification upon a visitor's entry."
+        }
+      },
+      "required": [
+        "id",
+        "name"
+      ]
     }
   },
   "auth": {
@@ -82,6 +118,54 @@
             {
               "name": "visitId",
               "description": "The unique identifier for a specific visit log entry."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/test_visits/{visitId}",
+        "definition": {
+          "entityName": "Visit",
+          "schema": {
+            "$ref": "#/backend/entities/Visit"
+          },
+          "description": "TEST COLLECTION: Stores all visitor log entries for testing purposes.",
+          "params": [
+            {
+              "name": "visitId",
+              "description": "The unique identifier for a specific visit log entry."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/hosts/{hostId}",
+        "definition": {
+          "entityName": "Host",
+          "schema": {
+            "$ref": "#/backend/entities/Host"
+          },
+          "description": "Stores all host entries. Any authenticated user can read the list to select a host. Only admins can create, update, or delete hosts.",
+          "params": [
+            {
+              "name": "hostId",
+              "description": "The unique identifier for a specific host entry."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/test_hosts/{hostId}",
+        "definition": {
+          "entityName": "Host",
+          "schema": {
+            "$ref": "#/backend/entities/Host"
+          },
+          "description": "TEST COLLECTION: Stores all host entries for testing purposes.",
+          "params": [
+            {
+              "name": "hostId",
+              "description": "The unique identifier for a specific host entry."
             }
           ]
         }

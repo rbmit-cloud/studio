@@ -106,6 +106,16 @@ service cloud.firestore {
     }
 
     /**
+     * @description TEST COLLECTION: Stores all visitor log entries for testing.
+     * @path /test_visits/{visitId}
+     */
+    match /test_visits/{visitId} {
+      allow get, list: if isAdmin();
+      allow create: if isSignedIn();
+      allow update, delete: if isAdmin() && isExistingDoc();
+    }
+
+    /**
      * @description Manages the list of hosts (employees) who can be visited.
      * Any authenticated user can read the list to select a host.
      * Only admins can create, update, or delete hosts.
@@ -116,6 +126,15 @@ service cloud.firestore {
      * @principle Secures host management to admins while allowing public read for functionality.
      */
     match /hosts/{hostId} {
+        allow get, list: if isSignedIn();
+        allow create, update, delete: if isAdmin();
+    }
+
+    /**
+     * @description TEST COLLECTION: Manages the list of hosts for testing.
+     * @path /test_hosts/{hostId}
+     */
+    match /test_hosts/{hostId} {
         allow get, list: if isSignedIn();
         allow create, update, delete: if isAdmin();
     }
