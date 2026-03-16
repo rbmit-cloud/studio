@@ -75,7 +75,7 @@ PLAN DE EMERGENCIA
 - En ningún caso ponga en peligro su vida.
 • Si se encuentra atrapado por el fuego:
 - Si la zona se encuentra inundada de humo, desplácese gateando y cúbrase la nariz y boca con un pañuelo u otro tipo de prenda. Evite la extensión del fuego y del humo cerrando puertas y ventanas. Tape las ranuras con trapos, preferiblemente húmedos.`,
-    'accept': 'Acepto',
+    'accept': 'He leído, entiendo y acepto',
 
     // personal/nuevo/page.tsx
     'personalVisitRegistration': 'Registro de Visita Personal',
@@ -152,7 +152,7 @@ PLAN DE EMERGENCIA
     'login': 'Login',
     'safetyRegulationsTitle': 'SAFETY RULES FOR VISITORS AND EXTERNAL COMPANIES',
     'safetyRegulationsContent': `Welcome to S.A. ROBAMA:
-In accordance with Article 24 of the Law on Prevention of Occupational Risks (Law 31/1995) and Royal Decree 171/2004 on Coordination of Business Activities, this document provides the basic instructions on Occupational Health and Safety that visitors and external companies must follow:
+In compliance with Article 24 of the Law on Prevention of Occupational Risks (Law 31/1995) and Royal Decree 171/2004 on Coordination of Business Activities, this document provides the basic instructions on Occupational Health and Safety that visitors and external companies must follow:
 
 • You must register every entry and exit you make in our facilities at Reception so that in case of an Emergency we are aware of your presence. If you are outside office hours (from 08:00 to 13:00 and from 14:00 to 17:00), please inform the Manufacturing/Warehouse Manager.
 • Before starting work in our facilities, the contracted company must ensure that all its personnel have sufficient training and information about their own occupational risks and the corresponding prevention measures, and that they have the necessary PPE (safety footwear, respiratory protection mask, gloves, glasses, harness, ...) and collective protections (fences, nets, ...).
