@@ -202,11 +202,19 @@ export default function RegistrosPage() {
       };
     });
 
-    const worksheet = XLSX.utils.json_to_sheet(dataToExport);
+    const headers = Object.keys(dataToExport[0]);
+    const dataRows = dataToExport.map(item => headers.map(header => (item as any)[header]));
+
+    let sheetData = [headers, ...dataRows];
 
     if (environment === 'test') {
-        XLSX.utils.sheet_add_aoa(worksheet, [['***ENTORNO TEST***']], { origin: -1 });
-        const numCols = Object.keys(dataToExport[0] || {}).length;
+        sheetData.unshift(['***ENTORNO TEST***']);
+    }
+
+    const worksheet = XLSX.utils.aoa_to_sheet(sheetData);
+
+    if (environment === 'test') {
+        const numCols = headers.length;
         if (numCols > 0) {
             if (!worksheet['!merges']) worksheet['!merges'] = [];
             worksheet['!merges'].push({ s: { r: 0, c: 0 }, e: { r: 0, c: numCols - 1 } });
@@ -249,11 +257,19 @@ export default function RegistrosPage() {
         };
     });
     
-    const worksheet = XLSX.utils.json_to_sheet(dataToExport);
+    const headers = Object.keys(dataToExport[0]);
+    const dataRows = dataToExport.map(item => headers.map(header => (item as any)[header]));
     
+    let sheetData = [headers, ...dataRows];
+
     if (environment === 'test') {
-        XLSX.utils.sheet_add_aoa(worksheet, [['***ENTORNO TEST***']], { origin: -1 });
-        const numCols = Object.keys(dataToExport[0] || {}).length;
+        sheetData.unshift(['***ENTORNO TEST***']);
+    }
+
+    const worksheet = XLSX.utils.aoa_to_sheet(sheetData);
+
+    if (environment === 'test') {
+        const numCols = headers.length;
         if (numCols > 0) {
             if (!worksheet['!merges']) worksheet['!merges'] = [];
             worksheet['!merges'].push({ s: { r: 0, c: 0 }, e: { r: 0, c: numCols - 1 } });
