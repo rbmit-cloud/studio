@@ -89,7 +89,7 @@ PLAN DE EMERGENCIA
     'department': 'Departamento',
     'departmentPlaceholder': 'Departamento',
     'purposeOfVisit': 'Motivo de la visita',
-    'privacyPolicy': 'He leído y acepto la Política de tratamiento de datos.',
+    'privacyPolicy': 'He leído, entiendo y acepto la política de tratamiento de datos.',
     'cancel': 'Cancelar',
     'registerEntry': 'Registrar Entrada',
     'registering': 'Registrando...',
@@ -201,7 +201,7 @@ EMERGENCY PLAN
 - Under no circumstances put your life in danger.
 • If you find yourself trapped by fire:
 - If the area is flooded with smoke, crawl and cover your nose and mouth with a handkerchief or other type of garment. Prevent the spread of fire and smoke by closing doors and windows. Cover the cracks with rags, preferably wet.`,
-    'accept': 'Accept',
+    'accept': 'I have read, understand, and accept',
 
     // personal/nuevo/page.tsx
     'personalVisitRegistration': 'Personal Visit Registration',
@@ -215,7 +215,7 @@ EMERGENCY PLAN
     'department': 'Department',
     'departmentPlaceholder': 'Department',
     'purposeOfVisit': 'Purpose of visit',
-    'privacyPolicy': 'I have read and accept the data processing policy.',
+    'privacyPolicy': 'I have read, understand, and accept the data processing policy.',
     'cancel': 'Cancel',
     'registerEntry': 'Register Entry',
     'registering': 'Registering...',
