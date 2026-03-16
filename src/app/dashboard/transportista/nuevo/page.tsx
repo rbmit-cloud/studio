@@ -149,7 +149,6 @@ export default function TransportistaFormPage() {
                     form.setValue("licensePlate", lastVisit.licensePlate);
                 }
             } else if (!result.success && result.message) {
-                console.error("Error searching for previous visit:", result.message);
                 toast({
                     title: t('dbError'),
                     description: result.message,

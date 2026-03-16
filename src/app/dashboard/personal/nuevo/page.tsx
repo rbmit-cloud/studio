@@ -151,7 +151,6 @@ export default function PersonalFormPage() {
                     }
                 }
             } else if (!result.success && result.message) {
-                console.error("Error searching for previous visit:", result.message);
                 // For index errors, the message contains a creation URL. It's long but helpful.
                 toast({
                     title: t('dbError'),
