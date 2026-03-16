@@ -150,9 +150,15 @@ export default function PersonalFormPage() {
                         form.setValue('department', selectedHost.department || '');
                     }
                 }
-            } else if (!result.success) {
-                // Optionally show a toast, but for now just log it to avoid bothering the user
+            } else if (!result.success && result.message) {
                 console.error("Error searching for previous visit:", result.message);
+                // For index errors, the message contains a creation URL. It's long but helpful.
+                toast({
+                    title: t('dbError'),
+                    description: result.message,
+                    variant: "destructive",
+                    duration: 20000, // Give user time to read/copy the link
+                });
             }
         } catch (error) {
             console.error("Error calling findPreviousVisitAction:", error);

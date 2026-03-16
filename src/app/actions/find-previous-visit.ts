@@ -83,7 +83,9 @@ export async function findPreviousVisitAction(payload: PreviousVisitPayload): Pr
                 return { success: false, data: null, message: 'Error de autenticación con la cuenta de servicio de Firebase. Verifique las variables de entorno FIREBASE_SERVICE_EMAIL y FIREBASE_SERVICE_PASSWORD. Si cambió la contraseña de este usuario recientemente, debe actualizarla aquí también.' };
              }
              if (error.code === 'firestore/failed-precondition') {
-                return { success: false, data: null, message: 'La consulta requiere un índice de Firestore. Por favor, revise los registros para crear el índice necesario.' };
+                // The original error message from Firestore contains the URL to create the index.
+                // It's important to pass this full message to the client.
+                return { success: false, data: null, message: error.message };
              }
         }
         
