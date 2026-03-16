@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useState, useContext, ReactNode, useEffect, useMemo } from 'react';
+import React, { createContext, useState, useContext, ReactNode, useEffect } from 'react';
 
 type Environment = 'prod' | 'test';
 
@@ -41,8 +41,8 @@ export const EnvironmentProvider = ({ children }: { children: ReactNode }) => {
     });
   };
 
-  const visitsCollection = useMemo(() => environment === 'test' ? 'test_visits' : 'visits', [environment]);
-  const hostsCollection = useMemo(() => environment === 'test' ? 'test_hosts' : 'hosts', [environment]);
+  const visitsCollection: 'visits' | 'test_visits' = environment === 'test' ? 'test_visits' : 'visits';
+  const hostsCollection: 'hosts' | 'test_hosts' = environment === 'test' ? 'test_hosts' : 'hosts';
 
   const value = {
     environment,
