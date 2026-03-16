@@ -55,7 +55,7 @@ const formSchema = z.object({
 
 
 export default function AjustesPage() {
-  const { environment, toggleEnvironment, hostsCollection } = useEnvironment();
+  const { hostsCollection } = useEnvironment();
   const db = useFirestore();
   const [hosts, setHosts] = useState<Host[]>([]);
   const [selectedHost, setSelectedHost] = useState<Host | null>(null);
@@ -338,14 +338,9 @@ export default function AjustesPage() {
               />
             </CardContent>
             <CardFooter className="flex justify-between">
-                <div className="flex gap-2">
-                    <Button type="submit" disabled={form.formState.isSubmitting}>
-                    {form.formState.isSubmitting ? 'Guardando...' : (selectedHost ? 'Actualizar Anfitrión' : 'Añadir Anfitrión')}
-                    </Button>
-                    <Button type="button" variant={environment === 'test' ? 'destructive' : 'secondary'} onClick={toggleEnvironment}>
-                        {environment === 'test' ? 'Desactivar Entorno Test' : 'Activar Entorno Test'}
-                    </Button>
-                </div>
+              <Button type="submit" disabled={form.formState.isSubmitting}>
+                {form.formState.isSubmitting ? 'Guardando...' : (selectedHost ? 'Actualizar Anfitrión' : 'Añadir Anfitrión')}
+              </Button>
               {selectedHost && (
                 <Button type="button" variant="outline" onClick={handleCancelEdit}>
                     Cancelar Edición
