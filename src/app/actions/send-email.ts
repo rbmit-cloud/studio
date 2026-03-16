@@ -84,9 +84,9 @@ export async function sendEmailReport(visits: (Visitor & { id: string })[], repo
               "Matrícula Camión": visit.entryType === 'Transportista' ? visit.vehicleDetails?.licensePlate || '' : '',
               "Matrícula Remolque": visit.entryType === 'Transportista' ? visit.vehicleDetails?.trailerLicensePlate || '' : '',
               "Fecha Entrada": entryDateTime.toLocaleDateString('es-ES'),
-              "Hora Entrada": entryDateTime.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }),
+              "Hora Entrada": entryDateTime.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
               "Fecha Salida": exitDateTime ? exitDateTime.toLocaleDateString('es-ES') : 'Dentro',
-              "Hora Salida": exitDateTime ? exitDateTime.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }) : '',
+              "Hora Salida": exitDateTime ? exitDateTime.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) : '',
               "Aceptó y Entendió Política Privacidad": visit.acceptedPrivacyPolicy ? 'Sí' : 'No',
               "Aceptó y Entendió Normas Seguridad": visit.acceptedSafetyRegulations ? 'Sí' : 'No'
           };

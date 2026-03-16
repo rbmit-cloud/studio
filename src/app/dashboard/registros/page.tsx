@@ -47,7 +47,7 @@ function VisitorRow({ visitor }: { visitor: Visitor & { id: string } }) {
       <TableCell className="text-right">
         <div>{new Date(visitor.entryDateTime).toLocaleDateString('es-ES')}</div>
         <div className="text-sm text-muted-foreground">
-          {new Date(visitor.entryDateTime).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}
+          {new Date(visitor.entryDateTime).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
         </div>
       </TableCell>
       <TableCell className="text-right">
@@ -55,7 +55,7 @@ function VisitorRow({ visitor }: { visitor: Visitor & { id: string } }) {
           <div>
             <div>{new Date(visitor.exitDateTime).toLocaleDateString('es-ES')}</div>
             <div className="text-sm text-muted-foreground">
-              {new Date(visitor.exitDateTime).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}
+              {new Date(visitor.exitDateTime).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
             </div>
           </div>
         ) : (
@@ -194,9 +194,9 @@ export default function RegistrosPage() {
           "Matrícula Camión": visit.entryType === 'Transportista' ? visit.vehicleDetails?.licensePlate || '' : '',
           "Matrícula Remolque": visit.entryType === 'Transportista' ? visit.vehicleDetails?.trailerLicensePlate || '' : '',
           "Fecha Entrada": entryDateTime.toLocaleDateString('es-ES'),
-          "Hora Entrada": entryDateTime.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }),
+          "Hora Entrada": entryDateTime.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
           "Fecha Salida": exitDateTime ? exitDateTime.toLocaleDateString('es-ES') : 'Dentro',
-          "Hora Salida": exitDateTime ? exitDateTime.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }) : '',
+          "Hora Salida": exitDateTime ? exitDateTime.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) : '',
           "Aceptó y Entendió Política Privacidad": visit.acceptedPrivacyPolicy ? 'Sí' : 'No',
           "Aceptó y Entendió Normas Seguridad": visit.acceptedSafetyRegulations ? 'Sí' : 'No'
       };
@@ -231,9 +231,9 @@ export default function RegistrosPage() {
             "Matrícula Camión": visit.entryType === 'Transportista' ? visit.vehicleDetails?.licensePlate || '' : '',
             "Matrícula Remolque": visit.entryType === 'Transportista' ? visit.vehicleDetails?.trailerLicensePlate || '' : '',
             "Fecha Entrada": entryDateTime.toLocaleDateString('es-ES'),
-            "Hora Entrada": entryDateTime.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }),
+            "Hora Entrada": entryDateTime.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
             "Fecha Salida": exitDateTime ? exitDateTime.toLocaleDateString('es-ES') : 'Dentro',
-            "Hora Salida": exitDateTime ? exitDateTime.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }) : '',
+            "Hora Salida": exitDateTime ? exitDateTime.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) : '',
             "Aceptó y Entendió Política Privacidad": visit.acceptedPrivacyPolicy ? 'Sí' : 'No',
             "Aceptó y Entendió Normas Seguridad": visit.acceptedSafetyRegulations ? 'Sí' : 'No'
         };
