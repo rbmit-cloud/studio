@@ -35,7 +35,7 @@ export default function SalidaPage() {
     const db = useFirestore();
     const router = useRouter();
     const [isClient, setIsClient] = useState(false);
-    const { visitsCollection } = useEnvironment();
+    const { environment, visitsCollection } = useEnvironment();
 
     useEffect(() => {
         setIsClient(true);
@@ -148,6 +148,11 @@ export default function SalidaPage() {
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)}>
                         <CardHeader>
+                            {environment === 'test' && (
+                                <p className="text-center font-bold text-destructive">
+                                    ENTORNO TEST ACTIVADO
+                                </p>
+                            )}
                             <CardTitle>{t('registerExitTitle')}</CardTitle>
                             <CardDescription>
                                 {t('registerExitDescription')}

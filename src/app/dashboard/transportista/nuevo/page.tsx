@@ -241,6 +241,11 @@ export default function TransportistaFormPage() {
                     <Form {...form}>
                         <form onSubmit={form.handleSubmit(onSubmit)}>
                             <CardHeader>
+                                {environment === 'test' && (
+                                    <p className="text-center font-bold text-destructive">
+                                        ENTORNO TEST ACTIVADO
+                                    </p>
+                                )}
                                 <CardTitle className="text-2xl md:text-3xl">{t('transporterRegistration')}</CardTitle>
                                 <CardDescription className="md:text-base">{t('transporterRegistrationDescription')}</CardDescription>
                             </CardHeader>
