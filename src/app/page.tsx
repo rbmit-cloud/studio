@@ -139,7 +139,7 @@ export default function Home() {
       </div>
       <div className="flex flex-col items-center gap-2">
         
-        <Image src="/robama-logo.jpg" alt="Logo de Robama S.A." width={300} height={84} className="w-[300px] h-auto" />
+        <Image src="/robama-logo.jpg" alt="Logo de Robama S.A." width={300} height={100} className="w-[300px] h-auto" />
         
         <Dialog open={open} onOpenChange={handleCloseDialog}>
             <DialogContent className="sm:max-w-[425px]">
