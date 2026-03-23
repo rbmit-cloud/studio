@@ -122,24 +122,25 @@ export default function Home() {
   };
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center p-8 bg-background relative">
-      <div className="absolute top-4 right-4">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" size="icon">
-              <Globe className="h-[1.2rem] w-[1.2rem]" />
-              <span className="sr-only">Seleccionar idioma</span>
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={() => setLanguage('en')}>EN</DropdownMenuItem>
-            <DropdownMenuItem onClick={() => setLanguage('es')}>ES</DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
+    <main className="flex min-h-screen flex-col items-center justify-center p-8 bg-background">
       <div className="flex flex-col items-center gap-2">
-        
-        <Image src="/robama-logo.jpg" alt="Logo de Robama S.A." width={300} height={100} />
+        <div className="w-full max-w-6xl relative flex justify-center items-center mb-2">
+            <Image src="/robama-logo.jpg" alt="Logo de Robama S.A." width={300} height={100} />
+            <div className="absolute top-0 right-0">
+                <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                    <Button variant="outline" size="icon">
+                    <Globe className="h-[1.2rem] w-[1.2rem]" />
+                    <span className="sr-only">Seleccionar idioma</span>
+                    </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                    <DropdownMenuItem onClick={() => setLanguage('en')}>EN</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setLanguage('es')}>ES</DropdownMenuItem>
+                </DropdownMenuContent>
+                </DropdownMenu>
+            </div>
+        </div>
         
         <Dialog open={open} onOpenChange={handleCloseDialog}>
             <DialogContent className="sm:max-w-[425px]">
