@@ -123,9 +123,9 @@ export default function Home() {
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-8 bg-background">
-      <div className="flex flex-col items-center gap-6 w-full max-w-6xl">
+      <div className="flex flex-col items-center gap-2 w-full max-w-6xl">
         <div className="w-full relative bg-muted p-2 rounded-lg flex items-center justify-center">
-            <Image src="/robama-logo.jpg" alt="Logo de Robama S.A." width={240} height={67} className="h-auto" />
+            <Image src="/robama-logo.jpg" alt="Logo de Robama S.A." width={320} height={88} className="h-auto" />
             <div className="absolute right-4 top-4">
                 <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -204,7 +204,7 @@ export default function Home() {
         </AlertDialog>
 
 
-        <div className="-mt-4">
+        <div className="mt-2 mb-4">
           <DateTime />
         </div>
 
