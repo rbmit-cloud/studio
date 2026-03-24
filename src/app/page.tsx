@@ -126,7 +126,7 @@ export default function Home() {
       <div className="flex flex-col items-center gap-8 w-full max-w-6xl">
         <div className="w-full relative bg-muted p-4 rounded-lg flex items-center justify-center">
             <Image src="/robama-logo.jpg" alt="Logo de Robama S.A." width={300} height={84} className="h-auto" />
-            <div className="absolute right-4 top-4">
+            <div className="absolute right-4 top-1/2 -translate-y-1/2">
                 <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                     <Button variant="outline" size="icon">

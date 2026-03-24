@@ -247,8 +247,8 @@ export default function PersonalFormPage() {
                                         ENTORNO TEST ACTIVADO
                                     </p>
                                 )}
-                                <CardTitle className="text-2xl md:text-3xl">{t('personalVisitRegistration')}</CardTitle>
-                                <CardDescription className="md:text-base">{t('personalVisitDescription')}</CardDescription>
+                                <CardTitle className="text-3xl">{t('personalVisitRegistration')}</CardTitle>
+                                <CardDescription className="text-base">{t('personalVisitDescription')}</CardDescription>
                             </CardHeader>
                             <CardContent className="grid gap-4">
                                 <FormField
@@ -256,7 +256,7 @@ export default function PersonalFormPage() {
                                     name="visitorName"
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel className="md:text-base">{t('fullName')}</FormLabel>
+                                            <FormLabel className="text-base">{t('fullName')}</FormLabel>
                                             <FormControl>
                                                 <Input 
                                                     placeholder={t('fullNamePlaceholder')} 
@@ -277,7 +277,7 @@ export default function PersonalFormPage() {
                                     name="companyName"
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel className="md:text-base">{t('company')}</FormLabel>
+                                            <FormLabel className="text-base">{t('company')}</FormLabel>
                                             <FormControl>
                                                 <Input placeholder={t('companyPlaceholder')} {...field} autoComplete="off" />
                                             </FormControl>
@@ -290,7 +290,7 @@ export default function PersonalFormPage() {
                                     name="hostName"
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel className="md:text-base">{t('personToVisit')}</FormLabel>
+                                            <FormLabel className="text-base">{t('personToVisit')}</FormLabel>
                                             <Select onValueChange={(value) => {
                                                 field.onChange(value);
                                                 const selectedHost = hosts.find(h => h.name === value);
@@ -320,7 +320,7 @@ export default function PersonalFormPage() {
                                     name="department"
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel className="md:text-base">{t('department')}</FormLabel>
+                                            <FormLabel className="text-base">{t('department')}</FormLabel>
                                             <FormControl>
                                                 <Input placeholder={t('departmentPlaceholder')} {...field} disabled />
                                             </FormControl>
@@ -333,7 +333,7 @@ export default function PersonalFormPage() {
                                     name="purposeOfVisit"
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel className="md:text-base">{t('purposeOfVisit')}</FormLabel>
+                                            <FormLabel className="text-base">{t('purposeOfVisit')}</FormLabel>
                                             <FormControl>
                                                 <Input {...field} autoComplete="off" />
                                             </FormControl>
@@ -354,7 +354,7 @@ export default function PersonalFormPage() {
                                         </FormControl>
                                         <div className="space-y-1 leading-none">
                                         <AlertDialogTrigger asChild>
-                                            <FormLabel className="cursor-pointer hover:underline md:text-base">
+                                            <FormLabel className="cursor-pointer hover:underline text-base">
                                                 {t('privacyPolicy')}
                                             </FormLabel>
                                         </AlertDialogTrigger>
