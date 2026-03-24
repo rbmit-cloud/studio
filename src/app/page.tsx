@@ -125,7 +125,7 @@ export default function Home() {
     <main className="flex min-h-screen flex-col items-center justify-center p-8 bg-background">
       <div className="flex flex-col items-center gap-2 w-full max-w-6xl">
         <div className="w-full relative bg-muted p-2 rounded-lg flex items-center justify-center">
-            <Image src="/robama-logo.jpg" alt="Logo de Robama S.A." width={320} height={88} className="h-auto" />
+            <Image src="/robama-logo.jpg" alt="Logo de Robama S.A." width={400} height={110} className="h-auto" />
             <div className="absolute right-4 top-4">
                 <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -204,31 +204,31 @@ export default function Home() {
         </AlertDialog>
 
 
-        <div className="mt-2 mb-4">
+        <div className="mt-4 mb-4">
           <DateTime />
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-y-4 md:gap-8 w-full max-w-6xl">
           <Card className="transform transition-transform duration-300 hover:scale-105 hover:shadow-red-2xl cursor-pointer" onClick={() => handleEntryClick('/dashboard/personal/nuevo')}>
             <CardContent className="p-0">
-              <div className="flex flex-col items-center justify-center h-20 p-4 text-center rounded-lg active:bg-destructive active:text-destructive-foreground">
-                <User className="w-8 h-8 mb-2" />
+              <div className="flex flex-col items-center justify-center h-24 p-4 text-center rounded-lg active:bg-destructive active:text-destructive-foreground">
+                <User className="w-10 h-10 mb-2" />
                 <h2 className="text-base font-semibold">{t('personalEntry')}</h2>
               </div>
             </CardContent>
           </Card>
           <Card className="transform transition-transform duration-300 hover:scale-105 hover:shadow-cyan-2xl cursor-pointer" onClick={() => handleEntryClick('/dashboard/transportista/nuevo')}>
             <CardContent className="p-0">
-              <div className="flex flex-col items-center justify-center h-20 p-4 text-center rounded-lg active:bg-info active:text-info-foreground">
-                <Truck className="w-8 h-8 mb-2" />
+              <div className="flex flex-col items-center justify-center h-24 p-4 text-center rounded-lg active:bg-info active:text-info-foreground">
+                <Truck className="w-10 h-10 mb-2" />
                 <h2 className="text-base font-semibold text-card-foreground">{t('transporterEntry')}</h2>
               </div>
             </CardContent>
           </Card>
           <Card className="transform transition-transform duration-300 hover:scale-105 hover:shadow-yellow-2xl cursor-pointer" onClick={() => router.push('/dashboard/salida')}>
             <CardContent className="p-0">
-              <div className="flex flex-col items-center justify-center h-20 p-4 text-center rounded-lg active:bg-warning active:text-warning-foreground">
-                <LogOut className="w-8 h-8 mb-2" />
+              <div className="flex flex-col items-center justify-center h-24 p-4 text-center rounded-lg active:bg-warning active:text-warning-foreground">
+                <LogOut className="w-10 h-10 mb-2" />
                 <h2 className="text-base font-semibold text-card-foreground">{t('registerExit')}</h2>
               </div>
             </CardContent>
