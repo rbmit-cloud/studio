@@ -354,7 +354,7 @@ export default function PersonalFormPage() {
                                         </FormControl>
                                         <div className="space-y-1 leading-none">
                                         <AlertDialogTrigger asChild>
-                                            <FormLabel className="cursor-pointer hover:underline text-base">
+                                            <FormLabel className="cursor-pointer hover:underline text-sm">
                                                 {t('privacyPolicy')}
                                             </FormLabel>
                                         </AlertDialogTrigger>
