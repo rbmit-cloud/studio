@@ -122,9 +122,9 @@ export default function Home() {
   };
 
   return (
-    <main className="flex flex-col items-center min-h-screen pt-4 bg-background">
-      <div className="w-full max-w-sm">
-        <div className="w-full relative bg-white p-2 rounded-lg flex items-center justify-center mb-4">
+    <main className="flex flex-col items-center min-h-screen bg-background">
+      <div className="w-full max-w-sm px-4">
+        <div className="w-full relative bg-muted p-2 rounded-lg flex items-center justify-center mb-4">
             <Image src="/robama-logo.jpg" alt="Logo de Robama S.A." width={250} height={66} className="h-auto" />
             <div className="absolute right-4 top-4">
                 <DropdownMenu>
