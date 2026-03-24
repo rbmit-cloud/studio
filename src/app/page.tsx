@@ -123,9 +123,9 @@ export default function Home() {
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-8 bg-background">
-      <div className="flex flex-col items-center gap-8 w-full max-w-6xl">
+      <div className="flex flex-col items-center gap-6 w-full max-w-6xl">
         <div className="w-full relative bg-muted p-2 rounded-lg flex items-center justify-center">
-            <Image src="/robama-logo.jpg" alt="Logo de Robama S.A." width={200} height={56} className="h-auto" />
+            <Image src="/robama-logo.jpg" alt="Logo de Robama S.A." width={240} height={67} className="h-auto" />
             <div className="absolute right-4 top-4">
                 <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -204,7 +204,7 @@ export default function Home() {
         </AlertDialog>
 
 
-        <div className="-mt-8">
+        <div className="-mt-4">
           <DateTime />
         </div>
 
@@ -220,7 +220,7 @@ export default function Home() {
           <Card className="transform transition-transform duration-300 hover:scale-105 hover:shadow-cyan-2xl cursor-pointer" onClick={() => handleEntryClick('/dashboard/transportista/nuevo')}>
             <CardContent className="p-0">
               <div className="flex flex-col items-center justify-center h-20 p-4 text-center rounded-lg active:bg-info active:text-info-foreground">
-                <Truck className="w-8 h-8 mb-2 text-primary" />
+                <Truck className="w-8 h-8 mb-2" />
                 <h2 className="text-base font-semibold text-card-foreground">{t('transporterEntry')}</h2>
               </div>
             </CardContent>
@@ -228,7 +228,7 @@ export default function Home() {
           <Card className="transform transition-transform duration-300 hover:scale-105 hover:shadow-yellow-2xl cursor-pointer" onClick={() => router.push('/dashboard/salida')}>
             <CardContent className="p-0">
               <div className="flex flex-col items-center justify-center h-20 p-4 text-center rounded-lg active:bg-warning active:text-warning-foreground">
-                <LogOut className="w-8 h-8 mb-2 text-primary" />
+                <LogOut className="w-8 h-8 mb-2" />
                 <h2 className="text-base font-semibold text-card-foreground">{t('registerExit')}</h2>
               </div>
             </CardContent>
