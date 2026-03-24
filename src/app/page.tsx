@@ -123,9 +123,9 @@ export default function Home() {
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-8 bg-background">
-      <div className="flex flex-col items-center gap-2 w-full max-w-6xl">
-        <div className="w-full relative flex justify-center items-center mb-2 bg-muted p-4 rounded-lg">
-            <Image src="/robama-logo.jpg" alt="Logo de Robama S.A." width={500} height={200} />
+      <div className="flex flex-col items-center gap-8 w-full max-w-6xl">
+        <div className="w-full relative">
+            <Image src="/robama-logo.jpg" alt="Logo de Robama S.A." width={300} height={84} className="mx-auto h-auto" />
             <div className="absolute top-1/2 -translate-y-1/2 right-4">
                 <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -206,28 +206,28 @@ export default function Home() {
 
         <DateTime />
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-y-4 md:gap-8 w-full max-w-6xl mt-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-y-4 md:gap-8 w-full max-w-6xl">
           <Card className="transform transition-transform duration-300 hover:scale-105 hover:shadow-red-2xl cursor-pointer" onClick={() => handleEntryClick('/dashboard/personal/nuevo')}>
             <CardContent className="p-0">
-              <div className="flex flex-col items-center justify-center h-12 p-6 text-center rounded-lg active:bg-destructive active:text-destructive-foreground">
-                <User className="w-6 h-6 mb-1" />
-                <h2 className="text-base font-semibold">{t('personalEntry')}</h2>
+              <div className="flex flex-col items-center justify-center h-24 p-6 text-center rounded-lg active:bg-destructive active:text-destructive-foreground">
+                <User className="w-8 h-8 mb-2" />
+                <h2 className="text-xl font-semibold">{t('personalEntry')}</h2>
               </div>
             </CardContent>
           </Card>
           <Card className="transform transition-transform duration-300 hover:scale-105 hover:shadow-cyan-2xl cursor-pointer" onClick={() => handleEntryClick('/dashboard/transportista/nuevo')}>
             <CardContent className="p-0">
-              <div className="flex flex-col items-center justify-center h-12 p-6 text-center rounded-lg active:bg-info active:text-info-foreground">
-                <Truck className="w-6 h-6 mb-1 text-primary" />
-                <h2 className="text-base font-semibold text-card-foreground">{t('transporterEntry')}</h2>
+              <div className="flex flex-col items-center justify-center h-24 p-6 text-center rounded-lg active:bg-info active:text-info-foreground">
+                <Truck className="w-8 h-8 mb-2 text-primary" />
+                <h2 className="text-xl font-semibold text-card-foreground">{t('transporterEntry')}</h2>
               </div>
             </CardContent>
           </Card>
           <Card className="transform transition-transform duration-300 hover:scale-105 hover:shadow-yellow-2xl cursor-pointer" onClick={() => router.push('/dashboard/salida')}>
             <CardContent className="p-0">
-              <div className="flex flex-col items-center justify-center h-12 p-6 text-center rounded-lg active:bg-warning active:text-warning-foreground">
-                <LogOut className="w-6 h-6 mb-1 text-primary" />
-                <h2 className="text-base font-semibold text-card-foreground">{t('registerExit')}</h2>
+              <div className="flex flex-col items-center justify-center h-24 p-6 text-center rounded-lg active:bg-warning active:text-warning-foreground">
+                <LogOut className="w-8 h-8 mb-2 text-primary" />
+                <h2 className="text-xl font-semibold text-card-foreground">{t('registerExit')}</h2>
               </div>
             </CardContent>
           </Card>
