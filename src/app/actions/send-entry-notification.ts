@@ -9,7 +9,7 @@ import type { Host, Visitor, VehicleDetails } from '@/lib/types';
 import { FirebaseError } from 'firebase/app';
 
 // Define a constant for our service app's name to avoid conflicts
-const SERVICE_APP_NAME = 'firebase-service-app-entry-notification';
+const SERVICE_APP_NAME = 'firebase-service-app';
 
 /**
  * Initializes a dedicated Firebase app for the service account,

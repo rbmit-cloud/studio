@@ -7,7 +7,7 @@ import { firebaseConfig } from '@/firebase/config';
 import type { Visitor } from '@/lib/types';
 import { FirebaseError } from 'firebase/app';
 
-const SERVICE_APP_NAME = 'firebase-service-app-find-visit';
+const SERVICE_APP_NAME = 'firebase-service-app';
 
 async function getAuthenticatedFirestore(): Promise<Firestore> {
     const apps = getApps();

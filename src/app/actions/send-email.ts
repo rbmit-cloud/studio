@@ -10,7 +10,7 @@ import type { Host, Visitor } from '@/lib/types';
 import { FirebaseError } from 'firebase/app';
 
 // Define a constant for our service app's name
-const SERVICE_APP_NAME = 'firebase-service-account-app';
+const SERVICE_APP_NAME = 'firebase-service-app';
 
 /**
  * Initializes a dedicated Firebase app for the service account,
