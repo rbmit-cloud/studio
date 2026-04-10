@@ -108,9 +108,7 @@
     --sidebar-border: 217.2 32.6% 17.5%;
     --sidebar-ring: 214 62% 39%;
   }
-}
 
-@layer base {
   body {
     @apply bg-background text-foreground;
   }
