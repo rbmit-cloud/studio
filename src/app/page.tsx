@@ -1,3 +1,4 @@
+
 'use client';
 
 import Image from 'next/image';
@@ -135,7 +136,7 @@ export default function Home() {
   return (
     <main className="flex flex-col items-center min-h-screen bg-background p-4">
       <div className="w-full max-w-lg px-4">
-        <div className="w-full relative p-2 rounded-lg flex flex-col items-center justify-center bg-muted mb-8">
+        <div className="w-full relative p-2 rounded-lg flex flex-col items-center justify-center bg-background">
             <Image src="/robama-logo.jpg" alt="Logo de Robama S.A." width={300} height={79} className="h-auto" />
             <DateTime />
             <div className="absolute right-0 top-0">
