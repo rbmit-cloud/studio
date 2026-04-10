@@ -1,4 +1,3 @@
-
 'use client';
 
 import Image from 'next/image';
@@ -221,7 +220,7 @@ export default function Home() {
             <CardContent className="p-0">
               <div className="flex flex-col items-center justify-center gap-4 p-6 rounded-lg active:bg-destructive active:text-destructive-foreground main-page-button">
                 <User className="w-20 h-20 md:w-24 md:h-24" />
-                <h2 className="text-2xl md:text-3xl font-semibold text-center">{t('personalEntry')}</h2>
+                <h2 className="text-[20px] md:text-[26px] font-semibold text-center">{t('personalEntry')}</h2>
               </div>
             </CardContent>
           </Card>
@@ -229,7 +228,7 @@ export default function Home() {
             <CardContent className="p-0">
               <div className="flex flex-col items-center justify-center gap-4 p-6 rounded-lg active:bg-info active:text-info-foreground main-page-button">
                 <Truck className="w-20 h-20 md:w-24 md:h-24" />
-                <h2 className="text-2xl md:text-3xl font-semibold text-card-foreground text-center">{t('transporterEntry')}</h2>
+                <h2 className="text-[20px] md:text-[26px] font-semibold text-card-foreground text-center">{t('transporterEntry')}</h2>
               </div>
             </CardContent>
           </Card>
@@ -237,7 +236,7 @@ export default function Home() {
             <CardContent className="p-0">
               <div className="flex flex-col items-center justify-center gap-4 p-6 rounded-lg active:bg-warning active:text-warning-foreground main-page-button">
                 <LogOut className="w-20 h-20 md:w-24 md:h-24" />
-                <h2 className="text-2xl md:text-3xl font-semibold text-card-foreground text-center">{t('registerExit')}</h2>
+                <h2 className="text-[20px] md:text-[26px] font-semibold text-card-foreground text-center">{t('registerExit')}</h2>
               </div>
             </CardContent>
           </Card>
