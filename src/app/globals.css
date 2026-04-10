@@ -4,8 +4,8 @@
 
 @layer components {
   .main-page-button {
-    width: 18rem;
-    height: 12rem;
+    width: 350px;
+    height: 180px;
   }
 }
 
