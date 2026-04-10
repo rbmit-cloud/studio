@@ -44,7 +44,7 @@ export default function Home() {
   const router = useRouter();
   const { toast } = useToast();
   const auth = useAuth();
-  const { isUserLoading } = useUser();
+  const { user, isUserLoading } = useUser();
   const [open, setOpen] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -62,6 +62,15 @@ export default function Home() {
             variant: "destructive"
         });
         return;
+    }
+
+    if (!user) {
+      toast({
+        title: "Error",
+        description: "El servicio de autenticación se está inicializando, espere un momento.",
+        variant: "destructive"
+      });
+      return;
     }
 
     try {
@@ -126,8 +135,9 @@ export default function Home() {
   return (
     <main className="flex flex-col items-center min-h-screen bg-background p-4">
       <div className="w-full max-w-lg px-4">
-        <div className="w-full relative p-2 rounded-lg flex items-center justify-center mb-4 bg-muted">
+        <div className="w-full relative p-2 rounded-lg flex flex-col items-center justify-center bg-muted mb-8">
             <Image src="/robama-logo.jpg" alt="Logo de Robama S.A." width={300} height={79} className="h-auto" />
+            <DateTime />
             <div className="absolute right-0 top-0">
                 <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -205,31 +215,26 @@ export default function Home() {
             </AlertDialogContent>
         </AlertDialog>
 
-
-        <div className="w-full flex justify-center mb-8">
-          <DateTime />
-        </div>
-
         <div className="flex flex-col items-center gap-6 w-full mt-8">
-          <Card className="transform transition-transform duration-300 hover:scale-105 hover:shadow-red-2xl cursor-pointer main-page-button" onClick={() => handleEntryClick('/dashboard/personal/nuevo')}>
+          <Card className="transform transition-transform duration-300 hover:scale-105 hover:shadow-red-2xl cursor-pointer" onClick={() => handleEntryClick('/dashboard/personal/nuevo')}>
             <CardContent className="p-0">
-              <div className="flex flex-col items-center justify-center gap-4 h-full p-6 rounded-lg active:bg-destructive active:text-destructive-foreground">
+              <div className="flex flex-col items-center justify-center gap-4 p-6 rounded-lg active:bg-destructive active:text-destructive-foreground main-page-button">
                 <User className="w-20 h-20 md:w-24 md:h-24" />
                 <h2 className="text-2xl md:text-3xl font-semibold text-center">{t('personalEntry')}</h2>
               </div>
             </CardContent>
           </Card>
-          <Card className="transform transition-transform duration-300 hover:scale-105 hover:shadow-cyan-2xl cursor-pointer main-page-button" onClick={() => handleEntryClick('/dashboard/transportista/nuevo')}>
+          <Card className="transform transition-transform duration-300 hover:scale-105 hover:shadow-cyan-2xl cursor-pointer" onClick={() => handleEntryClick('/dashboard/transportista/nuevo')}>
             <CardContent className="p-0">
-              <div className="flex flex-col items-center justify-center gap-4 h-full p-6 rounded-lg active:bg-info active:text-info-foreground">
+              <div className="flex flex-col items-center justify-center gap-4 p-6 rounded-lg active:bg-info active:text-info-foreground main-page-button">
                 <Truck className="w-20 h-20 md:w-24 md:h-24" />
                 <h2 className="text-2xl md:text-3xl font-semibold text-card-foreground text-center">{t('transporterEntry')}</h2>
               </div>
             </CardContent>
           </Card>
-          <Card className="transform transition-transform duration-300 hover:scale-105 hover:shadow-yellow-2xl cursor-pointer main-page-button" onClick={() => router.push('/dashboard/salida')}>
+          <Card className="transform transition-transform duration-300 hover:scale-105 hover:shadow-yellow-2xl cursor-pointer" onClick={() => router.push('/dashboard/salida')}>
             <CardContent className="p-0">
-              <div className="flex flex-col items-center justify-center gap-4 h-full p-6 rounded-lg active:bg-warning active:text-warning-foreground">
+              <div className="flex flex-col items-center justify-center gap-4 p-6 rounded-lg active:bg-warning active:text-warning-foreground main-page-button">
                 <LogOut className="w-20 h-20 md:w-24 md:h-24" />
                 <h2 className="text-2xl md:text-3xl font-semibold text-card-foreground text-center">{t('registerExit')}</h2>
               </div>
