@@ -38,6 +38,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useLanguage } from '@/context/language-context';
+import { Separator } from '@/components/ui/separator';
 
 
 export default function Home() {
@@ -137,6 +138,7 @@ export default function Home() {
       <div className="w-full max-w-lg px-4">
         <div className="w-full relative p-2 rounded-lg flex flex-col items-center justify-center bg-background">
             <Image src="/robama-logo.jpg" alt="Logo de Robama S.A." width={300} height={79} className="h-auto" />
+            <Separator className="my-4" />
             <DateTime />
             <div className="absolute right-0 top-0">
                 <DropdownMenu>
