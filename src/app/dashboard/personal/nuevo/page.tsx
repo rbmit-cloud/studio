@@ -42,7 +42,7 @@ import {
     AlertDialogTrigger,
   } from "@/components/ui/alert-dialog";
 import { useEffect, useState, useMemo } from "react";
-import { useFirestore } from "@/firebase";
+import { useFirestore, useUser } from "@/firebase";
 import { addDoc, collection, getDocs, onSnapshot, orderBy, query, where } from "firebase/firestore";
 import type { Host } from "@/lib/types";
 import { useLanguage, getZodSchema } from "@/context/language-context";
@@ -54,6 +54,7 @@ export default function PersonalFormPage() {
     const { t } = useLanguage();
     const formSchema = useMemo(() => getZodSchema(t).personal, [t]);
     const { environment, visitsCollection, hostsCollection } = useEnvironment();
+    const { isUserLoading } = useUser();
 
     const [isClient, setIsClient] = useState(false);
     const db = useFirestore();
@@ -366,7 +367,7 @@ export default function PersonalFormPage() {
                             </CardContent>
                             <CardFooter className="flex justify-end gap-2">
                                 <Button type="button" variant="outline" onClick={() => router.back()}>{t('cancel')}</Button>
-                                <Button type="submit" disabled={form.formState.isSubmitting || !privacyPolicyAccepted}>
+                                <Button type="submit" disabled={isUserLoading || form.formState.isSubmitting || !privacyPolicyAccepted}>
                                     {form.formState.isSubmitting ? t('registering') : t('registerEntry')}
                                 </Button>
                             </CardFooter>
