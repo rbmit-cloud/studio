@@ -74,16 +74,16 @@ function VisitorRow({
           <Badge variant="destructive">Dentro</Badge>
         )}
       </TableCell>
-      <TableCell className="text-center">
-        {showCount && (
+      {showCount && (
+        <TableCell className="text-center">
           <Checkbox
             checked={isCounted}
             onCheckedChange={onCountChange}
             aria-label="Marcar para recuento"
             onClick={(e) => e.stopPropagation()}
           />
-        )}
-      </TableCell>
+        </TableCell>
+      )}
     </TableRow>
   );
 }
@@ -551,7 +551,6 @@ export default function RegistrosPage() {
                     <TableHead className="hidden lg:table-cell">Anfitrión</TableHead>
                     <TableHead className="text-right">Entrada</TableHead>
                     <TableHead className="text-right">Salida</TableHead>
-                    <TableHead className="text-center">Recuento</TableHead>
                 </TableRow>
             </TableHeader>
             <TableBody>
@@ -561,7 +560,7 @@ export default function RegistrosPage() {
                   ))
               ) : (
                   <TableRow>
-                      <TableCell colSpan={6} className="h-24 text-center">
+                      <TableCell colSpan={5} className="h-24 text-center">
                           {isUserLoading ? "Cargando..." : (user?.isAnonymous ? "Acceso denegado. Inicie sesión como administrador." : (date ? 'No hay registros que coincidan con su búsqueda.' : 'Seleccione un rango de fechas para ver los registros.'))}
                       </TableCell>
                   </TableRow>
