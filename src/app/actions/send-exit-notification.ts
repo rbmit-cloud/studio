@@ -34,6 +34,7 @@ type ExitNotificationPayload = {
     entryDateTime: string;
     exitDateTime: string;
     environment: 'prod' | 'test';
+    isAutomaticCheckout?: boolean;
 };
 
 export async function sendExitNotificationEmail(payload: ExitNotificationPayload): Promise<{ success: boolean; message: string }> {
@@ -75,18 +76,28 @@ export async function sendExitNotificationEmail(payload: ExitNotificationPayload
         const entryTime = new Date(payload.entryDateTime).toLocaleString('es-ES');
         const exitTime = new Date(payload.exitDateTime).toLocaleString('es-ES');
 
+        const subject = payload.isAutomaticCheckout
+            ? `[OLVIDO] Registro de Salida: ${payload.visitorName}`
+            : `Registro de Salida: ${payload.visitorName}`;
+
+        const introMessage = payload.isAutomaticCheckout
+            ? `<p>Se ha registrado una <strong>salida automática</strong> para un visitante que te visitó y que podría haber olvidado registrar su salida.</p>`
+            : `<p>Se ha registrado la salida de un visitante que te estaba visitando.</p>`;
+
+        const exitTimeLabel = payload.isAutomaticCheckout ? 'Hora de Salida (Automática)' : 'Hora de Salida';
+
         const emailHtml = `
           <div>
-            <h1>Registro de Salida de Visita</h1>
+            <h1>${subject}</h1>
             <p>Hola ${host.name},</p>
-            <p>Se ha registrado la salida de un visitante que te estaba visitando.</p>
+            ${introMessage}
             <br/>
             <p><strong>Detalles de la visita:</strong></p>
             <ul>
               <li><strong>Visitante:</strong> ${payload.visitorName}</li>
               <li><strong>Empresa:</strong> ${payload.companyName || 'N/A'}</li>
               <li><strong>Hora de Entrada:</strong> ${entryTime}</li>
-              <li><strong>Hora de Salida:</strong> ${exitTime}</li>
+              <li><strong>${exitTimeLabel}:</strong> ${exitTime}</li>
             </ul>
             <br/>
             <p>Saludos cordiales,</p>
@@ -97,7 +108,7 @@ export async function sendExitNotificationEmail(payload: ExitNotificationPayload
         await transporter.sendMail({
             from: `"Sistema de Registros" <${process.env.GMAIL_EMAIL}>`,
             to: host.email,
-            subject: `Registro de Salida: ${payload.visitorName}`,
+            subject: subject,
             html: emailHtml,
         });
 

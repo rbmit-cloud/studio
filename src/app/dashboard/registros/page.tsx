@@ -19,6 +19,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { sendEmailReport } from '@/app/actions/send-email';
+import { sendExitNotificationEmail } from '@/app/actions/send-exit-notification';
 import { useEnvironment } from '@/context/environment-context';
 
 type DateRange = {
@@ -97,6 +98,7 @@ export default function RegistrosPage() {
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
       const visitsData: (Visitor & { id: string })[] = [];
       const updatesToPerform: { ref: DocumentReference, data: { exitDateTime: string } }[] = [];
+      const notificationsToSend: Promise<any>[] = [];
 
       querySnapshot.forEach((doc) => {
         const visit = { id: doc.id, ...doc.data() } as Visitor & { id: string };
@@ -119,6 +121,20 @@ export default function RegistrosPage() {
             
             // Actualiza también el objeto que vamos a meter en el estado para una actualización inmediata de la UI
             visit.exitDateTime = newExitTime;
+
+            // Prepare email notification for automatic checkout
+            if (visit.hostName) {
+                const notificationPromise = sendExitNotificationEmail({
+                    visitorName: visit.visitorName,
+                    companyName: visit.companyName,
+                    hostName: visit.hostName,
+                    entryDateTime: visit.entryDateTime,
+                    exitDateTime: newExitTime,
+                    environment: environment,
+                    isAutomaticCheckout: true,
+                });
+                notificationsToSend.push(notificationPromise);
+            }
           }
         }
         
@@ -133,6 +149,21 @@ export default function RegistrosPage() {
         });
       }
 
+      // Send all notifications in parallel
+      if (notificationsToSend.length > 0) {
+        Promise.all(notificationsToSend).then(results => {
+            results.forEach(result => {
+                if (!result.success) {
+                    console.error("Failed to send automatic exit notification:", result.message);
+                } else {
+                    console.log("Automatic exit notification sent:", result.message);
+                }
+            });
+        }).catch(error => {
+            console.error("Error sending automatic exit notifications:", error);
+        });
+      }
+
       setVisits(visitsData);
     }, (error) => {
       console.error("Error fetching visits:", error);
@@ -144,7 +175,7 @@ export default function RegistrosPage() {
     });
 
     return () => unsubscribe();
-  }, [db, user, isUserLoading, toast, visitsCollection]);
+  }, [db, user, isUserLoading, toast, visitsCollection, environment]);
 
   const activeVisits = useMemo(() => {
     return visits.filter(visit => !visit.exitDateTime);
