@@ -263,7 +263,8 @@ export default function RegistrosPage() {
           "Fecha Salida": exitDateTime ? exitDateTime.toLocaleDateString('es-ES') : 'Dentro',
           "Hora Salida": exitDateTime ? exitDateTime.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) : '',
           "Aceptó y Entendió Política Privacidad": visit.acceptedPrivacyPolicy ? 'Sí' : 'No',
-          "Aceptó y Entendió Normas Seguridad": visit.acceptedSafetyRegulations ? 'Sí' : 'No'
+          "Aceptó y Entendió Normas Seguridad": visit.acceptedSafetyRegulations ? 'Sí' : 'No',
+          "Recuento": "N/A"
       };
     });
 
@@ -318,7 +319,8 @@ export default function RegistrosPage() {
             "Fecha Salida": exitDateTime ? exitDateTime.toLocaleDateString('es-ES') : 'Dentro',
             "Hora Salida": exitDateTime ? exitDateTime.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) : '',
             "Aceptó y Entendió Política Privacidad": visit.acceptedPrivacyPolicy ? 'Sí' : 'No',
-            "Aceptó y Entendió Normas Seguridad": visit.acceptedSafetyRegulations ? 'Sí' : 'No'
+            "Aceptó y Entendió Normas Seguridad": visit.acceptedSafetyRegulations ? 'Sí' : 'No',
+            "Recuento": countedVisits.has(visitor.id) ? 'Sí' : 'No'
         };
     });
     
