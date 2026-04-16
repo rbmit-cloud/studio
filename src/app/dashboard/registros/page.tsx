@@ -21,13 +21,24 @@ import {
 import { sendEmailReport } from '@/app/actions/send-email';
 import { sendExitNotificationEmail } from '@/app/actions/send-exit-notification';
 import { useEnvironment } from '@/context/environment-context';
+import { Checkbox } from '@/components/ui/checkbox';
 
 type DateRange = {
   from?: Date;
   to?: Date;
 }
 
-function VisitorRow({ visitor }: { visitor: Visitor & { id: string } }) {
+function VisitorRow({ 
+  visitor, 
+  showCount, 
+  isCounted, 
+  onCountChange 
+}: { 
+  visitor: Visitor & { id: string };
+  showCount?: boolean;
+  isCounted?: boolean;
+  onCountChange?: (checked: boolean) => void;
+}) {
   const isTransportista = visitor.entryType === 'Transportista';
   
   return (
@@ -63,6 +74,16 @@ function VisitorRow({ visitor }: { visitor: Visitor & { id: string } }) {
           <Badge variant="destructive">Dentro</Badge>
         )}
       </TableCell>
+      <TableCell className="text-center">
+        {showCount && (
+          <Checkbox
+            checked={isCounted}
+            onCheckedChange={onCountChange}
+            aria-label="Marcar para recuento"
+            onClick={(e) => e.stopPropagation()}
+          />
+        )}
+      </TableCell>
     </TableRow>
   );
 }
@@ -71,10 +92,23 @@ export default function RegistrosPage() {
   const [visits, setVisits] = useState<(Visitor & { id: string })[]>([]);
   const [date, setDate] = useState<DateRange | undefined>();
   const [isSending, setIsSending] = useState(false);
+  const [countedVisits, setCountedVisits] = useState<Set<string>>(new Set());
   const db = useFirestore();
   const { toast } = useToast();
   const { user, isUserLoading } = useUser();
   const { visitsCollection, hostsCollection, environment } = useEnvironment();
+
+  const handleCountChange = (visitorId: string, isChecked: boolean) => {
+    setCountedVisits(prev => {
+        const newSet = new Set(prev);
+        if (isChecked) {
+            newSet.add(visitorId);
+        } else {
+            newSet.delete(visitorId);
+        }
+        return newSet;
+    });
+  };
 
   useEffect(() => {
     // Por defecto, mostrar las visitas del día actual al cargar la página en el cliente.
@@ -424,16 +458,23 @@ export default function RegistrosPage() {
                 <TableHead className="hidden lg:table-cell">Anfitrión</TableHead>
                 <TableHead className="text-right">Entrada</TableHead>
                 <TableHead className="text-right">Salida</TableHead>
+                <TableHead className="text-center">Recuento</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {activeVisits.length > 0 ? (
                   activeVisits.map((visitor) => (
-                      <VisitorRow key={visitor.id} visitor={visitor} />
+                      <VisitorRow 
+                        key={visitor.id} 
+                        visitor={visitor}
+                        showCount={true}
+                        isCounted={countedVisits.has(visitor.id)}
+                        onCountChange={(checked) => handleCountChange(visitor.id, !!checked)}
+                      />
                   ))
               ) : (
                   <TableRow>
-                      <TableCell colSpan={5} className="h-24 text-center">
+                      <TableCell colSpan={6} className="h-24 text-center">
                           No hay visitas activas en este momento.
                       </TableCell>
                   </TableRow>
@@ -508,16 +549,17 @@ export default function RegistrosPage() {
                     <TableHead className="hidden lg:table-cell">Anfitrión</TableHead>
                     <TableHead className="text-right">Entrada</TableHead>
                     <TableHead className="text-right">Salida</TableHead>
+                    <TableHead className="text-center">Recuento</TableHead>
                 </TableRow>
             </TableHeader>
             <TableBody>
               {filteredVisits.length > 0 ? (
                   filteredVisits.map((visitor) => (
-                      <VisitorRow key={visitor.id} visitor={visitor} />
+                      <VisitorRow key={visitor.id} visitor={visitor} showCount={false} />
                   ))
               ) : (
                   <TableRow>
-                      <TableCell colSpan={5} className="h-24 text-center">
+                      <TableCell colSpan={6} className="h-24 text-center">
                           {isUserLoading ? "Cargando..." : (user?.isAnonymous ? "Acceso denegado. Inicie sesión como administrador." : (date ? 'No hay registros que coincidan con su búsqueda.' : 'Seleccione un rango de fechas para ver los registros.'))}
                       </TableCell>
                   </TableRow>
