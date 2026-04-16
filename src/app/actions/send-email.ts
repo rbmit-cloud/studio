@@ -34,7 +34,7 @@ async function getAuthenticatedFirestore(): Promise<Firestore> {
     return getFirestore(serviceApp);
 }
 
-export async function sendEmailReport(visits: (Visitor & { id: string })[], reportTitle: string, hostsCollectionName: 'hosts' | 'test_hosts'): Promise<{ success: boolean; message: string }> {
+export async function sendEmailReport(visits: (Visitor & { id: string })[], reportTitle: string, hostsCollectionName: 'hosts' | 'test_hosts', recipientEmail: string): Promise<{ success: boolean; message: string }> {
     // --- Start: Environment Variable Validation ---
     if (!process.env.GMAIL_EMAIL || !process.env.GMAIL_APP_PASSWORD) {
         return { success: false, message: 'Las credenciales de Gmail no están configuradas en las variables de entorno. Por favor, añada GMAIL_EMAIL y GMAIL_APP_PASSWORD.' };
@@ -58,18 +58,19 @@ export async function sendEmailReport(visits: (Visitor & { id: string })[], repo
         // Get an authenticated Firestore instance
         const db = await getAuthenticatedFirestore();
         
-        // 1. Get hosts who want to receive reports
+        // 1. Get the host who requested the report
         const hostsRef = collection(db, hostsCollectionName);
-        const q = query(hostsRef, where("sendRecords", "==", true));
+        const q = query(hostsRef, where("email", "==", recipientEmail));
         const querySnapshot = await getDocs(q);
+        
+        if (querySnapshot.empty) {
+            return { success: false, message: `No se encontró ningún anfitrión con el correo electrónico ${recipientEmail}. Asegúrese de que su perfil de anfitrión está creado con este correo.` };
+        }
 
-        const hostsToSend = querySnapshot.docs
-            .map(doc => doc.data() as Host)
-            .filter(host => host.email && host.email.trim() !== '');
+        const host = querySnapshot.docs[0].data() as Host;
 
-
-        if (hostsToSend.length === 0) {
-            return { success: true, message: 'No hay anfitriones configurados para recibir correos.' };
+        if (!host.sendRecords) {
+            return { success: false, message: 'No tiene activada la opción para recibir informes por correo.' };
         }
 
         // 2. Generate XLSX buffer
@@ -117,11 +118,8 @@ export async function sendEmailReport(visits: (Visitor & { id: string })[], repo
         XLSX.utils.book_append_sheet(workbook, worksheet, "Registros");
         const xlsxBuffer = XLSX.write(workbook, { type: 'buffer', bookType: 'xlsx' });
 
-        // 3. Send email to each host
-        const emailsToSend = hostsToSend.map(host => {
-            if (!host.email) return null;
-
-            const emailHtml = `
+        // 3. Send email to the host
+        const emailHtml = `
               <div>
                 <h1>${reportTitle}</h1>
                 <p>Hola ${host.name},</p>
@@ -131,24 +129,21 @@ export async function sendEmailReport(visits: (Visitor & { id: string })[], repo
               </div>
             `;
 
-            return transporter.sendMail({
-                from: `"Sistema de Registros" <${process.env.GMAIL_EMAIL}>`,
-                to: host.email,
-                subject: reportTitle,
-                html: emailHtml,
-                attachments: [
-                    {
-                        filename: 'reporte_visitas.xlsx',
-                        content: xlsxBuffer,
-                        contentType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-                    },
-                ],
-            });
-        }).filter(Boolean);
+        await transporter.sendMail({
+            from: `"Sistema de Registros" <${process.env.GMAIL_EMAIL}>`,
+            to: host.email!,
+            subject: reportTitle,
+            html: emailHtml,
+            attachments: [
+                {
+                    filename: 'reporte_visitas.xlsx',
+                    content: xlsxBuffer,
+                    contentType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                },
+            ],
+        });
 
-        await Promise.all(emailsToSend);
-
-        return { success: true, message: `Informe enviado a ${hostsToSend.length} anfitriones.` };
+        return { success: true, message: `Informe enviado a ${host.name}.` };
     } catch (error: any) {
         console.error('Error sending email report:', error);
 

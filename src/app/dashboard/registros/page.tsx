@@ -338,6 +338,17 @@ export default function RegistrosPage() {
 
   const handleSendEmail = async (reportType: 'active' | 'filtered') => {
     setIsSending(true);
+
+    if (!user || user.isAnonymous || !user.email) {
+        toast({
+            variant: "destructive",
+            title: "No autenticado",
+            description: "Debe iniciar sesión con un correo electrónico para recibir informes.",
+        });
+        setIsSending(false);
+        return;
+    }
+
     toast({
         title: "Enviando informe...",
         description: "Esto puede tardar unos segundos.",
@@ -356,7 +367,7 @@ export default function RegistrosPage() {
         return;
     }
 
-    const result = await sendEmailReport(visitsToEmail, reportTitle, hostsCollection);
+    const result = await sendEmailReport(visitsToEmail, reportTitle, hostsCollection, user.email);
 
     if (result.success) {
         toast({
