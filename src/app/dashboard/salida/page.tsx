@@ -23,11 +23,13 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { useRouter } from "next/navigation";
-import { useFirestore } from "@/firebase";
+import { useFirestore, useUser } from "@/firebase";
 import { collection, getDocs, query, where, updateDoc, doc } from "firebase/firestore";
 import { useLanguage, getZodSchema } from "@/context/language-context";
 import { useMemo, useEffect, useState } from "react";
 import { useEnvironment } from "@/context/environment-context";
+import type { Visitor } from "@/lib/types";
+import { sendExitNotificationEmail } from "@/app/actions/send-exit-notification";
 
 export default function SalidaPage() {
     const { t } = useLanguage();
@@ -36,6 +38,7 @@ export default function SalidaPage() {
     const router = useRouter();
     const [isClient, setIsClient] = useState(false);
     const { environment, visitsCollection } = useEnvironment();
+    const { isUserLoading } = useUser();
 
     useEffect(() => {
         setIsClient(true);
@@ -114,14 +117,33 @@ export default function SalidaPage() {
             activeVisits.sort((a, b) => new Date(b.data().entryDateTime).getTime() - new Date(a.data().entryDateTime).getTime());
             
             const visitToUpdate = activeVisits[0];
+            const visitData = visitToUpdate.data() as Visitor;
+            const newExitDateTime = new Date().toISOString();
 
             await updateDoc(doc(db, visitsCollection, visitToUpdate.id), {
-                exitDateTime: new Date().toISOString(),
+                exitDateTime: newExitDateTime,
             });
+
+            if (visitData.hostName) {
+                sendExitNotificationEmail({
+                    visitorName: visitData.visitorName,
+                    companyName: visitData.companyName,
+                    hostName: visitData.hostName,
+                    entryDateTime: visitData.entryDateTime,
+                    exitDateTime: newExitDateTime,
+                    environment: environment
+                }).then(result => {
+                    if (!result.success) {
+                        console.error("Failed to send exit notification:", result.message);
+                    } else {
+                        console.log("Exit notification email result:", result.message);
+                    }
+                });
+            }
 
             toast({
                 title: t('exitSuccessTitle'),
-                description: t('exitSuccessDescription', { visitorName: visitToUpdate.data().visitorName }),
+                description: t('exitSuccessDescription', { visitorName: visitData.visitorName }),
             });
             form.reset();
             setTimeout(() => {
@@ -175,7 +197,7 @@ export default function SalidaPage() {
                         </CardContent>
                         <CardFooter className="flex justify-end gap-2">
                             <Button type="button" variant="outline" onClick={() => router.back()}>{t('cancel')}</Button>
-                            <Button type="submit" disabled={form.formState.isSubmitting}>
+                            <Button type="submit" disabled={isUserLoading || form.formState.isSubmitting}>
                                 {form.formState.isSubmitting ? t('registering') : t('registerExitButton')}
                             </Button>
                         </CardFooter>
