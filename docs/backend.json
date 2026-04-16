@@ -98,6 +98,10 @@
         "sendEntryNotification": {
           "type": "boolean",
           "description": "Whether the host should receive an email notification upon a visitor's entry."
+        },
+        "sendExitNotification": {
+          "type": "boolean",
+          "description": "Whether the host should receive an email notification upon a visitor's exit."
         }
       },
       "required": [

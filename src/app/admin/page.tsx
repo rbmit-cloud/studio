@@ -50,6 +50,7 @@ const formSchema = z.object({
   department: z.string().optional(),
   email: z.string().email("Debe ser un correo electrónico válido.").or(z.literal("")).optional(),
   sendEntryNotification: z.boolean().default(false).optional(),
+  sendExitNotification: z.boolean().default(false).optional(),
   sendRecords: z.boolean().default(false).optional(),
 });
 
@@ -68,6 +69,7 @@ export default function AjustesPage() {
       department: "",
       email: "",
       sendEntryNotification: false,
+      sendExitNotification: false,
       sendRecords: false,
     },
   });
@@ -77,6 +79,7 @@ export default function AjustesPage() {
   useEffect(() => {
     if (!emailValue) {
         form.setValue('sendEntryNotification', false);
+        form.setValue('sendExitNotification', false);
         form.setValue('sendRecords', false);
     }
   }, [emailValue, form]);
@@ -110,13 +113,14 @@ export default function AjustesPage() {
         department: "",
         email: "",
         sendEntryNotification: false,
+        sendExitNotification: false,
         sendRecords: false,
     });
   };
 
   const handleSelectHost = (host: Host) => {
     setSelectedHost(host);
-    form.reset({ ...host, email: host.email || '', sendEntryNotification: host.sendEntryNotification || false, sendRecords: host.sendRecords || false });
+    form.reset({ ...host, email: host.email || '', sendEntryNotification: host.sendEntryNotification || false, sendExitNotification: host.sendExitNotification || false, sendRecords: host.sendRecords || false });
   };
 
 
@@ -164,6 +168,7 @@ export default function AjustesPage() {
         department: values.department || "",
         email: values.email || "",
         sendEntryNotification: values.sendEntryNotification || false,
+        sendExitNotification: values.sendExitNotification || false,
         sendRecords: values.sendRecords || false,
       };
 
@@ -232,6 +237,7 @@ export default function AjustesPage() {
         'Departamento': host.department,
         'Email': host.email,
         'Recibir Notif. Entrada': host.sendEntryNotification ? 'Sí' : 'No',
+        'Recibir Notif. Salida': host.sendExitNotification ? 'Sí' : 'No',
         'Recibir informes': host.sendRecords ? 'Sí' : 'No',
     }));
     
@@ -315,6 +321,29 @@ export default function AjustesPage() {
               />
               <FormField
                 control={form.control}
+                name="sendExitNotification"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4 shadow-sm">
+                    <FormControl>
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                        disabled={!emailValue}
+                      />
+                    </FormControl>
+                    <div className="space-y-1 leading-none">
+                      <FormLabel>
+                        Recibir notificación de salida
+                      </FormLabel>
+                      <FormDescription>
+                        Si está marcado, se recibirá un email cuando un visitante que le visitaba registre su salida.
+                      </FormDescription>
+                    </div>
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
                 name="sendRecords"
                 render={({ field }) => (
                   <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4 shadow-sm">
@@ -371,6 +400,7 @@ export default function AjustesPage() {
                 <TableHead>Departamento</TableHead>
                 <TableHead className="hidden sm:table-cell">Email</TableHead>
                 <TableHead>Notif. Entrada</TableHead>
+                <TableHead>Notif. Salida</TableHead>
                 <TableHead>Recibir informes</TableHead>
                 <TableHead className="text-right">Acción</TableHead>
               </TableRow>
@@ -392,6 +422,7 @@ export default function AjustesPage() {
                     <TableCell>{host.department}</TableCell>
                     <TableCell className="hidden sm:table-cell">{host.email}</TableCell>
                     <TableCell>{host.sendEntryNotification ? 'Sí' : 'No'}</TableCell>
+                    <TableCell>{host.sendExitNotification ? 'Sí' : 'No'}</TableCell>
                     <TableCell>{host.sendRecords ? 'Sí' : 'No'}</TableCell>
                     <TableCell className="text-right">
                         <AlertDialog>
@@ -420,7 +451,7 @@ export default function AjustesPage() {
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={6} className="h-24 text-center">
+                  <TableCell colSpan={7} className="h-24 text-center">
                     No hay anfitriones registrados.
                   </TableCell>
                 </TableRow>

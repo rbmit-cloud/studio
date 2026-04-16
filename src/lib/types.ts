@@ -26,4 +26,5 @@ export type Host = {
   email?: string;
   sendRecords?: boolean;
   sendEntryNotification?: boolean;
+  sendExitNotification?: boolean;
 };
