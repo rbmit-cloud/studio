@@ -188,7 +188,15 @@ export default function SalidaPage() {
                                     <FormItem>
                                         <FormLabel>{t('fullName')}</FormLabel>
                                         <FormControl>
-                                            <Input placeholder={t('exitFullNamePlaceholder')} {...field} autoComplete="off" />
+                                            <Input
+                                                placeholder={t('exitFullNamePlaceholder')}
+                                                {...field}
+                                                onBlur={(e) => {
+                                                    form.setValue('visitorName', e.target.value.trim());
+                                                    field.onBlur();
+                                                }}
+                                                autoComplete="off"
+                                            />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
