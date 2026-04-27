@@ -77,6 +77,7 @@ export async function sendEmailReport(visits: (Visitor & { id: string })[], repo
         const dataToExport = visits.map(visit => {
           const entryDateTime = new Date(visit.entryDateTime);
           const exitDateTime = visit.exitDateTime ? new Date(visit.exitDateTime) : null;
+          const timeZone = 'Europe/Madrid';
           return {
               "Tipo Entrada": visit.entryType,
               "Nombre Visitante": visit.visitorName,
@@ -86,10 +87,10 @@ export async function sendEmailReport(visits: (Visitor & { id: string })[], repo
               "Departamento": visit.department || '',
               "Matrícula Camión": visit.entryType === 'Transportista' ? visit.vehicleDetails?.licensePlate || '' : '',
               "Matrícula Remolque": visit.entryType === 'Transportista' ? visit.vehicleDetails?.trailerLicensePlate || '' : '',
-              "Fecha Entrada": entryDateTime.toLocaleDateString('es-ES'),
-              "Hora Entrada": entryDateTime.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
-              "Fecha Salida": exitDateTime ? exitDateTime.toLocaleDateString('es-ES') : 'Dentro',
-              "Hora Salida": exitDateTime ? exitDateTime.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) : '',
+              "Fecha Entrada": entryDateTime.toLocaleDateString('es-ES', { timeZone }),
+              "Hora Entrada": entryDateTime.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit', second: '2-digit', timeZone }),
+              "Fecha Salida": exitDateTime ? exitDateTime.toLocaleDateString('es-ES', { timeZone }) : 'Dentro',
+              "Hora Salida": exitDateTime ? exitDateTime.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit', second: '2-digit', timeZone }) : '',
               "Aceptó y Entendió Política Privacidad": visit.acceptedPrivacyPolicy ? 'Sí' : 'No',
               "Aceptó y Entendió Normas Seguridad": visit.acceptedSafetyRegulations ? 'Sí' : 'No'
           };

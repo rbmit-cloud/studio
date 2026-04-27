@@ -73,8 +73,9 @@ export async function sendExitNotificationEmail(payload: ExitNotificationPayload
             },
         });
         
-        const entryTime = new Date(payload.entryDateTime).toLocaleString('es-ES');
-        const exitTime = new Date(payload.exitDateTime).toLocaleString('es-ES');
+        const timeZone = 'Europe/Madrid';
+        const entryTime = new Date(payload.entryDateTime).toLocaleString('es-ES', { timeZone });
+        const exitTime = new Date(payload.exitDateTime).toLocaleString('es-ES', { timeZone });
 
         const subject = payload.isAutomaticCheckout
             ? `[OLVIDO] Registro de Salida: ${payload.visitorName}`
