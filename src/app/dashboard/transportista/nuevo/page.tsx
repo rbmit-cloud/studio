@@ -269,8 +269,10 @@ export default function TransportistaFormPage() {
                                                     placeholder={t('transporterFullNamePlaceholder')} 
                                                     {...field}
                                                     onBlur={(e) => {
+                                                        const trimmedValue = e.target.value.trim();
+                                                        form.setValue('visitorName', trimmedValue);
                                                         field.onBlur();
-                                                        findPreviousVisit(e.target.value);
+                                                        findPreviousVisit(trimmedValue);
                                                     }}
                                                     autoComplete="off" 
                                                 />
